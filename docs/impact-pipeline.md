@@ -1,6 +1,6 @@
 # Impact scoring for ACAPS Humanitarian Access Events — handoff note
 
-Status as of 2026-11-06, branch `data-ranking`. Owner: Vlad (data & ranking).
+Status as of 2026-11-07, branch `data-ranking`. Owner: Vlad (data & ranking).
 
 ## Goal
 
@@ -9,108 +9,125 @@ Give each of the 14,847 ACAPS Humanitarian Access Events Risk Radar–style scor
 methodology in `references/` (ACAPS *Introduction to Risk Analysis Methodology*, May 2019,
 pp. 9–10).
 
-## Current approach (knowledge distillation)
+## Current state (use this)
+
+**Every event is scored directly by the LLM with the validated v5 prompt.**
+File: `data/processed/access_events_scored_v5.csv` (`source = llm_v5`; columns: scores,
+`explicit_pin`, `scope_type`, `brief_reasoning`, `impact_score`, `impact_label`).
 
 ```
-events ──► stratified sample (1,000) ──► LLM "teacher" labels (silver labels)
-                                              │
-                                              ▼
-           TF-IDF + LightGBM "student" (one model for intensity, one for exposure)
-                                              │
-all events ◄── student predicts ──► confidence rule fails? ──► LLM fallback
-                                              │
-                                              ▼
-                     impact = ACAPS chart[exposure, intensity]   (deterministic)
+all 14,847 events ──► GreenPT deepseek-v4.1-flash, prompt v5, thinking OFF ──► I, E
+                                                                          │
+                                       impact = ACAPS chart[exposure, intensity]
 ```
 
-- **Teacher:** GreenPT `deepseek-v4.1-flash`, temperature 0, 25 events per call, prompt in
-  `ml/prompts/silver_labels.md` (rubrics for intensity and exposure, JSON output with
-  `brief_reasoning` before the scores). `glm-5.3` returned HTTP 503 at the time.
-- **Sample:** stratified by (subindicator, country_wide), min 10 per stratum, rest
-  proportional (68 strata).
-- **Student features.** Intensity: TF-IDF(1–2 grams, 3000) + one-hot indicator/subindicator
-  + INFORM Risk Vulnerability & Lack of Coping Capacity (JRC API, mid-2026 release).
-  Exposure: regex people-numbers, country population (World Bank), country_wide,
-  number of adm1 regions, one-hot targeted groups, TF-IDF.
-- **Confidence rule:** accept if max proba ≥ 0.55, or top-two scores adjacent and summing
-  to ≥ 0.85; otherwise send to the LLM.
+Impact distribution (old pipeline → v5): Very Low 3,667 → 4,081 · Low 8,048 → 8,775 ·
+Moderate 2,185 → 1,376 · Significant 876 → 587 · Major 71 → 28. Half of the events keep
+the same impact; where it changes v5 is more often lower (vague country-wide texts are no
+longer inflated).
+
+**New events (~230/month):** label them with the LLM (≈ $0.04/month). The LightGBM student
+is only an offline fallback (see below); it is not needed for cost.
+
+## How the prompt was chosen
+
+1. **Gold set** `data/processed/gold_labels.csv` (80 events, column `rater`):
+   - `tune` 40 (3 Vlad, 37 Claude) — used to iterate prompts;
+   - `test` 20 (10 Vlad, 10 Claude) — held out until a prompt was frozen;
+   - `test2` 10 (Claude) — fresh test after the v5 exposure fix;
+   - `final10` 10 (Vlad) — newest events, one final human check of the finished pipeline.
+   Claude scored blind from the text; on the 10 events both scored, Vlad vs Claude agree
+   exactly 60% (I) / 60% (E), within one level 80% / 90%. That is the realistic ceiling.
+   **Caveat:** most gold labels are Claude's, not Vlad's.
+2. **Prompt versions** in `ml/prompts/versions/` (each run ≈ $0.007 on 40 events):
+
+   | Version | Change | Tune: I exact / qwk | Tune: E exact / qwk |
+   |---|---|---|---|
+   | v1 | original | 48% / 0.74 (bias +0.38) | 57% / 0.89 |
+   | v2 | strict rules | 50% / 0.63 | 80% / 0.85 (big misses) |
+   | v3 | score the consequence | 68–75% / 0.83 | 55–57% / 0.87 |
+   | v4 | + explicit-number rule | 65–70% / 0.80–0.83 | 60–62% / 0.87–0.90 |
+   | **v5** | softer exposure rules | 62–70% / 0.77–0.82 | **68–70% / 0.89–0.90** |
+
+   Ranges = two runs with shuffled batches; run-to-run noise ≈ ±7 points.
+   v4 failed the held-out test on exposure (bias −0.55) → v5. v5 = `ml/prompts/silver_labels.md`.
+   Key rules: killings ≥ 3 regardless of perpetrator; score the consequence for people, not the
+   constraint type; `country_wide` alone caps exposure at 3; exposure = people needing help
+   because of the event; stated numbers/percentages use the bands exactly.
+3. **Held-out results (v5):** test2 (fresh) I 70% exact / 100% within-1, E 50% / 100%;
+   test I 70% / 95%, E 60% / 95% (v5 design saw the test misses, so test2 is the clean one).
+   v1 on the same events: E bias +0.4, within-1 80–90%.
+
+## Final evaluation: Vlad's 10 newest events (F01–F10, `final10_comparison.csv`)
+
+| vs Vlad | Intensity exact / within 1 | Exposure exact / within 1 | Same impact level |
+|---|---|---|---|
+| **LLM v5** | **6/10 / 10/10** (bias −0.2) | **8/10 / 9/10** (bias −0.3) | **6/10** |
+| Old pipeline (mostly student) | 4/10 / 10/10 (−0.4) | 4/10 / 8/10 (−0.6) | 4/10 |
+| New student (v5 labels) | 3/10 / 9/10 (−0.8) | 4/10 / 9/10 (−0.7) | 1/10 |
+
+The LLM is within one level of Vlad on every intensity score and slightly conservative. Its
+largest misses: F01 small landslide (I 1 vs 2, E 1 vs 3), F06 IED killings (I 3 vs 4).
+The student systematically under-rates severe events, so it should not score the main dataset.
+
+## Student (offline fallback only)
+
+`python -m ml.pipeline.student_timesplit --labels data/processed/llm_labels_all.jsonl`
+(needs the project `venv`: lightgbm is not in system Python). Time split: oldest 80% train
+(to 2025-07-09), newest 20% test (2,955 events); every choice (model variant, routing rule,
+thresholds) tuned on the newest 20% of the training period only; gold events excluded.
+Report: `data/processed/student_timesplit_report.json`.
+
+| Student vs LLM, untouched test | Exact | Within 1 | QWK |
+|---|---|---|---|
+| Intensity (old labels → v5 labels) | 58% → 68% | 98% → 99% | 0.47 → 0.62 |
+| Exposure (old labels → v5 labels) | 54% → 69% | 89% → 97% | 0.71 → 0.81 |
+
+Routing (per-target rule: "severe" for intensity, max-proba for exposure): routing 20% to the
+LLM → 72%/72% exact on accepted; 40% → 75%/77%. Still never predicts intensity 5 and
+predicts only 39% of true 4s. A GPU text-model student was considered and skipped: the LLM
+is cheap enough for all new events.
+
+## Cost and safeguards
+
+Total GreenPT spend ≈ **$3.42** (estimated from tokens at the $0.50/122-call rate; check the
+GreenPT dashboard): $0.50 earlier, ~$0.20 prompt testing, ~$2.72 full relabel (594 calls,
+~15 min with 6 parallel workers, 0 failures).
+
+**Incident (2026-11-07):** GreenPT now enables "thinking" by default; deepseek-v4 spent up to
+8,000 hidden reasoning tokens per call and often returned nothing (~$0.12 wasted). Fixes in
+`ml/pipeline/greenpt.py`:
+- `reasoning_effort: "none"` on every call (`GREENPT_REASONING`), part of the cache key;
+- raises `ThinkingNotDisabled` on the first reply that still used reasoning tokens;
+- `GREENPT_BUDGET_USD` hard cap (no new uncached call once estimated spend reaches it);
+- `max_tokens` 4000.
 
 ## Files and commands
 
 | File | Role |
 |---|---|
-| `ml/pipeline/fetch_acaps.py` | Download the events from the ACAPS API (`ACAPS_TOKEN` in `.env`) |
-| `ml/pipeline/greenpt.py` | GreenPT client (key `GREENPT_KEY` or `GREENPT_API_KEY`, model `GREENPT_MODEL`); caches replies, logs token usage |
-| `ml/pipeline/silver_labels.py` | Sampling, prompt building, schema validation, batched labelling (resumable) |
-| `ml/pipeline/country_context.py` | INFORM Risk VU/CC + World Bank population (cached in `data/raw/`) |
-| `ml/pipeline/student.py` | Features, LightGBM models, 80/20 evaluation, confidence rule |
-| `ml/pipeline/score_events.py` | Score all events, optional LLM fallback, chart lookup |
-| `ml/pipeline/impact.py` | ACAPS chart and exposure bands |
-| `ml/tests/test_impact_pipeline.py` | Offline tests (no API) |
+| `ml/pipeline/gold_set.py` | Build the stratified gold set (never overwrites human scores) |
+| `ml/pipeline/gold_labeler.py` | Local blind scoring page, saves to `gold_labels.csv` (`python -m ml.pipeline.gold_labeler`, port 8765) |
+| `ml/pipeline/gold_eval.py` | LLM labels vs gold: exact, within-1, QWK, bias, disagreements |
+| `ml/pipeline/prompt_eval.py` | Run a prompt on a gold split (`--split test*` requires `--final`), `--shuffle` for noise |
+| `ml/pipeline/relabel_all.py` | Label all events with the frozen prompt, parallel, resumable, budget-capped |
+| `ml/pipeline/student_timesplit.py` | Time-split student evaluation and routing |
+| `ml/pipeline/greenpt.py` | GreenPT client: cache, usage log, thinking off, budget cap |
+| `ml/prompts/silver_labels.md` | Frozen v5 prompt (history in `ml/prompts/versions/`) |
 
 ```bash
-python -m ml.pipeline.fetch_acaps                       # raw events (not committed, 25 MB)
-GREENPT_MODEL=deepseek-v4.1-flash python -m ml.pipeline.silver_labels --n 1000
-python -m ml.pipeline.student
-GREENPT_MODEL=deepseek-v4.1-flash python -m ml.pipeline.score_events --llm-fallback --max-llm-calls 100
-python -m pytest ml/tests
+GREENPT_MODEL=deepseek-v4.1-flash python -m ml.pipeline.prompt_eval ml/prompts/silver_labels.md --dry-run
+GREENPT_MODEL=deepseek-v4.1-flash GREENPT_BUDGET_USD=5 python -m ml.pipeline.relabel_all --workers 6
+python -m ml.pipeline.gold_eval --labels data/processed/llm_labels_all.jsonl --split test2
 ```
 
-Outputs in `data/processed/`: `silver_sample.csv`, `silver_labels.jsonl`,
-`llm_fallback_labels.jsonl`, `student_report.json`, `access_events_scored.csv`
-(columns: scores, probabilities, `source` = llm_silver / llm_fallback / student,
-`brief_reasoning`, impact).
+The old pipeline (`student.py`, `score_events.py`, `access_events_scored.csv`) is kept for
+reference; `score_events.py` does not yet use the v5 labels.
 
-## Results so far
+## Open items
 
-- Labels: 1,000 silver + 1,979 fallback = 2,979 events scored by the LLM; 11,868 by the student.
-- Cost: ~120 GreenPT calls ≈ **$0.50** (≈ $0.004 per 25-event call). Labelling all 14,847
-  events with the LLM would cost ≈ $2.50.
-- Final impact distribution: Very Low 3,667 · Low 8,048 · Moderate 2,185 ·
-  Significant 876 · Major 71.
-
-Student vs LLM on 200 held-out silver labels:
-
-| | Exact | Within 1 | Quadratic kappa |
-|---|---|---|---|
-| Intensity | 60% | 98% | 0.51 |
-| Exposure | 53% | 91% | 0.74 |
-
-- The confidence rule accepts 99% of intensity predictions and accepted ones are not more
-  accurate: **it does not work for intensity** (labels cluster at 2–3, so the
-  adjacent-sum condition almost always passes). Routing came almost entirely from exposure.
-- The student rarely predicts intensity 1 or 5 (27 and 13 silver labels only) and
-  **under-rates severe events** (true level 4 → predicted 4 in only ~1/3 of validation cases).
-- Regex vs LLM people count: regex finds a number in 54% of cases where the LLM found one;
-  same exposure band 90% when both found one; 2% false positives.
-
-## Manual checks
-
-| Event | Manual | LLM (I/E) | Student (I/E) | Note |
-|---|---|---|---|---|
-| 1000 Trinidad & Tobago (US State Dept, police killings, impunity) | intensity 4–5 (Vlad) | 2 / 2 | (trained on it) | LLM weighted "impunity" (rubric level 2) over "unlawful killings"; 3 seems fairer |
-| 10000 Burkina Faso (rape, burned villages, looted health centres) | intensity 3–4 (Vlad) | 4 / 4 | 3 / 2 | Student confidently wrong (93%), never routed to the LLM |
-
-Ten random student-scored events, three raters (Claude's blind scores, LLM, student):
-intensity agreed within one level for every pair; exact 6/10 (Claude–LLM), 7/10
-(Claude–student), 5/10 (LLM–student). Exposure exact only 3–4/10 for any pair.
-Patterns: the LLM rates vague nationwide texts higher (intensity +1, exposure 4 for
-"nationwide" texts with no stated harm); the student misses acute severity (Gaza shelter
-shelling: 3 vs 4). Note Claude's scores are a third opinion, not ground truth.
-
-## Open decisions / next steps
-
-1. **Fix the prompt** before more labelling:
-   - exposure = people *needing assistance because of the event*, not people living in
-     the area; `country_wide` with no stated harm to people should not exceed 2–3;
-   - killings by state or armed actors → intensity at least 3; rubric level-4 examples
-     (systematic rape, burning villages, destroyed health/water infrastructure) → 4.
-2. **Build a gold set:** 30–50 events hand-scored by Vlad and ideally a second person,
-   stratified by subindicator; measure human–human agreement, then compare prompt versions
-   against it (cheap: one prompt version ≈ $0.01 on 50 events).
-3. **Re-label with the chosen prompt and score all events with the LLM** (≈ $2.50) so the
-   current dataset has no student errors; compare student vs LLM on all events.
-4. **Keep the student only for new events**, after fixing its routing (e.g. send predicted
-   intensity 3 to the LLM whenever P(4) is meaningful; tune thresholds on the fallback pairs).
-5. Optional sanity checks: read all "Major" events; compare country/month averages with
-   known crises and the Risk Radar.
+1. Most gold labels are Claude's: a second human rater (or Vlad on the 20 `test` events
+   scored by Claude) would make the evaluation stronger.
+2. Wire `access_events_scored_v5.csv` into ranking/backend; label new events with the LLM.
+3. LLM tends to be slightly conservative (bias −0.1 to −0.3): fine for ranking, note it in the pitch.
+4. `pytest` is not installed, so `ml/tests` was not run after this session's changes.

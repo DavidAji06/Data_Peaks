@@ -103,8 +103,8 @@ def to_prompt_records(df: pd.DataFrame) -> list[dict]:
     return out
 
 
-def build_prompt(records: list[dict]) -> str:
-    template = PROMPT_PATH.read_text(encoding="utf-8")
+def build_prompt(records: list[dict], template: str | None = None) -> str:
+    template = template or PROMPT_PATH.read_text(encoding="utf-8")
     return template.replace(PLACEHOLDER, json.dumps(records, ensure_ascii=False, indent=1))
 
 
@@ -157,13 +157,14 @@ def validate(item: dict, expected_ids: set[str]) -> dict:
             "exposure_score": exp, "intensity_score": inten}
 
 
-def label_batch(client, df: pd.DataFrame, depth: int = 0) -> tuple[list[dict], list[str]]:
+def label_batch(client, df: pd.DataFrame, depth: int = 0,
+                template: str | None = None) -> tuple[list[dict], list[str]]:
     """Label one batch. Missing/invalid events are retried in halves (up to 2 levels)."""
     records = to_prompt_records(df)
     ids = {r["event_id"] for r in records}
     good: dict[str, dict] = {}
     try:
-        for item in parse_reply(client.chat([{"role": "user", "content": build_prompt(records)}])):
+        for item in parse_reply(client.chat([{"role": "user", "content": build_prompt(records, template)}])):
             try:
                 v = validate(item, ids)
                 good.setdefault(v["event_id"], v)
@@ -177,14 +178,14 @@ def label_batch(client, df: pd.DataFrame, depth: int = 0) -> tuple[list[dict], l
         half = math.ceil(len(rest) / 2)
         for part in (rest.iloc[:half], rest.iloc[half:]):
             if len(part):
-                g, _ = label_batch(client, part, depth + 1)
+                g, _ = label_batch(client, part, depth + 1, template)
                 good.update({x["event_id"]: x for x in g})
         missing = [i for i in ids if i not in good]
     return list(good.values()), missing
 
 
 def label_events(client, df: pd.DataFrame, out_path: Path, max_calls: int | None = None,
-                 tag: str = "silver") -> pd.DataFrame:
+                 tag: str = "silver", template: str | None = None) -> pd.DataFrame:
     """Label every event in df not yet in out_path; append results; return all labels."""
     done = read_labels(out_path)
     todo = df[~df["event_id"].isin(done["event_id"])] if len(done) else df
@@ -194,7 +195,7 @@ def label_events(client, df: pd.DataFrame, out_path: Path, max_calls: int | None
     failed: list[str] = []
     out_path.parent.mkdir(parents=True, exist_ok=True)
     for k, batch in enumerate(batches, 1):
-        labels, missing = label_batch(client, batch)
+        labels, missing = label_batch(client, batch, template=template)
         with out_path.open("a", encoding="utf-8") as f:
             for lab in labels:
                 f.write(json.dumps({**lab, "model": client.model, "source": tag}) + "\n")

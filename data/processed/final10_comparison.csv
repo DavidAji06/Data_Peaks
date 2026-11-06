@@ -1,0 +1,11 @@
+gold_id,event_id,country,my_intensity,my_exposure,llm_I,llm_E,brief_reasoning,stu_I,stu_E,stu_pI,old_I,old_E,old_src,you_I,you_E,you_imp,llm_imp,stu_imp,old_imp
+F01,21705,Colombia,2,3,1,1,"Heavy rains caused flooding, fallen trees, landslide closing road; no concrete harm to people stated = intensity 1. One municipality, no number = exposure 1.",2,2,0.45,2,2,student,2,3,Low,Very Low,Very Low,Very Low
+F02,21546,South Sudan,3,5,3,5,"886,106 affected, 287,300 displaced, damage to homes, crops, schools, boreholes; displacement, intensity 3. Stated 886,106, exposure 5.",3,5,0.5,4,5,student,3,5,Moderate,Moderate,Moderate,Significant
+F03,22049,Palestine,5,5,5,5,"66,000 killed, 150,000 maimed, 92% homes destroyed, hospitals destroyed. Intensity 5 (mass mortality), exposure 5 (territory-wide).",4,4,0.95,4,4,student,5,5,Major,Major,Significant,Significant
+F04,22836,Sudan,4,3,4,3,"173 health workers killed (intensity 4, pattern of killings); country-wide attacks on health care, exposure 3 for system-scale pressure without number.",3,2,0.5,3,1,student,4,3,Moderate,Moderate,Low,Low
+F05,23204,Brazil,4,4,4,4,"133,000 affected = exposure 4; 72 fatalities, deadliest rainy season in 20 years, mass casualties = intensity 4.",3,4,0.54,4,4,llm_fallback,4,4,Significant,Significant,Moderate,Significant
+F06,20907,Kenya,4,2,3,1,"IEDs killed two civilians and three soldiers. Any killing = 3. Two one-off roadside incidents, few people affected = 1.",3,1,0.8,3,1,student,4,2,Moderate,Low,Low,Low
+F07,23740,Dominican Republic,3,3,3,3,"Storms damaged homes, crops, flooding across provinces; destruction of homes = intensity 3. Multiple provinces, no number, exposure 3.",2,2,0.4,2,3,student,3,3,Low,Low,Very Low,Low
+F08,24525,Central African Republic,3,2,2,2,Restrictions and interference including illegal taxation on aid delivery; no population harm stated. Several organisations.,2,2,0.85,2,3,student,3,2,Low,Very Low,Very Low,Low
+F09,22704,Mozambique,3,4,4,4,"Catastrophic flooding increasing disease and malnutrition risk, wildlife in urban areas. Life-threatening conditions at scale = 4. Province-wide.",3,2,0.47,3,2,student,3,4,Moderate,Significant,Low,Low
+F10,20948,Nigeria,5,5,5,5,1.8 million children at risk of death from SAM; 84% of facilities lack RUTF. Famine-level mortality risk = 5. Stated 1.8M = 5.,3,5,0.43,5,5,llm_silver,5,5,Major,Major,Moderate,Major
