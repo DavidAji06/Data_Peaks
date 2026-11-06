@@ -59,3 +59,54 @@
     outline-offset: 2px;
   }
 }
+
+/*
+ * Probability slider: a 44px-tall touch target with our own track, so nothing is filled until the expert
+ * sets a value (no visual anchor at 50). --fill is set inline to the chosen percent.
+ */
+.probability-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2.75rem;
+  background: transparent;
+  cursor: pointer;
+  --track: linear-gradient(to right, var(--color-accent) var(--fill, 0%), var(--color-line) var(--fill, 0%));
+}
+.probability-range.is-unset {
+  --track: var(--color-line);
+}
+.probability-range::-webkit-slider-runnable-track {
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--track);
+  box-shadow: inset 0 0 0 1px var(--color-line-strong);
+}
+.probability-range::-moz-range-track {
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--track);
+  box-shadow: inset 0 0 0 1px var(--color-line-strong);
+}
+.probability-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: -0.625rem;
+  border-radius: 9999px;
+  border: 3px solid var(--color-surface);
+  background: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+.probability-range::-moz-range-thumb {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  border: 3px solid var(--color-surface);
+  background: var(--color-accent);
+}
+.probability-range.is-unset::-webkit-slider-thumb {
+  opacity: 0;
+}
+.probability-range.is-unset::-moz-range-thumb {
+  opacity: 0;
+}
