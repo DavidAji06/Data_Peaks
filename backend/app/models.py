@@ -63,3 +63,28 @@ class Response(Base):
     reason: Mapped[str] = mapped_column(Text)
     round: Mapped[int]  # 1 = blind answer, 2 = revision
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class Alert(Base):
+    __tablename__ = "alerts"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    risk_id: Mapped[str] = mapped_column(ForeignKey("risks.id"))
+    trigger_id: Mapped[str | None]
+    report_title: Mapped[str] = mapped_column(Text)
+    report_source: Mapped[str | None]
+    report_url: Mapped[str | None]
+    published_at: Mapped[str | None]
+    direction: Mapped[str | None]
+    strength: Mapped[float | None]
+    evidence: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(default="pending")
+
+
+class Invite(Base):
+    __tablename__ = "invites"
+    __table_args__ = (UniqueConstraint("question_id", "expert_id"),)
+
+    token: Mapped[str] = mapped_column(String, primary_key=True)
+    question_id: Mapped[str] = mapped_column(ForeignKey("questions.id"))
+    expert_id: Mapped[str] = mapped_column(ForeignKey("experts.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

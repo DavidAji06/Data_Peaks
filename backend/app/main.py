@@ -10,14 +10,16 @@ from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .db import Base, engine, get_db
-from .models import Expert, Question, Response, Risk
-from .schemas import ResponseIn
+from .models import Alert, Invite, Question, Response, Risk
+from .schemas import AlertDecision, AnswerIn
+from .services.routing import route_question
 
 CONTRACTS = Path(__file__).resolve().parents[2] / "contracts"
+FRONTEND_URL = "http://localhost:3000"
 
 Base.metadata.create_all(engine)
 
@@ -25,11 +27,13 @@ app = FastAPI(title="Data Peaks API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[FRONTEND_URL],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
+# Helpers
 
 def load_sample(name: str):
     path = CONTRACTS / f"{name}.json"
@@ -42,24 +46,47 @@ def to_dict(obj):
     return {column.name: getattr(obj, column.name) for column in obj.__table__.columns}
 
 
-def has_answered(db: Session, question_id: str, expert_id: str, round: int) -> bool:
+def alert_to_dict(alert: Alert):
+    return {
+        "id": alert.id,
+        "risk_id": alert.risk_id,
+        "trigger_id": alert.trigger_id,
+        "report": {
+            "title": alert.report_title,
+            "source": alert.report_source,
+            "url": alert.report_url,
+            "published_at": alert.published_at,
+        },
+        "direction": alert.direction,
+        "strength": alert.strength,
+        "evidence": alert.evidence,
+        "status": alert.status,
+    }
+
+
+def get_invite(db: Session, token: str) -> Invite:
+    invite = db.get(Invite, token)
+    if invite is None:
+        raise HTTPException(status_code=404, detail="Link not found")
+    return invite
+
+
+def get_response(db: Session, question_id: str, expert_id: str, round: int):
     return db.scalar(
         select(Response).where(
             Response.question_id == question_id,
             Response.expert_id == expert_id,
             Response.round == round,
         )
-    ) is not None
+    )
 
 
-def get_open_question(db: Session, question_id: str) -> Question:
-    question = db.get(Question, question_id)
-    if question is None:
-        raise HTTPException(status_code=404, detail="Question not found")
+def require_open(question: Question):
     if question.status != "open":
         raise HTTPException(status_code=400, detail="Question is closed")
-    return question
 
+
+# General
 
 @app.get("/")
 def root():
@@ -71,29 +98,65 @@ def health():
     return {"status": "ok"}
 
 
-# Mock routes until the ML pipeline is ready
+# Moderator: alerts
 
 @app.get("/alerts")
-def list_alerts():
-    return [load_sample("alert")]
+def list_alerts(status: str = "pending", db: Session = Depends(get_db)):
+    alerts = db.scalars(select(Alert).where(Alert.status == status)).all()
+    return [alert_to_dict(alert) for alert in alerts]
 
 
 @app.post("/alerts/{alert_id}/decision")
-def decide_alert(alert_id: str, decision: dict):
-    return {"alert_id": alert_id, "status": decision.get("status", "approved")}
+def decide_alert(alert_id: str, body: AlertDecision, db: Session = Depends(get_db)):
+    alert = db.get(Alert, alert_id)
+    if alert is None:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    if alert.status != "pending":
+        raise HTTPException(status_code=409, detail="Alert already decided")
 
+    if body.status == "rejected":
+        alert.status = "rejected"
+        db.commit()
+        return {"alert_id": alert_id, "status": "rejected"}
+
+    risk = db.get(Risk, alert.risk_id)
+    count = db.scalar(select(func.count()).select_from(Question))
+    question = Question(
+        id=f"Q{count + 1:03d}",
+        risk_id=risk.id,
+        alert_id=alert.id,
+        text=body.question_text,
+        resolution_criteria=body.resolution_criteria,
+        deadline=body.deadline,
+    )
+    db.add(question)
+    invites = route_question(db, question, risk.country)
+    alert.status = "approved"
+    db.commit()
+
+    # Stand-in for real notifications
+    for invite in invites:
+        print(f"[notify] {invite.expert_id}: {FRONTEND_URL}/q/{invite.token}")
+
+    return {
+        "alert_id": alert_id,
+        "status": "approved",
+        "question_id": question.id,
+        "experts_invited": len(invites),
+    }
+
+
+# Moderator: risks and questions
 
 @app.get("/risks/ranked")
 def ranked_risks():
-    return [load_sample("ranked_risk")]
+    return [load_sample("ranked_risk")]  # Mock until ML is ready
 
 
 @app.get("/risks/{risk_id}/similar")
 def similar_risks(risk_id: str):
-    return [load_sample("similar_risk")]
+    return [load_sample("similar_risk")]  # Mock until ML is ready
 
-
-# Database routes
 
 @app.get("/risks/{risk_id}")
 def get_risk(risk_id: str, db: Session = Depends(get_db)):
@@ -111,53 +174,82 @@ def get_question(question_id: str, db: Session = Depends(get_db)):
     return to_dict(question)
 
 
-@app.post("/questions/{question_id}/responses")
-def submit_response(question_id: str, body: ResponseIn, db: Session = Depends(get_db)):
-    get_open_question(db, question_id)
-    if db.get(Expert, body.expert_id) is None:
-        raise HTTPException(status_code=404, detail="Expert not found")
-    if has_answered(db, question_id, body.expert_id, 1):
+# Expert: secret-link routes
+
+@app.get("/q/{token}")
+def expert_question(token: str, db: Session = Depends(get_db)):
+    invite = get_invite(db, token)
+    question = db.get(Question, invite.question_id)
+    risk = db.get(Risk, question.risk_id)
+    alert = db.get(Alert, question.alert_id) if question.alert_id else None
+
+    return {
+        "question": {
+            "id": question.id,
+            "text": question.text,
+            "resolution_criteria": question.resolution_criteria,
+            "deadline": question.deadline,
+            "status": question.status,
+        },
+        "risk": {
+            "id": risk.id,
+            "title": risk.title,
+            "country": risk.country,
+            "risk_level": risk.risk_level,
+        },
+        "trigger_update": alert_to_dict(alert) if alert else None,
+        "similar_risks": [load_sample("similar_risk")],  # Mock until ML is ready
+        "answered": get_response(db, question.id, invite.expert_id, 1) is not None,
+        "revised": get_response(db, question.id, invite.expert_id, 2) is not None,
+    }
+
+
+@app.post("/q/{token}/responses")
+def submit_answer(token: str, body: AnswerIn, db: Session = Depends(get_db)):
+    invite = get_invite(db, token)
+    require_open(db.get(Question, invite.question_id))
+    if get_response(db, invite.question_id, invite.expert_id, 1):
         raise HTTPException(status_code=409, detail="Already answered")
 
     db.add(Response(
-        question_id=question_id,
-        expert_id=body.expert_id,
+        question_id=invite.question_id,
+        expert_id=invite.expert_id,
         probability=body.probability,
         reason=body.reason,
         round=1,
     ))
     db.commit()
-    return {"question_id": question_id, "status": "received"}
+    return {"status": "received"}
 
 
-@app.post("/questions/{question_id}/revision")
-def submit_revision(question_id: str, body: ResponseIn, db: Session = Depends(get_db)):
-    get_open_question(db, question_id)
-    if not has_answered(db, question_id, body.expert_id, 1):
+@app.post("/q/{token}/revision")
+def submit_revision(token: str, body: AnswerIn, db: Session = Depends(get_db)):
+    invite = get_invite(db, token)
+    require_open(db.get(Question, invite.question_id))
+    if not get_response(db, invite.question_id, invite.expert_id, 1):
         raise HTTPException(status_code=403, detail="Submit your first answer before revising")
-    if has_answered(db, question_id, body.expert_id, 2):
+    if get_response(db, invite.question_id, invite.expert_id, 2):
         raise HTTPException(status_code=409, detail="Already revised")
 
     db.add(Response(
-        question_id=question_id,
-        expert_id=body.expert_id,
+        question_id=invite.question_id,
+        expert_id=invite.expert_id,
         probability=body.probability,
         reason=body.reason,
         round=2,
     ))
     db.commit()
-    return {"question_id": question_id, "status": "revised"}
+    return {"status": "revised"}
 
 
-@app.get("/questions/{question_id}/group")
-def group_view(question_id: str, expert_id: str, db: Session = Depends(get_db)):
-    if db.get(Question, question_id) is None:
-        raise HTTPException(status_code=404, detail="Question not found")
-    if not has_answered(db, question_id, expert_id, 1):
+@app.get("/q/{token}/group")
+def group_view(token: str, db: Session = Depends(get_db)):
+    invite = get_invite(db, token)
+    if not get_response(db, invite.question_id, invite.expert_id, 1):
         raise HTTPException(status_code=403, detail="Submit your answer before seeing the group view")
 
     responses = db.scalars(
-        select(Response).where(Response.question_id == question_id)
+        select(Response).where(Response.question_id == invite.question_id)
     ).all()
 
     latest = {}
@@ -169,7 +261,7 @@ def group_view(question_id: str, expert_id: str, db: Session = Depends(get_db)):
     probabilities = [r.probability for r in latest.values()]
 
     return {
-        "question_id": question_id,
+        "question_id": invite.question_id,
         "response_count": len(probabilities),
         "median": round(statistics.median(probabilities), 2),
         "min": min(probabilities),
