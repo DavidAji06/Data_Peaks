@@ -167,6 +167,22 @@ export function getRisk(id: string): Promise<Loaded<RiskDetail>> {
   return load(async (call) => toRiskDetail(await call<ApiRisk>('GET', `/risks/${enc(id)}`)));
 }
 
+export interface RiskOverview {
+  risk: RiskDetail;
+  questions: QuestionListItem[];
+}
+
+/** One risk plus the expert questions asked about it, from the same source. */
+export function getRiskOverview(id: string): Promise<Loaded<RiskOverview>> {
+  return load(async (call) => {
+    const risk = toRiskDetail(await call<ApiRisk>('GET', `/risks/${enc(id)}`));
+    const questions = (await call<ApiQuestionListItem[]>('GET', '/moderator/questions'))
+      .map(toQuestionListItem)
+      .filter((q) => q.riskId === risk.id);
+    return { risk, questions };
+  });
+}
+
 export function getRankedRisks(): Promise<Loaded<RankedRisks>> {
   return load(async (call) => {
     const raw = await call<ApiRankedRisk[]>('GET', '/risks/ranked');
