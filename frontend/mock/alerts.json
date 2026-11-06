@@ -1,0 +1,95 @@
+{
+  "_meta": {
+    "source": "Hand-written for the demo (frontend/CLAUDE.md §3.6). Reports are real articles already cited in ACAPS's own updates for R1043 and R1066; summaries are in our words.",
+    "generatedBy": "hand",
+    "synthetic": true,
+    "note": "Synthetic pipeline alerts: the matching, scores and drafts are made up. Demo: approve A-001 (strong, T0618), reject A-002 (weak: a convoy is not strategic infrastructure), A-003 stays pending."
+  },
+  "items": [
+    {
+      "id": "A-001",
+      "riskId": "R1043",
+      "triggerId": "T0618",
+      "evidence": {
+        "id": "ev-reuters-2026-08-27",
+        "title": "Chad accuses Sudan of cross-border strike, raises alert level",
+        "source": "Reuters",
+        "url": "https://www.reuters.com/world/africa/chad-accuses-sudan-cross-border-strike-raises-alert-level-2026-08-27/",
+        "publishedAt": "2026-08-27",
+        "summary": "Chad says Sudanese army aircraft and drones struck a convoy more than 100 km inside Ennedi-Est province. Authorities raised the regional alert level to its highest and deployed more forces.",
+        "language": "en",
+        "synthetic": false
+      },
+      "direction": "up",
+      "strength": "strong",
+      "strengthScore": 0.82,
+      "confidence": 0.9,
+      "machineRationale": "The report describes an air strike on Chadian territory more than 100 km from the border. T0618 expects more drone strikes, shelling or armed incursions that raise civilian casualties and constrain humanitarian operations.",
+      "status": "pending",
+      "draftQuestion": {
+        "text": "Will cross-border attacks in eastern Chad become sustained and recurrent, affecting multiple border localities and causing significant civilian casualties, displacement or access disruption, by 6 May 2027?",
+        "resolutionCriteria": "Resolves yes if ACAPS's trigger T0618 reaches 100% by 6 May 2027. ACAPS's objective for 100%: \"100% completion would be reached if cross-border attacks become sustained and recurrent, affecting multiple border localities in eastern Chad and causing significant civilian casualties, displacement, or humanitarian access disruptions.\"",
+        "deadline": "2027-05-06"
+      },
+      "createdAt": "2026-11-06T07:30:00Z",
+      "questionId": "Q-R1043-T0618",
+      "synthetic": true
+    },
+    {
+      "id": "A-002",
+      "riskId": "R1043",
+      "triggerId": "T0619",
+      "evidence": {
+        "id": "ev-reuters-2026-08-27",
+        "title": "Chad accuses Sudan of cross-border strike, raises alert level",
+        "source": "Reuters",
+        "url": "https://www.reuters.com/world/africa/chad-accuses-sudan-cross-border-strike-raises-alert-level-2026-08-27/",
+        "publishedAt": "2026-08-27",
+        "summary": "Chad says Sudanese army aircraft and drones struck a convoy more than 100 km inside Ennedi-Est province. Authorities raised the regional alert level to its highest and deployed more forces.",
+        "language": "en",
+        "synthetic": false
+      },
+      "direction": "up",
+      "strength": "weak",
+      "strengthScore": 0.31,
+      "confidence": 0.42,
+      "machineRationale": "The report mentions an air strike affecting transport in eastern Chad. T0619 covers attacks on airports, military installations or critical transport corridors, so the pipeline matched on the transport wording.",
+      "status": "pending",
+      "draftQuestion": {
+        "text": "Will an attack directly target strategic infrastructure in Chad (an airport, military facility, border post or major transport corridor) by 6 May 2027?",
+        "resolutionCriteria": "Resolves yes if ACAPS's trigger T0619 reaches 100% by 6 May 2027. ACAPS's objective for 100%: \"100% completion would be reached if attacks directly target strategic infrastructure in Chad, including airports, military facilities, border posts, or major transport corridors, causing significant disruption to civilian, humanitarian, or commercial activities.\"",
+        "deadline": "2027-05-06"
+      },
+      "createdAt": "2026-11-06T07:31:00Z",
+      "synthetic": true
+    },
+    {
+      "id": "A-003",
+      "riskId": "R1066",
+      "triggerId": "T0669",
+      "evidence": {
+        "id": "ev-aj-2026-09-22",
+        "title": "Hundreds flee homes in far north Cameroon after armed group raid kills 15",
+        "source": "Al Jazeera",
+        "url": "https://www.aljazeera.com/amp/news/2026/9/22/hundreds-flee-homes-in-far-north-cameroon-after-armed-group-raid-kills-15",
+        "publishedAt": "2026-09-22",
+        "summary": "A raid on Madegoua, near Makary in Cameroon's Far North, killed at least 15 civilians. Several hundred people from nearby villages fled towards Kousseri, Mora and Waza. No group claimed it; an analyst assessed ISWAP was likely responsible.",
+        "language": "en",
+        "synthetic": false
+      },
+      "direction": "up",
+      "strength": "moderate",
+      "strengthScore": 0.55,
+      "confidence": 0.61,
+      "machineRationale": "A deadly raid on civilians in Cameroon's Far North that an analyst attributed to ISWAP. T0669 expects retaliatory ISWAP attacks with spillover into Cameroon's Far North.",
+      "status": "pending",
+      "draftQuestion": {
+        "text": "Will ISWAP or JAS/Boko Haram attacks rise in a sustained way in Borno, with spillover into neighbouring countries, by 6 May 2027?",
+        "resolutionCriteria": "Resolves yes if ACAPS's trigger T0669 reaches 100% by 6 May 2027. ACAPS's objective for 100%: \"Increased retaliatory attacks by ISWAP and/or JAS/Boko Haram following the killing of Abu-Bilal al-Minuki, resulting in sustained increases in attacks against military positions and civilians in Borno with spillover into neighbouring countries.\"",
+        "deadline": "2027-05-06"
+      },
+      "createdAt": "2026-11-05T16:20:00Z",
+      "synthetic": true
+    }
+  ]
+}

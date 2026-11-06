@@ -1,0 +1,11 @@
+{
+  "_meta": {
+    "source": "Hand-written for the demo",
+    "generatedBy": "hand",
+    "synthetic": true,
+    "note": "resolvedCount, meanBrier and calibration are computed by lib/probability.ts from the replay questions and the expert's answers. 'How your input was used' entries are added when ACAPS records a decision on a round the expert answered, so this list starts empty instead of claiming things ACAPS never did."
+  },
+  "items": [
+    { "pseudonymId": "Amber Falcon", "contributions": [] }
+  ]
+}

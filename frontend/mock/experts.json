@@ -1,0 +1,96 @@
+{
+  "_meta": {
+    "source": "Hand-written for the demo (frontend/CLAUDE.md §3.6), profiles from the challenge brief",
+    "generatedBy": "hand",
+    "synthetic": true,
+    "note": "Synthetic Chad panel. These people do not exist: pseudonyms are neutral codes and display names are placeholders. Never replace them with real experts' data. Sage Lantern is at their weekly contact limit, so the R1043 question skips them."
+  },
+  "items": [
+    {
+      "id": "exp-01",
+      "pseudonymId": "Amber Falcon",
+      "anonymity": "pseudonymous",
+      "countries": ["Chad"],
+      "topics": ["early warning", "displacement", "protection"],
+      "locale": "en",
+      "maxPromptsPerWeek": 2,
+      "promptsThisWeek": 0,
+      "profile": { "role": "Anticipatory action and early warning practitioner", "basedIn": "N'Djamena, Chad", "orgType": "International NGO" },
+      "synthetic": true
+    },
+    {
+      "id": "exp-02",
+      "pseudonymId": "Cobalt Heron",
+      "displayName": "Expert A (synthetic)",
+      "anonymity": "known_to_acaps",
+      "countries": ["Chad", "Sudan"],
+      "topics": ["conflict", "protection"],
+      "locale": "en",
+      "maxPromptsPerWeek": 3,
+      "promptsThisWeek": 1,
+      "profile": { "role": "Conflict analyst, active on social media", "basedIn": "Nairobi, Kenya", "orgType": "Independent" },
+      "synthetic": true
+    },
+    {
+      "id": "exp-03",
+      "pseudonymId": "Sage Lantern",
+      "anonymity": "anonymous",
+      "countries": ["Chad", "Sudan"],
+      "topics": ["conflict", "displacement"],
+      "locale": "en",
+      "maxPromptsPerWeek": 1,
+      "promptsThisWeek": 1,
+      "profile": { "role": "Academic researcher", "basedIn": "Paris, France", "orgType": "University" },
+      "synthetic": true
+    },
+    {
+      "id": "exp-04",
+      "pseudonymId": "Ochre Swift",
+      "anonymity": "anonymous",
+      "countries": ["Chad"],
+      "topics": ["protection", "displacement", "food security"],
+      "locale": "fr",
+      "maxPromptsPerWeek": 1,
+      "promptsThisWeek": 0,
+      "profile": { "role": "Local NGO leader", "basedIn": "Abéché, Chad", "orgType": "National NGO" },
+      "synthetic": true
+    },
+    {
+      "id": "exp-05",
+      "pseudonymId": "Juniper Atlas",
+      "anonymity": "pseudonymous",
+      "countries": ["Chad", "Sudan"],
+      "topics": ["conflict", "protection", "humanitarian access"],
+      "locale": "en",
+      "maxPromptsPerWeek": 2,
+      "promptsThisWeek": 0,
+      "profile": { "role": "UN agency staff, regional office", "basedIn": "Amman, Jordan", "orgType": "UN agency" },
+      "synthetic": true
+    },
+    {
+      "id": "exp-06",
+      "pseudonymId": "Silver Kestrel",
+      "displayName": "Expert B (synthetic)",
+      "anonymity": "known_to_acaps",
+      "countries": ["Chad"],
+      "topics": ["food security", "displacement", "protection"],
+      "locale": "en",
+      "maxPromptsPerWeek": 2,
+      "promptsThisWeek": 0,
+      "profile": { "role": "MEAL officer, Red Cross Red Crescent", "basedIn": "Nairobi, Kenya", "orgType": "Red Cross Red Crescent" },
+      "synthetic": true
+    },
+    {
+      "id": "exp-07",
+      "pseudonymId": "Teal Meridian",
+      "anonymity": "pseudonymous",
+      "countries": ["Chad"],
+      "topics": ["humanitarian access", "displacement", "protection"],
+      "locale": "fr",
+      "maxPromptsPerWeek": 2,
+      "promptsThisWeek": 0,
+      "profile": { "role": "INGO field coordinator", "basedIn": "Farchana, Chad", "orgType": "International NGO" },
+      "synthetic": true
+    }
+  ]
+}

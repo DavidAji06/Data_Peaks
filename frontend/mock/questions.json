@@ -1,0 +1,112 @@
+{
+  "_meta": {
+    "source": "R1043 question text from frontend/CLAUDE.md §3.6; resolution criteria quote the ACAPS trigger objectives in the Risk Radar export; replay questions are built from resolved risks in the export",
+    "generatedBy": "hand",
+    "synthetic": "partly",
+    "note": "similarRisks is filled in by lib/api.ts from similar_risks.json. Replay questions are practice rounds on real resolved risks: their outcomes come from the export's Status field; their deadlines are approximate because the export has no creation dates."
+  },
+  "items": [
+    {
+      "id": "Q-R1043-T0618",
+      "riskId": "R1043",
+      "triggerId": "T0618",
+      "text": "Will cross-border attacks in eastern Chad become sustained and recurrent, affecting multiple border localities and causing significant civilian casualties, displacement or access disruption, by 6 May 2027?",
+      "resolutionCriteria": "Resolves yes if ACAPS's trigger T0618 reaches 100% by 6 May 2027. ACAPS's objective for 100%: \"100% completion would be reached if cross-border attacks become sustained and recurrent, affecting multiple border localities in eastern Chad and causing significant civilian casualties, displacement, or humanitarian access disruptions.\"",
+      "deadline": "2027-05-06",
+      "status": "open",
+      "context": {
+        "triggerUpdate": "On 21 August, Chad said Sudanese army aircraft and drones struck a convoy more than 100 km inside Ennedi-Est, and raised its regional alert level to the highest. On 28 August, an air strike near the border killed at least 12 people at a fuel market.",
+        "evidence": [
+          {
+            "id": "ev-reuters-2026-08-27",
+            "title": "Chad accuses Sudan of cross-border strike, raises alert level",
+            "source": "Reuters",
+            "url": "https://www.reuters.com/world/africa/chad-accuses-sudan-cross-border-strike-raises-alert-level-2026-08-27/",
+            "publishedAt": "2026-08-27",
+            "summary": "Chad says Sudanese army aircraft and drones struck a convoy more than 100 km inside Ennedi-Est province. Authorities raised the regional alert level to its highest and deployed more forces.",
+            "language": "en",
+            "synthetic": false
+          },
+          {
+            "id": "ev-aj-2026-08-28",
+            "title": "Chad accuses Sudan of deadly air strike near shared border",
+            "source": "Al Jazeera",
+            "url": "https://www.aljazeera.com/news/2026/8/28/chad-accuses-sudan-of-deadly-air-strike-near-shared-border",
+            "publishedAt": "2026-08-28",
+            "summary": "An air strike near the border killed at least 12 people at a fuel market, adding to civilian protection risks and fears of escalation.",
+            "language": "en",
+            "synthetic": false
+          }
+        ]
+      },
+      "similarRisks": [],
+      "acapsProbability": "high",
+      "reviewDate": "2026-11-13"
+    },
+    {
+      "id": "RQ-R0248",
+      "riskId": "R0248",
+      "text": "Will camps and basic services in East Darfur state be stretched beyond capacity by an influx of South Sudanese refugees by June 2016?",
+      "resolutionCriteria": "Practice question built from ACAPS risk R0248. Resolves yes if ACAPS recorded the risk as materialised.",
+      "deadline": "2016-06-30",
+      "status": "resolved",
+      "outcome": true,
+      "context": { "triggerUpdate": "", "evidence": [] },
+      "similarRisks": [],
+      "acapsProbability": "high",
+      "replay": true
+    },
+    {
+      "id": "RQ-R0998",
+      "riskId": "R0998",
+      "text": "Will an intensifying humanitarian and security crisis in Kenya worsen conditions in its refugee camps within six months?",
+      "resolutionCriteria": "Practice question built from ACAPS risk R0998. Resolves yes if ACAPS recorded the risk as materialised.",
+      "deadline": "2025-09-30",
+      "status": "resolved",
+      "outcome": true,
+      "context": { "triggerUpdate": "", "evidence": [] },
+      "similarRisks": [],
+      "acapsProbability": "high",
+      "replay": true
+    },
+    {
+      "id": "RQ-R1002",
+      "riskId": "R1002",
+      "text": "Will a prolonged Syria–Lebanon border conflict cause displacement and increase shelter and livelihood needs within six months?",
+      "resolutionCriteria": "Practice question built from ACAPS risk R1002. Resolves yes if ACAPS recorded the risk as materialised.",
+      "deadline": "2026-04-30",
+      "status": "resolved",
+      "outcome": false,
+      "context": { "triggerUpdate": "", "evidence": [] },
+      "similarRisks": [],
+      "acapsProbability": "medium",
+      "replay": true
+    },
+    {
+      "id": "RQ-R0002",
+      "riskId": "R0002",
+      "text": "Will the establishment of a military regime in Sudan lead to increased conflict and the spread of violence across the country within six months?",
+      "resolutionCriteria": "Practice question built from ACAPS risk R0002. Resolves yes if ACAPS recorded the risk as materialised.",
+      "deadline": "2019-10-31",
+      "status": "resolved",
+      "outcome": true,
+      "context": { "triggerUpdate": "", "evidence": [] },
+      "similarRisks": [],
+      "acapsProbability": "high",
+      "replay": true
+    },
+    {
+      "id": "RQ-R0995",
+      "riskId": "R0995",
+      "text": "Will the consolidation of power by Dbeibeh's forces across Libya provoke counteractions from other factions and renewed clashes within six months?",
+      "resolutionCriteria": "Practice question built from ACAPS risk R0995. Resolves yes if ACAPS recorded the risk as materialised.",
+      "deadline": "2025-11-30",
+      "status": "resolved",
+      "outcome": false,
+      "context": { "triggerUpdate": "", "evidence": [] },
+      "similarRisks": [],
+      "acapsProbability": "low",
+      "replay": true
+    }
+  ]
+}

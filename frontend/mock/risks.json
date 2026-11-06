@@ -1,0 +1,982 @@
+{
+  "_meta": {
+    "source": "ACAPS Risk Radar export (data/risk-radar-export.csv), used under ACAPS terms of use",
+    "generatedBy": "scripts/extract-risk-radar.mjs",
+    "synthetic": false,
+    "note": "Real ACAPS data. 28 active risks, plus R0248, R0998, R1002 (similar past risks for R1043) and two resolved risks for practice replay questions (R0002 Sudan, materialised; R0995 Libya, not materialised). rationaleSummary is the first sentence of the ACAPS rationale. Dated rationale updates are included for R1043, R1066 and R1055 only."
+  },
+  "items": [
+    {
+      "id": "R1062",
+      "title": "Continued attacks between Pakistan and Afghanistan increase protection risks, food security needs, and access constraints in Afghanistan’s border provinces",
+      "country": "Afghanistan",
+      "iso": "AFG",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "very_high",
+      "impact": 4,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Food security",
+        "Protection",
+        "Humanitarian access"
+      ],
+      "rationaleSummary": "Humanitarian needs, particularly related to protection, food security, and access, are increasing and are at high risk of deteriorating further along the Durand Line between Afghanistan and Pakistan given the conflict escalation and air strikes between the two countries.",
+      "lastReviewed": "2026-10-07",
+      "triggerIds": [
+        "T0667",
+        "T0668"
+      ]
+    },
+    {
+      "id": "R1067",
+      "title": "Escalating clashes between Interim Taliban Authority forces and armed opposition groups in Badakhshan deteriorates food security and increases protection risks",
+      "country": "Afghanistan",
+      "iso": "AFG",
+      "type": "New emerging risk",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "trend": "stable",
+      "status": "active",
+      "expectedExposure": "20,000-100,000",
+      "priorityNeeds": [
+        "Protection",
+        "Health",
+        "Food security"
+      ],
+      "rationaleSummary": "Persistent tension in Badakhshan, driven by disputes over mining resources, ethnic differences, contested territorial control, and grievances over Interim Taliban Authority (ITA) governance, risk creating recurrent instability and protection risks for communities.",
+      "lastReviewed": "2026-10-06",
+      "triggerIds": [
+        "T0671",
+        "T0672",
+        "T0673"
+      ]
+    },
+    {
+      "id": "R1043",
+      "title": "Escalating cross-border insecurity linked to the Sudan conflict increases protection risks and humanitarian needs in eastern Chad",
+      "country": "Chad",
+      "iso": "TCD",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Protection",
+        "Food security",
+        "Livelihoods",
+        "Health"
+      ],
+      "rationaleSummary": "Since early 2026, the conflict in Sudan has evolved from a humanitarian crisis affecting Chad into a direct security threat to eastern border areas.",
+      "lastReviewed": "2026-09-30",
+      "triggerIds": [
+        "T0618",
+        "T0619",
+        "T0620"
+      ],
+      "updates": [
+        {
+          "date": "2026-09-30",
+          "text": "The risk remains active, although no significant new cross-border attacks inside Chad were identified during the second half of September. Humanitarian pressure linked to the Sudan conflict has nevertheless increased sharply as fighting in Darfur and other parts of Sudan drives renewed displacement across the border. By 25 September, more than 400 Sudanese refugees were crossing into Chad each day, around 20 times the rate recorded in previous months, bringing arrivals since the beginning of 2026 to more than 55,000. The acceleration in arrivals is increasing pressure on already overstretched reception areas and services in eastern Chad, while funding constraints affect humanitarian organisations' capacity to provide shelter, food, and relocation assistance. Continued conflict in neighbouring Sudan therefore maintains the risk of further refugee arrivals and humanitarian deterioration in eastern Chad, while the potential for renewed cross-border security incidents remains, given the heightened military presence and tensions established along the border following the August strikes.",
+          "sources": [
+            {
+              "label": "UNHCR 25/09/2026",
+              "url": "https://www.unhcr.org/news/briefing-notes/unhcr-its-fourth-year-sudan-conflict-drives-new-displacement-chad-funding-falls"
+            },
+            {
+              "label": "Reuters 25/09/2026",
+              "url": "https://www.reuters.com/world/africa/number-sudanese-fleeing-chad-surges-20-fold-aid-runs-dry-un-says-2026-09-25/"
+            }
+          ]
+        },
+        {
+          "date": "2026-09-13",
+          "text": "The risk deteriorated in August 2026 as cross-border violence increasingly affected Chadian territory and prompted stronger security measures. On 21 August, Chad accused Sudanese Armed Forces aircraft and drones of striking a convoy more than 100km inside Ennedi-Est province, prompting authorities to raise the regional alert level to its highest and deploy additional forces. On 28 August, an air strike near the border killed at least 12 people at a fuel market, further increasing civilian protection risks and concerns over escalation.",
+          "sources": [
+            {
+              "label": "Reuters 27/08/2026",
+              "url": "https://www.reuters.com/world/africa/chad-accuses-sudan-cross-border-strike-raises-alert-level-2026-08-27/"
+            },
+            {
+              "label": "AJ 28/08/2026",
+              "url": "https://www.aljazeera.com/news/2026/8/28/chad-accuses-sudan-of-deadly-air-strike-near-shared-border"
+            }
+          ]
+        },
+        {
+          "date": "2026-08-05",
+          "text": "The risk remains active after slightly deteriorating in July. Cross-border insecurity continues along eastern Chad, with new drone attacks reported on 21 July near Tiné amid intensified hostilities in Darfur. One strike in Indour hit a water point, causing livestock losses and possible human casualties, while another damaged an administrative vehicle in Bamina. Between 17 June and 17 July, 23 security incidents were recorded, killing 23 people, nearly half concentrated in Ouaddai and Wadi Fira. Chadian authorities have continued disarmament operations and movement controls in Sila, reflecting persistent concerns over cross-border armed activity. Humanitarian pressures have also increased. Despite the official border closure, 4,126 new refugees arrived in July, while protection conditions during displacement worsened. The proportion of households reporting at least one human rights violation during flight increased from 53% in June to 58% in July, with reported physical violence rising from 22% to 29%. More than 220,000 refugees remain stranded in insecure border areas awaiting relocation, increasing their exposure to insecurity and limited access to services. Over the coming months, further drone strikes, cross-border violence, or proxy mobilisation could further restrict safe movement across eastern Chad and increase protection risks for refugees, returnees, and host communities. The continued backlog of relocations, rainy season access constraints, and the potential suspension of WFP food assistance from September would likely amplify the humanitarian consequences of any further deterioration in border security.",
+          "sources": [
+            {
+              "label": "UNHCR 30/07/2026",
+              "url": "https://reliefweb.int/report/chad/flash-updates-55-nouvel-afflux-de-refugies-soudanais-au-tchad"
+            },
+            {
+              "label": "UNHCR 02/08/2026",
+              "url": "https://reliefweb.int/report/chad/projet-21-tchad-urgence-soudanaise-monitoring-aux-frontieres-tendances-cles-juillet-2026"
+            },
+            {
+              "label": "WFP 27/07/2026",
+              "url": "https://reliefweb.int/report/chad/wfp-chad-country-brief-july-2026"
+            },
+            {
+              "label": "FEWS NET 04/08/2026",
+              "url": "https://reliefweb.int/report/chad/tchad-mise-jour-des-messages-cles-retard-dinstallation-de-la-saison-dans-les-provinces-de-lest-deja-en-crise-phase-3-de-lipc-juillet-2026-janvier-2027"
+            },
+            {
+              "label": "ICG 23/07/2026",
+              "url": "https://www.crisisgroup.org/vid/africa/chad/sudans-war-risks-fracturing-eastern-chad"
+            }
+          ]
+        },
+        {
+          "date": "2026-06-26",
+          "text": "The risk remains active and has slightly deteriorated. Recent reporting indicates that border insecurity continues to affect eastern Chad, with refugee arrivals from Sudan slowing in May likely because of insecurity around crossing points, including a 26 May drone strike in Al-Tina. This supports the risk logic that violence linked to the Sudan conflict is increasingly affecting Chadian border areas and limiting safe mobility rather than only generating humanitarian spillover. The humanitarian exposure remains high. As of 21 June, 932,771 Sudanese refugees had arrived in Chad since April 2023, while 400,914 Chadian returnees were also recorded. Most new arrivals remain concentrated in Ouaddaï, Wadi Fira, Sila, and Ennedi Est, including 234,499 in Wadi Fira and 509,637 in Ouaddaï. UNHCR also reports that 87% of registered people are women and children and 13% have specific needs. Protection risks are also increasing. Border monitoring between 1–15 June found that 63% of interviewed households fled Sudan because of insecurity, 42% reported human rights violations during flight, and 49% had family members still blocked in Sudan, mainly because of lack of transport means. In Wadi Fira, continued Zaghawa–Tama tensions and clashes have restricted movement and access to essential SRH and GBV services. UNFPA also reports a 90% funding gap, severely limiting life-saving SRH and protection services. Over the next one to three months, further drone strikes, cross-border violence, or proxy mobilisation could further restrict movement across the Chad–Sudan border, increase protection risks, and strain humanitarian operations in eastern Chad. The acceleration of refugee relocations from unstable border areas to safer inland sites shows that insecurity remains a direct operational concern. If insecurity persists, humanitarian actors may face greater access constraints while refugees, returnees, and host communities face worsening protection, health, and service-access risks.",
+          "sources": [
+            {
+              "label": "UNFPA 16/06/2026",
+              "url": "https://reliefweb.int/report/chad/unfpa-situation-report-chad-humanitarian-response-1-31-may-2026"
+            },
+            {
+              "label": "UNHCR 15/06/2026",
+              "url": "https://reliefweb.int/report/chad/hcr-tchad-rapport-operationnel-hebdomadaire-du-15-avril-2026"
+            },
+            {
+              "label": "UNHCR 21/06/2026",
+              "url": "https://reliefweb.int/report/chad/core-emergency-situation-chad-update-arrivals-sudan-21-june-2026"
+            },
+            {
+              "label": "UNHCR 17/06/2026",
+              "url": "https://reliefweb.int/report/chad/p21-tchad-urgence-soudanaise-situation-de-protection-des-nouveaux-arrivants-01-15-juin-2026-fr"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R1066",
+      "title": "Escalating insecurity across the Lake Chad Basin increases displacement, protection risks, and humanitarian access constraints",
+      "country": "Chad, Niger, Cameroon, Nigeria",
+      "iso": "TCD, NER, CMR, NGA",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "very_high",
+      "impact": 4,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": "100,000-250,000",
+      "priorityNeeds": [
+        "Protection",
+        "Food security",
+        "Livelihoods"
+      ],
+      "rationaleSummary": "Violence involving Boko Haram and Islamic State West Africa Province (ISWAP) is rising after five years of declining lethality in the Lake Chad Basin.",
+      "lastReviewed": "2026-09-30",
+      "triggerIds": [
+        "T0669",
+        "T0670"
+      ],
+      "updates": [
+        {
+          "date": "2026-09-30",
+          "text": "The risk continued to increase in the second half of September, with persistent armed group activity generating new displacement and protection concerns in Cameroon's Far North region. On 17 September, armed assailants killed at least 15 civilians in Madegoua, near Makary commune in Logone et Chari division. While no group claimed responsibility, a security analyst assessed that Islamic State West Africa Province was likely responsible. The attack prompted several hundred people from around ten nearby villages to flee towards Kousseri, Mora, and Waza, where new arrivals faced inadequate food and shelter and increased pressure on local health services. Insecurity remained persistent elsewhere in Far North region during September, including attempted attacks by Islamic State West Africa Province on security positions near Fotokol and continued Boko Haram abductions. These developments reinforce the risk of further displacement and protection needs in border communities and demonstrate that sustained armed group activity is translating into humanitarian impacts despite continued military operations.",
+          "sources": [
+            {
+              "label": "Internazionale 17/09/2026",
+              "url": "https://www.internazionale.it/ultime-notizie-reuters/2026/09/17/militants-kill-15-in-overnight-cameroon-raid-village-sources-say"
+            },
+            {
+              "label": "AJ 22/09/2026",
+              "url": "https://www.aljazeera.com/amp/news/2026/9/22/hundreds-flee-homes-in-far-north-cameroon-after-armed-group-raid-kills-15"
+            }
+          ]
+        },
+        {
+          "date": "2026-09-13",
+          "text": "The risk deteriorated in August 2026 as sustained Boko Haram and Islamic State West Africa Province activity across the Lake Chad Basin continued to challenge security forces and disrupt civilian movement. In Borno, repeated attacks and insurgent logistics activity prompted intensified military operations, while 204 conflict-related incidents and 108 deaths were recorded in Cameroon’s Far North between 1 July and 25 August. Continued insecurity across border areas is increasing protection risks and constraining livelihoods and humanitarian access, reversing fragile stabilisation gains.",
+          "sources": [
+            {
+              "label": "The Guardian Nigeria 30/08/2026",
+              "url": "https://guardian.ng/business-services/maritime/troops-foil-iswap-attack-on-borno-community-neutralise-27-terrorists/"
+            },
+            {
+              "label": "Africa Monitoring 08/09/2026",
+              "url": "https://africamonitoring.com/news/security/524"
+            },
+            {
+              "label": "ACLED 19/05/2026",
+              "url": "https://acleddata.com/expert-comment/violence-involving-boko-haram-and-islamic-state-west-africa-province-rising"
+            },
+            {
+              "label": "Critical Threats 13/08/2026",
+              "url": "https://www.criticalthreats.org/analysis/aussom-shabaab-somalia-puntland-fgs-somalia-iswap-boko-nigeria-africa-file-august-13-2026"
+            },
+            {
+              "label": "ISS 03/08/2026",
+              "url": "https://issafrica.org/iss-today/boko-haram-s-cameroonian-commanders-are-extending-the-group-s-reach"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R1059",
+      "title": "Peace talk end and military offensive against armed groups in Colombia escalate conflict and increase civilian casualties and displacement",
+      "country": "Colombia",
+      "iso": "COL",
+      "type": "New emerging risk",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": "100,000-250,000",
+      "priorityNeeds": [
+        "Protection",
+        "Food security",
+        "WASH"
+      ],
+      "rationaleSummary": "After the elections in June 2026, Abelardo de la Espriella’s win as Colombia's new President signalled a major change in the country's stance towards non-state armed groups (NSAGs) and drug trafficking organisations.",
+      "lastReviewed": "2026-09-02",
+      "triggerIds": [
+        "T0656",
+        "T0657",
+        "T0658",
+        "T0659"
+      ]
+    },
+    {
+      "id": "R1045",
+      "title": "Forecast below-average Kiremt rains in Ethiopia threaten food production and livelihoods",
+      "country": "Ethiopia",
+      "iso": "ETH",
+      "type": "New emerging risk",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "trend": "stable",
+      "status": "active",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Food security",
+        "Nutrition",
+        "Health"
+      ],
+      "rationaleSummary": "El Niño conditions are forecast to develop by July 2026 and strengthen through the second half of the year.",
+      "lastReviewed": "2026-09-29",
+      "triggerIds": [
+        "T0625",
+        "T0626"
+      ]
+    },
+    {
+      "id": "R1071",
+      "title": "Intensifying forest and peatland fires across Indonesia cause prolonged hazardous haze, health impacts, and education, transport, and livelihood disruptions",
+      "country": "Indonesia",
+      "iso": "IDN",
+      "type": "Future impact of a hazard which has already taken place",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Health",
+        "Education",
+        "Livelihoods"
+      ],
+      "rationaleSummary": "Indonesia's annual forest and peatland fire season has intensified sharply during the 2026 dry season.",
+      "lastReviewed": "2026-09-30",
+      "triggerIds": [
+        "T0683",
+        "T0684"
+      ]
+    },
+    {
+      "id": "R1044",
+      "title": "Forecast El Niño conditions threaten crop production and worsen food insecurity in Kenya",
+      "country": "Kenya",
+      "iso": "KEN",
+      "type": "New emerging risk",
+      "probability": "high",
+      "impact": 2,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Livelihoods",
+        "Food security",
+        "Health"
+      ],
+      "rationaleSummary": "El Niño conditions are forecast to develop by July 2026 and strengthen through the second half of the year.",
+      "lastReviewed": "2026-09-29",
+      "triggerIds": [
+        "T0623",
+        "T0624"
+      ]
+    },
+    {
+      "id": "R1046",
+      "title": "El Niño drives drought conditions, increasing food insecurity and heightening humanitarian needs in Madagascar in 2027",
+      "country": "Madagascar",
+      "iso": "MDG",
+      "type": "New emerging risk",
+      "probability": "medium",
+      "impact": 4,
+      "riskLevel": "medium",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Food security",
+        "Nutrition",
+        "WASH"
+      ],
+      "rationaleSummary": "Current models indicate a very high probability for El Niño to develop by July 2026 and persist into early 2027.",
+      "lastReviewed": "2026-10-05",
+      "triggerIds": [
+        "T0627"
+      ]
+    },
+    {
+      "id": "R1042",
+      "title": "Continued coordinated JNIM–FLA attacks and blockades increase protection risks, displacement, and humanitarian access constraints in Mali",
+      "country": "Mali",
+      "iso": "MLI",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Protection",
+        "Food security",
+        "Health"
+      ],
+      "rationaleSummary": "Since late April 2026, the unprecedented operational coordination between Jama’at Nasr Al Islam wal Muslimin (JNIM) and the Front de libération de l’Azawad (FLA) has significantly increased pressure on Mali’s security apparatus and exposed vulnerabilities in state control across northern, central, and western regions.",
+      "lastReviewed": "2026-09-30",
+      "triggerIds": [
+        "T0616",
+        "T0617"
+      ]
+    },
+    {
+      "id": "R1047",
+      "title": "El Niño-induced dry conditions in southern and central Mozambique and floods in the northern provinces increase humanitarian needs in 2026 and early 2027",
+      "country": "Mozambique",
+      "iso": "MOZ",
+      "type": "New emerging risk",
+      "probability": "medium",
+      "impact": 4,
+      "riskLevel": "medium",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Food security",
+        "WASH",
+        "Health"
+      ],
+      "rationaleSummary": "Climate projections indicate a high likelihood of El Niño conditions developing in July 2026 and persisting into the 2026/2027 rainy season, coinciding with Mozambique's main agricultural period.",
+      "lastReviewed": "2026-10-05",
+      "triggerIds": [
+        "T0628",
+        "T0629",
+        "T0630"
+      ]
+    },
+    {
+      "id": "R1072",
+      "title": "Sustained military pressure in Cabo Delgado drives Islamic State Mozambique attacks on less-exposed communities in Niassa and northern Nampula, causing localised displacement, abductions, and livelihood loss",
+      "country": "Mozambique",
+      "iso": "MOZ",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "status": "active",
+      "expectedExposure": "20,000-100,000",
+      "priorityNeeds": [
+        "Livelihoods",
+        "Food security",
+        "Health",
+        "Protection"
+      ],
+      "rationaleSummary": "Islamic State Mozambique (ISM) activity in northern Mozambique has increasingly shifted towards mobile, small-group operations as a response to intensified military pressure from Mozambican security forces and their regional partners.",
+      "lastReviewed": "2026-10-02",
+      "triggerIds": [
+        "T0685",
+        "T0686",
+        "T0687"
+      ]
+    },
+    {
+      "id": "R1069",
+      "title": "Military operations to secure the Dawei Special Economic Zone cause further forced displacement and severe protection risks in Dawei district, Tanintharyi region",
+      "country": "Myanmar",
+      "iso": "MMR",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "high",
+      "impact": 3,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": "20,000-100,000",
+      "priorityNeeds": [
+        "Protection",
+        "Shelter",
+        "Food security"
+      ],
+      "rationaleSummary": "By 28 August 2026, an estimated 700–1,000 military personnel were conducting clearance operations around the long-stalled Dawei Special Economic Zone (SEZ) in Yebyu township after a late-June order to protect the strategic projects.",
+      "lastReviewed": "2026-10-05",
+      "triggerIds": [
+        "T0677",
+        "T0678",
+        "T0679"
+      ]
+    },
+    {
+      "id": "R1038",
+      "title": "Escalation of inter-group conflict between Jama’at Nusrat al-Islam wal-Muslimin and Islamic State Sahel Province in western Niger leads to increased violence against civilians and displacement",
+      "country": "Niger",
+      "iso": "NER",
+      "type": "New emerging risk",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": "20,000-100,000",
+      "priorityNeeds": [
+        "Protection",
+        "Food security",
+        "Livelihoods"
+      ],
+      "rationaleSummary": "In early April 2026, the Islamic State Sahel Province (ISSP) attacked a Jama’at Nusrat al-Islam wal-Muslimin (JNIM) position in Tillabéri, marking the first reported direct confrontation between the two groups in Niger after years of rivalry concentrated in Mali and Burkina Faso.",
+      "lastReviewed": "2026-09-30",
+      "triggerIds": [
+        "T0608",
+        "T0609",
+        "T0610",
+        "T0611"
+      ]
+    },
+    {
+      "id": "R1074",
+      "title": "Post-mutiny divisions in Niger's army enable JNIM and ISSP expansion across Tillabéri, Tahoua, and Dosso, driving displacement and restricting humanitarian access",
+      "country": "Niger",
+      "iso": "NER",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "medium",
+      "impact": 4,
+      "riskLevel": "medium",
+      "status": "active",
+      "expectedExposure": "100,000-250,000",
+      "priorityNeeds": [
+        "Protection",
+        "Food security",
+        "Livelihoods"
+      ],
+      "rationaleSummary": "The 28–29 August mutiny in Niamey exposed growing divisions within Niger's armed forces that are directly connected to the counterinsurgency front line.",
+      "lastReviewed": "2026-10-07",
+      "triggerIds": [
+        "T0690",
+        "T0691",
+        "T0692"
+      ]
+    },
+    {
+      "id": "R1061",
+      "title": "Permanent military exclusion zone east of the Yellow Line before the Israeli elections increases displacement and humanitarian access constraints",
+      "country": "Palestine",
+      "iso": "PSE",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "trend": "stable",
+      "status": "active",
+      "expectedExposure": "100,000-250,000",
+      "priorityNeeds": [
+        "Humanitarian access",
+        "Food security",
+        "WASH"
+      ],
+      "rationaleSummary": "There is a high probability that Israeli forces will formally declare and physically enclose a permanent military exclusion zone east of the Yellow Line in the period leading up to Israel's October 2026 parliamentary elections, progressively reducing the territory accessible to civilians and humanitarian responders.",
+      "lastReviewed": "2026-09-04",
+      "triggerIds": [
+        "T0660",
+        "T0661",
+        "T0662",
+        "T0663"
+      ]
+    },
+    {
+      "id": "R1073",
+      "title": "Accelerated implementation of the E1 settlement plan results in demolitions, displacement of Bedouin communities, and access constraints",
+      "country": "Palestine",
+      "iso": "PSE",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "status": "active",
+      "expectedExposure": "<20,000",
+      "priorityNeeds": [
+        "Humanitarian access",
+        "Education",
+        "Protection"
+      ],
+      "rationaleSummary": "The E1 settlement plan is a longstanding Israeli initiative that was revived in July 2025 after four years of suspension and approved for advancement by the Israeli Government on 20 August 2025.",
+      "lastReviewed": "2026-10-02",
+      "triggerIds": [
+        "T0688",
+        "T0689"
+      ]
+    },
+    {
+      "id": "R1058",
+      "title": "El Niño-driven agricultural losses and water shortages in the Philippines increase food security, WASH, and health needs",
+      "country": "Philippines",
+      "iso": "PHL",
+      "type": "New emerging risk",
+      "probability": "high",
+      "impact": 3,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Food security",
+        "WASH",
+        "Health"
+      ],
+      "rationaleSummary": "The Philippines faces an increasing risk of El Niño-driven drought, potentially triggering water shortages, agricultural losses, and heat stress in the coming months.",
+      "lastReviewed": "2026-09-30",
+      "triggerIds": [
+        "T0655"
+      ]
+    },
+    {
+      "id": "R1037",
+      "title": "Escalating violence between the Sudan People's Liberation Movement and the Sudan People's Liberation Movement-in-Opposition reignites civil war, driving mass displacement and service collapse",
+      "country": "South Sudan",
+      "iso": "SSD",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Food security",
+        "Displacement",
+        "Protection",
+        "Nutrition",
+        "WASH"
+      ],
+      "rationaleSummary": "The collapse of the 2018 revitalized peace agreement and the disbandment of the unity government have dramatically increased the risk of South Sudan sliding back into full-scale civil conflict.",
+      "lastReviewed": "2026-09-29",
+      "triggerIds": [
+        "T0603",
+        "T0604",
+        "T0605"
+      ]
+    },
+    {
+      "id": "R1048",
+      "title": "RSF expansion in Blue Nile state triggers displacement and protection risks",
+      "country": "Sudan",
+      "iso": "SDN",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": "20,000-100,000",
+      "priorityNeeds": [
+        "WASH",
+        "Protection",
+        "Shelter"
+      ],
+      "rationaleSummary": "The RSF offensive launched in early 2026 against Sudanese Armed Forces (SAF) positions in Baw county opened a new front in Blue Nile state.",
+      "lastReviewed": "2026-09-13",
+      "triggerIds": [
+        "T0631",
+        "T0632",
+        "T0633"
+      ]
+    },
+    {
+      "id": "R1049",
+      "title": "RSF restoration of siege on Al Obeid, North Kordofan drives widescale displacement towards White Nile state",
+      "country": "Sudan",
+      "iso": "SDN",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "medium",
+      "impact": 5,
+      "riskLevel": "medium",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": "100,000-250,000",
+      "priorityNeeds": [
+        "Food security",
+        "Livelihoods",
+        "Health",
+        "WASH"
+      ],
+      "rationaleSummary": "Since October 2025, RSF has mobilised troops near Al Obeid's borders, including deploying combat vehicles along the western side.",
+      "lastReviewed": "2026-09-13",
+      "triggerIds": [
+        "T0634",
+        "T0635",
+        "T0636"
+      ]
+    },
+    {
+      "id": "R1051",
+      "title": "Interregional trade restrictions disrupt markets and deepen food insecurity in West Kordofan",
+      "country": "Sudan",
+      "iso": "SDN",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "medium",
+      "impact": 5,
+      "riskLevel": "medium",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": "250,000-500,000",
+      "priorityNeeds": [
+        "Food security",
+        "Livelihoods",
+        "Health",
+        "Protection"
+      ],
+      "rationaleSummary": "The continuation or expansion of trade bans imposed in late 2025 by Khartoum, Northern, and North Kordofan states on the movement of goods into RSF-controlled areas would likely further restrict supplies to West Kordofan.",
+      "lastReviewed": "2026-09-13",
+      "triggerIds": [
+        "T0637",
+        "T0638",
+        "T0639"
+      ]
+    },
+    {
+      "id": "R1052",
+      "title": "A rift between SAF and allied groups in Khartoum leads to worsening humanitarian conditions and protection concerns",
+      "country": "Sudan",
+      "iso": "SDN",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "low",
+      "impact": 5,
+      "riskLevel": "medium",
+      "trend": "stable",
+      "status": "active",
+      "expectedExposure": "250,000-500,000",
+      "priorityNeeds": [
+        "Protection",
+        "Health",
+        "Food security",
+        "Livelihoods"
+      ],
+      "rationaleSummary": "The Sudanese Armed Forces (SAF) face growing pressure from key external allies, including Egypt, Saudi Arabia, and the US, to distance itself from allied armed groups with political Islam leanings, including the Al Baraa Bin Malik Brigade.",
+      "lastReviewed": "2026-08-03",
+      "triggerIds": [
+        "T0640",
+        "T0641",
+        "T0642"
+      ]
+    },
+    {
+      "id": "R1053",
+      "title": "Long-range RSF drones targeting the eastern supply corridor and Port Sudan disrupt trade and aid delivery in Red Sea state",
+      "country": "Sudan",
+      "iso": "SDN",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "medium",
+      "impact": 3,
+      "riskLevel": "medium",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": "250,000-500,000",
+      "priorityNeeds": [
+        "Livelihoods",
+        "Food security",
+        "Health",
+        "WASH"
+      ],
+      "rationaleSummary": "RSF tactics have increasingly shifted from ground offensives in SAF-controlled areas to long-range drone strikes.",
+      "lastReviewed": "2026-09-13",
+      "triggerIds": [
+        "T0643",
+        "T0644",
+        "T0645"
+      ]
+    },
+    {
+      "id": "R1054",
+      "title": "RSF drone attacks damage the Merowe Dam and power grid in Northern state, disrupting health, food security, and public services",
+      "country": "Sudan",
+      "iso": "SDN",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "low",
+      "impact": 5,
+      "riskLevel": "medium",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": "250,000-500,000",
+      "priorityNeeds": [
+        "WASH",
+        "Health",
+        "Food security",
+        "Livelihoods"
+      ],
+      "rationaleSummary": "Since 2025, RSF has expanded its long-range drone capabilities, including kamikaze munitions able to target infrastructure far inside SAF-controlled areas.",
+      "lastReviewed": "2026-09-13",
+      "triggerIds": [
+        "T0646",
+        "T0647",
+        "T0648"
+      ]
+    },
+    {
+      "id": "R1055",
+      "title": "Mass returns from eastern Chad exacerbate humanitarian needs in West Darfur State",
+      "country": "Sudan",
+      "iso": "SDN",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "medium",
+      "impact": 3,
+      "riskLevel": "medium",
+      "trend": "stable",
+      "status": "active",
+      "expectedExposure": "100,000-250,000",
+      "priorityNeeds": [
+        "Protection",
+        "Shelter",
+        "Food security",
+        "Livelihoods"
+      ],
+      "rationaleSummary": "Deteriorating humanitarian conditions, aid shortfalls, and insecurity in eastern Chad are increasingly pushing Sudanese refugees to return to unsafe areas in Darfur, particularly West Darfur.",
+      "lastReviewed": "2026-08-03",
+      "triggerIds": [
+        "T0649",
+        "T0650",
+        "T0651"
+      ],
+      "updates": [
+        {
+          "date": "2026-08-03",
+          "text": "The risk remained stable in July 2026, with continued pressure on Sudanese refugees and returnees in Chad, although there was no clear evidence of a sudden mass return movement into West Darfur during the month. By 30 June, more than 1.33 million people had crossed into Chad since the start of the Sudan crisis, including over 405,000 Chadian returnees, with further arrivals expected as conflict and food insecurity persist in Darfur. At the same time, severe funding shortfalls continued to reduce access to food, water, shelter, protection, and healthcare for refugees in Chad, weakening coping capacities in refugee-hosting areas.",
+          "sources": [
+            {
+              "label": "IOM 30/06/2026",
+              "url": "https://dtm.iom.int/reports/chad-sudan-crisis-response-situation-update-66-june-2026"
+            },
+            {
+              "label": "UNHCR/WFP 09/04/2026",
+              "url": "https://www.unhcr.org/africa/news/press-releases/funding-shortfalls-put-lifelines-risk-sudanese-refugees-chad"
+            },
+            {
+              "label": "IOM 08/06/2026",
+              "url": "https://dtm.iom.int/reports/dtm-sudan-cross-border-monitoring-report-4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R1068",
+      "title": "Renewed violence in As Sweida or settler outpost establishment drives Israeli expansion in southern Syria, displacing civilians and restricting access",
+      "country": "Syria",
+      "iso": "SYR",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "low",
+      "impact": 4,
+      "riskLevel": "medium",
+      "trend": "deteriorated",
+      "status": "active",
+      "expectedExposure": "100,000-250,000",
+      "priorityNeeds": [
+        "Humanitarian access",
+        "Livelihoods",
+        "WASH"
+      ],
+      "rationaleSummary": "Since the fall of Bashar Al Assad in December 2024, Israel’s military presence in southern Syria has evolved from incursions into sustained territorial control.",
+      "lastReviewed": "2026-10-05",
+      "triggerIds": [
+        "T0674",
+        "T0675",
+        "T0676"
+      ]
+    },
+    {
+      "id": "R1065",
+      "title": "Renewed cross-border strikes collapse the 2022 Houthi–Saudi truce, driving new displacement, disrupting imports, and reducing humanitarian access across Yemen",
+      "country": "Yemen",
+      "iso": "YEM",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "medium",
+      "impact": 5,
+      "riskLevel": "medium",
+      "trend": "stable",
+      "status": "active",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Food security",
+        "Livelihoods",
+        "Health"
+      ],
+      "rationaleSummary": "On 13 July 2026, the Iran-backed de-facto authority (DFA) in the north of Yemen (also known as the Houthis) announced the end of a de facto period of de-escalation with Saudi Arabia and the Saudi-backed Internationally Recognized Government (IRG) of Yemen, increasing the risk of renewed cross-border and intra-Yemeni h…",
+      "lastReviewed": "2026-08-05",
+      "triggerIds": [
+        "T0664",
+        "T0665",
+        "T0666"
+      ]
+    },
+    {
+      "id": "R0248",
+      "title": "Camps and basic services in East Darfur state are stretched beyond capacity following the influx of up to 100,000 South Sudanese refugees by June 2016",
+      "country": "Sudan",
+      "iso": "SDN",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "status": "materialised",
+      "expectedExposure": "100,000-250,000",
+      "priorityNeeds": [
+        "Displacement"
+      ],
+      "rationaleSummary": "There is a water shortage across Darfur, and most IDP and refugee sites remain below emergency standards of 20L water per person per day and 20 people per latrine.",
+      "lastReviewed": "2024-11-28",
+      "triggerIds": [
+        "T0280",
+        "T0281"
+      ],
+      "outcome": {
+        "what": "hazard_and_impact",
+        "hazardText": "The refugee population in East Darfur state had dramatically increased by 2016, with numbers rising from 164 individuals in December 2015 to over 47,000 by June.",
+        "impactText": "This rapid influx strained resources and led to overcrowding at refugee sites. Water shortages and inadequate sanitation at camps, such as Khor Omer, worsened living conditions, with most sites failing to meet emergency standards for water and sanitation. By December 2017, congestion remained a significant issue, stretching basic services beyond their capacities."
+      }
+    },
+    {
+      "id": "R0998",
+      "title": "Intensifying humanitarian and security crisis in Kenya worsens conditions in refugee camps",
+      "country": "Kenya",
+      "iso": "KEN",
+      "type": "Marked deterioration in an existing crisis",
+      "probability": "high",
+      "impact": 3,
+      "riskLevel": "high",
+      "trend": "deteriorated",
+      "status": "materialised",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Food security",
+        "Protection",
+        "Displacement"
+      ],
+      "rationaleSummary": "Kenya’s refugee camps, particularly Dadaab and Kakuma, are facing an increasingly fragile situation owing to severe underfunding, overstretched infrastructure, and surging new arrivals.",
+      "lastReviewed": "2025-09-10",
+      "triggerIds": [
+        "T0501",
+        "T0502"
+      ],
+      "outcome": {
+        "what": "hazard_and_impact",
+        "hazardText": "Kenya’s humanitarian and security situation deteriorates, particularly in refugee-hosting areas such as Garissa and Turkana counties. This systemic breakdown in assistance created a volatile environment, heightening tensions between refugees and host communities, and sparking protests and violent clashes, such as those in Kalobeyei in late June 2025. At the same time, rising insecurity, resource scarcity, and disease outbreaks including dengue fever in Dadaab have compounded the fragility of the camps.",
+        "impactText": "The situation in Kenya’s refugee-hosting areas has escalated into a full-scale humanitarian crisis, marking clear impact materialisation. Food ration cuts and funding shortages have left 85,000 refugees nearly half the camp populations in Kakuma and Kalobeyei without assistance, triggering widespread hunger, protests, and violent clashes with police. As conditions deteriorated, more than 9,300 South Sudanese refugees have returned home since June 2025, many through Nadapal into Eastern Equatoria. The majority are children, now exposed to ambushes, unsafe border conditions, poor sanitation, and heightened risks of gender-based violence (GBV) and disease. Within the camps, worsening socioeconomic conditions have driven a spike in crime, GBV, and early or forced marriages, while malnutrition among children and pregnant or lactating women continues to rise. Water shortages, service interruptions, and dengue fever outbreaks in Dadaab further reflect the strain on essential services. Host communities are increasingly overstretched, facing overcrowding, food insecurity, and limited access to health and shelter, amplifying humanitarian needs for both refugees and hosts."
+      }
+    },
+    {
+      "id": "R1002",
+      "title": "A prolonged Syria–Lebanon border conflict results in displacement and increases shelter and livelihood needs",
+      "country": "Syria",
+      "iso": "SYR",
+      "type": "New emerging risk",
+      "probability": "medium",
+      "impact": 3,
+      "riskLevel": "medium",
+      "trend": "stable",
+      "status": "not_materialised",
+      "expectedExposure": "<20,000",
+      "priorityNeeds": [
+        "Livelihoods",
+        "Humanitarian access"
+      ],
+      "rationaleSummary": "The Syria–Lebanon border remains a key smuggling corridor for fuel, drugs (especially Captagon), and weapons, primarily from Syria to Lebanon, often facilitated by networks linked to Hezbollah and Iran-backed militias.",
+      "lastReviewed": "2026-04-25",
+      "triggerIds": [
+        "T0513",
+        "T0514"
+      ],
+      "outcome": {
+        "closingNote": "The risk improved slightly in April 2026 after tensions rose in March with an escalation between Hezbollah and Israel."
+      }
+    },
+    {
+      "id": "R0002",
+      "title": "Establishment of military regime leads to increased conflict and spread of violence across Sudan",
+      "country": "Sudan",
+      "iso": "SDN",
+      "type": "Future impact of a hazard which has already taken place",
+      "probability": "high",
+      "impact": 4,
+      "riskLevel": "high",
+      "status": "materialised",
+      "expectedExposure": ">500,000",
+      "priorityNeeds": [
+        "Protection"
+      ],
+      "rationaleSummary": "After the ousting of President Omar Al Bashir in April 2019, a transitional military government – specifically, the Transitional Military Council (TMC) – was installed.",
+      "lastReviewed": "2024-11-25",
+      "triggerIds": [
+        "T0189",
+        "T0190"
+      ],
+      "outcome": {
+        "what": "hazard",
+        "hazardText": "After the removal of Omar Al Bashir in April 2019, Sudan's Transitional Military Council (TMC) faced massive protests led by the Forces of Freedom and Change. Protesters demanded a transition to civilian rule, accusing the TMC of perpetuating Al Bashir's authoritarian regime. Tensions escalated on 3 June when the Rapid Support Forces violently dispersed a peaceful sit-in in Khartoum, killing over 100 people. Persistent demonstrations and mediation efforts resulted in a power-sharing agreement in August that established a joint military-civilian Sovereign Council to lead the transition."
+      }
+    },
+    {
+      "id": "R0995",
+      "title": "The consolidation of power by Dbeibeh's forces across Libya provokes counteractions from other factions, renewing clashes and protection risks",
+      "country": "Libya",
+      "iso": "LBY",
+      "type": "New emerging risk",
+      "probability": "low",
+      "impact": 3,
+      "riskLevel": "medium",
+      "trend": "stable",
+      "status": "not_materialised",
+      "expectedExposure": "<20,000",
+      "priorityNeeds": [
+        "Displacement",
+        "Health",
+        "WASH"
+      ],
+      "rationaleSummary": "On 12 May 2025, Tripoli security forces announced the killing of Abdel Ghani al-Kikli (also known as Ghnewa), commander of the Stability Support Apparatus (SSA).",
+      "lastReviewed": "2025-11-24",
+      "triggerIds": [
+        "T0493",
+        "T0494"
+      ],
+      "outcome": {
+        "closingNote": "The political situation in Libya has been relatively calm since the brief clashes reported in September 2025. It is likely that no further escalation will occur."
+      }
+    }
+  ]
+}

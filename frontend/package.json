@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "check:contracts": "tsc --noEmit -p tsconfig.contracts.json",
+    "mocks:extract": "node scripts/extract-risk-radar.mjs"
   },
   "dependencies": {
     "next": "16.4.5",

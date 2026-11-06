@@ -1,0 +1,9 @@
+{
+  "_meta": {
+    "source": "Audit log of decisions taken in this app",
+    "generatedBy": "hand",
+    "synthetic": true,
+    "note": "Starts empty. Each moderator decision in the demo adds an entry (in server memory, reset on restart)."
+  },
+  "items": []
+}
