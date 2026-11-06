@@ -17,6 +17,8 @@ from .db import Base, engine, get_db
 from .models import Alert, Invite, Question, Response, Risk
 from .schemas import AlertDecision, AnswerIn
 from .services.routing import route_question
+from .routers.moderator import router as moderator_router
+
 
 CONTRACTS = Path(__file__).resolve().parents[2] / "contracts"
 FRONTEND_URL = "http://localhost:3000"
@@ -31,6 +33,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(moderator_router)
 
 
 # Helpers
