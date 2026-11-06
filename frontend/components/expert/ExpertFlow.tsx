@@ -176,6 +176,9 @@ export function ExpertFlow({ token, data, source }: { token: string; data: Exper
           <button type="button" onClick={() => go('estimate')} className={`${buttonClass.primary} mt-6 w-full`}>
             {s.context.start}
           </button>
+          <Link href={`/q/${encodeURIComponent(token)}/record`} className={`${buttonClass.link} mt-2`}>
+            {s.record.link}
+          </Link>
         </>
       )}
 
