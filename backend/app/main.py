@@ -5,6 +5,7 @@ Never includes expert IDs
 """
 
 import json
+import secrets
 import statistics
 from pathlib import Path
 
@@ -14,15 +15,16 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .db import Base, engine, get_db
-from .models import Alert, Invite, Question, Response, Risk
-from .schemas import AlertDecision, AnswerIn
-from .services.routing import route_question
+from .models import Alert, Expert, Invite, PanelInvite, Question, Response, Risk
 from .routers.moderator import router as moderator_router
+from .schemas import AlertDecision, AnswerIn, JoinIn, PanelInviteIn, SettingsUpdate
+from .services.auth import require_moderator
+from .services.routing import route_question
 from .services.scoring import BASELINE_BRIER, expert_scores, summarise_scores
-
 
 CONTRACTS = Path(__file__).resolve().parents[2] / "contracts"
 FRONTEND_URL = "http://localhost:3000"
+MODERATOR_ONLY = [Depends(require_moderator)]
 
 Base.metadata.create_all(engine)
 
@@ -91,6 +93,38 @@ def require_open(question: Question):
         raise HTTPException(status_code=400, detail="Question is closed")
 
 
+def clean_topics(topics: list[str]) -> str:
+    cleaned = [topic.strip().lower() for topic in topics if topic.strip()]
+    return ",".join(dict.fromkeys(cleaned))  # Removes duplicates, keeps order
+
+
+def new_pseudonym(db: Session) -> str:
+    while True:
+        name = f"Analyst {secrets.token_hex(2).upper()}"
+        if db.scalar(select(Expert).where(Expert.pseudonym == name)) is None:
+            return name
+
+
+def get_open_panel_invite(db: Session, token: str) -> PanelInvite:
+    invite = db.get(PanelInvite, token)
+    if invite is None:
+        raise HTTPException(status_code=404, detail="Invite not found")
+    if invite.used:
+        raise HTTPException(status_code=409, detail="Invite already used")
+    return invite
+
+
+def settings_dict(expert: Expert):
+    return {
+        "pseudonym": expert.pseudonym,
+        "anonymity_level": expert.anonymity_level,
+        "country": expert.country,
+        "topics": [topic for topic in expert.topics.split(",") if topic],
+        "language": expert.language,
+        "max_open_questions": expert.max_open_questions,
+    }
+
+
 # General
 
 @app.get("/")
@@ -103,15 +137,32 @@ def health():
     return {"status": "ok"}
 
 
+# Moderator: panel invitations
+
+@app.post("/moderator/panel-invites", dependencies=MODERATOR_ONLY, tags=["moderator"])
+def create_panel_invite(body: PanelInviteIn, db: Session = Depends(get_db)):
+    invite = PanelInvite(
+        token=secrets.token_urlsafe(16),
+        email=body.email,
+        country=body.country,
+    )
+    db.add(invite)
+    db.commit()
+
+    join_link = f"{FRONTEND_URL}/join/{invite.token}"
+    print(f"[notify] Invitation for {body.email}: {join_link}")  # Stand-in for an email
+    return {"status": "invited", "join_link": join_link}
+
+
 # Moderator: alerts
 
-@app.get("/alerts")
+@app.get("/alerts", dependencies=MODERATOR_ONLY)
 def list_alerts(status: str = "pending", db: Session = Depends(get_db)):
     alerts = db.scalars(select(Alert).where(Alert.status == status)).all()
     return [alert_to_dict(alert) for alert in alerts]
 
 
-@app.post("/alerts/{alert_id}/decision")
+@app.post("/alerts/{alert_id}/decision", dependencies=MODERATOR_ONLY)
 def decide_alert(alert_id: str, body: AlertDecision, db: Session = Depends(get_db)):
     alert = db.get(Alert, alert_id)
     if alert is None:
@@ -128,7 +179,6 @@ def decide_alert(alert_id: str, body: AlertDecision, db: Session = Depends(get_d
     count = db.scalar(
         select(func.count()).select_from(Question).where(Question.id.like("Q%"))
     )
-    
     question = Question(
         id=f"Q{count + 1:03d}",
         risk_id=risk.id,
@@ -156,17 +206,17 @@ def decide_alert(alert_id: str, body: AlertDecision, db: Session = Depends(get_d
 
 # Moderator: risks and questions
 
-@app.get("/risks/ranked")
+@app.get("/risks/ranked", dependencies=MODERATOR_ONLY)
 def ranked_risks():
     return [load_sample("ranked_risk")]  # Mock until ML is ready
 
 
-@app.get("/risks/{risk_id}/similar")
+@app.get("/risks/{risk_id}/similar", dependencies=MODERATOR_ONLY)
 def similar_risks(risk_id: str):
     return [load_sample("similar_risk")]  # Mock until ML is ready
 
 
-@app.get("/risks/{risk_id}")
+@app.get("/risks/{risk_id}", dependencies=MODERATOR_ONLY)
 def get_risk(risk_id: str, db: Session = Depends(get_db)):
     risk = db.get(Risk, risk_id)
     if risk is None:
@@ -174,12 +224,39 @@ def get_risk(risk_id: str, db: Session = Depends(get_db)):
     return to_dict(risk)
 
 
-@app.get("/questions/{question_id}")
+@app.get("/questions/{question_id}", dependencies=MODERATOR_ONLY)
 def get_question(question_id: str, db: Session = Depends(get_db)):
     question = db.get(Question, question_id)
     if question is None:
         raise HTTPException(status_code=404, detail="Question not found")
     return to_dict(question)
+
+
+# Expert: joining the panel
+
+@app.get("/join/{token}")
+def join_info(token: str, db: Session = Depends(get_db)):
+    invite = get_open_panel_invite(db, token)
+    return {"country": invite.country}
+
+
+@app.post("/join/{token}")
+def join_panel(token: str, body: JoinIn, db: Session = Depends(get_db)):
+    invite = get_open_panel_invite(db, token)
+    expert = Expert(
+        id=f"expert-{secrets.token_hex(4)}",
+        pseudonym=new_pseudonym(db),
+        anonymity_level=body.anonymity_level,
+        country=body.country,
+        topics=clean_topics(body.topics),
+        language=body.language,
+        max_open_questions=body.max_open_questions,
+        email=invite.email,
+    )
+    db.add(expert)
+    invite.used = True
+    db.commit()
+    return {"status": "joined", "pseudonym": expert.pseudonym}
 
 
 # Expert: secret-link routes
@@ -277,6 +354,7 @@ def group_view(token: str, db: Session = Depends(get_db)):
         "themes": {"agreement": [], "disagreement": [], "new_information": []},
     }
 
+
 @app.get("/q/{token}/track-record")
 def track_record(token: str, db: Session = Depends(get_db)):
     invite = get_invite(db, token)
@@ -286,3 +364,24 @@ def track_record(token: str, db: Session = Depends(get_db)):
         "baseline_brier": BASELINE_BRIER,
         "history": scores,
     }
+
+
+@app.get("/q/{token}/settings")
+def get_settings(token: str, db: Session = Depends(get_db)):
+    invite = get_invite(db, token)
+    return settings_dict(db.get(Expert, invite.expert_id))
+
+
+@app.patch("/q/{token}/settings")
+def update_settings(token: str, body: SettingsUpdate, db: Session = Depends(get_db)):
+    invite = get_invite(db, token)
+    expert = db.get(Expert, invite.expert_id)
+
+    updates = body.model_dump(exclude_unset=True, exclude_none=True)
+    if "topics" in updates:
+        updates["topics"] = clean_topics(updates["topics"])
+    for field, value in updates.items():
+        setattr(expert, field, value)
+
+    db.commit()
+    return settings_dict(expert)

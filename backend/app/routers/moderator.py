@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from ..services.auth import require_moderator
 from ..db import get_db
 from ..models import Expert, Invite, Question, Response, Risk
 from ..schemas import ResolveIn
@@ -25,7 +26,11 @@ from ..services.scoring import (
     summarise_scores,
 )
 
-router = APIRouter(prefix="/moderator", tags=["moderator"])
+router = APIRouter(
+    prefix="/moderator",
+    tags=["moderator"],
+    dependencies=[Depends(require_moderator)],
+)
 
 MIN_RESOLVED_FOR_RANKING = 3
 

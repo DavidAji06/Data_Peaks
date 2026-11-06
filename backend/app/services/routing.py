@@ -11,7 +11,6 @@ from sqlalchemy.orm import Session
 
 from ..models import Expert, Invite, Question
 
-MAX_OPEN_INVITES = 3
 MAX_PANEL_SIZE = 10
 
 
@@ -32,7 +31,7 @@ def route_question(db: Session, question: Question, country: str) -> list[Invite
     candidates = []
     for expert in experts:
         count = open_invite_count(db, expert.id)
-        if count < MAX_OPEN_INVITES:
+        if count < expert.max_open_questions:
             candidates.append((count, expert))
     candidates.sort(key=lambda pair: pair[0])
 

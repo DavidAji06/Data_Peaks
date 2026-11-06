@@ -6,7 +6,7 @@ Each expert can submit one answer per round of Q's
 
 from datetime import date, datetime
 
-from sqlalchemy import DateTime, Float, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .db import Base
@@ -37,32 +37,20 @@ class Expert(Base):
     anonymity_level: Mapped[str]  # known_to_acaps, pseudonymous, anonymous
     country: Mapped[str]
     topics: Mapped[str]  # Comma-separated tags
+    language: Mapped[str] = mapped_column(default="en")
+    max_open_questions: Mapped[int] = mapped_column(default=3)
+    email: Mapped[str | None]  # Synthetic only; never returned by the API
 
 
-class Question(Base):
-    __tablename__ = "questions"
+class PanelInvite(Base):
+    __tablename__ = "panel_invites"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
-    risk_id: Mapped[str] = mapped_column(ForeignKey("risks.id"))
-    alert_id: Mapped[str | None]
-    text: Mapped[str] = mapped_column(Text)
-    resolution_criteria: Mapped[str] = mapped_column(Text)
-    deadline: Mapped[date]
-    status: Mapped[str] = mapped_column(default="open")
-    outcome: Mapped[int | None]  # 1 = happened, 0 = didn't, None = unresolved
-
-
-class Response(Base):
-    __tablename__ = "responses"
-    __table_args__ = (UniqueConstraint("question_id", "expert_id", "round"),)
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    question_id: Mapped[str] = mapped_column(ForeignKey("questions.id"))
-    expert_id: Mapped[str] = mapped_column(ForeignKey("experts.id"))
-    probability: Mapped[float] = mapped_column(Float)
-    reason: Mapped[str] = mapped_column(Text)
-    round: Mapped[int]  # 1 = blind answer, 2 = revision
+    token: Mapped[str] = mapped_column(String, primary_key=True)
+    email: Mapped[str]
+    country: Mapped[str]
+    used: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
 
 class Alert(Base):
     __tablename__ = "alerts"
@@ -80,6 +68,20 @@ class Alert(Base):
     status: Mapped[str] = mapped_column(default="pending")
 
 
+class Question(Base):
+    __tablename__ = "questions"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    risk_id: Mapped[str] = mapped_column(ForeignKey("risks.id"))
+    alert_id: Mapped[str | None]
+    text: Mapped[str] = mapped_column(Text)
+    resolution_criteria: Mapped[str] = mapped_column(Text)
+    deadline: Mapped[date]
+    status: Mapped[str] = mapped_column(default="open")
+    outcome: Mapped[int | None]  # 1 = happened, 0 = didn't, None = unresolved
+    themes: Mapped[str | None] = mapped_column(Text)  # AI summary as JSON, used in Part 2
+
+
 class Invite(Base):
     __tablename__ = "invites"
     __table_args__ = (UniqueConstraint("question_id", "expert_id"),)
@@ -87,4 +89,17 @@ class Invite(Base):
     token: Mapped[str] = mapped_column(String, primary_key=True)
     question_id: Mapped[str] = mapped_column(ForeignKey("questions.id"))
     expert_id: Mapped[str] = mapped_column(ForeignKey("experts.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class Response(Base):
+    __tablename__ = "responses"
+    __table_args__ = (UniqueConstraint("question_id", "expert_id", "round"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    question_id: Mapped[str] = mapped_column(ForeignKey("questions.id"))
+    expert_id: Mapped[str] = mapped_column(ForeignKey("experts.id"))
+    probability: Mapped[float] = mapped_column(Float)
+    reason: Mapped[str] = mapped_column(Text)
+    round: Mapped[int]  # 1 = blind answer, 2 = revision
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
