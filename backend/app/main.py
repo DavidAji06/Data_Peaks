@@ -18,6 +18,7 @@ from .models import Alert, Invite, Question, Response, Risk
 from .schemas import AlertDecision, AnswerIn
 from .services.routing import route_question
 from .routers.moderator import router as moderator_router
+from .services.scoring import BASELINE_BRIER, expert_scores, summarise_scores
 
 
 CONTRACTS = Path(__file__).resolve().parents[2] / "contracts"
@@ -124,7 +125,10 @@ def decide_alert(alert_id: str, body: AlertDecision, db: Session = Depends(get_d
         return {"alert_id": alert_id, "status": "rejected"}
 
     risk = db.get(Risk, alert.risk_id)
-    count = db.scalar(select(func.count()).select_from(Question))
+    count = db.scalar(
+        select(func.count()).select_from(Question).where(Question.id.like("Q%"))
+    )
+    
     question = Question(
         id=f"Q{count + 1:03d}",
         risk_id=risk.id,
@@ -271,4 +275,14 @@ def group_view(token: str, db: Session = Depends(get_db)):
         "min": min(probabilities),
         "max": max(probabilities),
         "themes": {"agreement": [], "disagreement": [], "new_information": []},
+    }
+
+@app.get("/q/{token}/track-record")
+def track_record(token: str, db: Session = Depends(get_db)):
+    invite = get_invite(db, token)
+    scores = expert_scores(db, invite.expert_id)
+    return {
+        **summarise_scores(scores),
+        "baseline_brier": BASELINE_BRIER,
+        "history": scores,
     }

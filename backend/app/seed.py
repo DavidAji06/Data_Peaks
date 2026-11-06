@@ -3,6 +3,8 @@ Loads the real risks from the CSV, adds 6 fake experts and asks 1 question
 5 experts have already answered, then expert-a can show the blind-answer
 (for the demo)
 """
+import random
+import secrets
 from datetime import date
 from pathlib import Path
 
@@ -13,6 +15,9 @@ from .models import Alert, Expert, Invite, Question, Response, Risk
 
 CSV = Path(__file__).resolve().parents[2] / "data" / "risk-radar-export.csv"
 
+# Simulated forecasting skill for each synthetic expert (1 = perfect, 0 = always 50%)
+SKILLS = {"a": 0.8, "b": 0.6, "c": 0.4, "d": 0.7, "e": 0.3, "f": 0.5}
+
 
 def clean(value):
     return None if pd.isna(value) else value
@@ -22,6 +27,7 @@ def seed():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     db = SessionLocal()
+    rng = random.Random(42)  # Fixed seed so the demo data is the same every time
 
     # Real risks from the ACAPS Risk Radar
     df = pd.read_csv(CSV)
@@ -81,7 +87,7 @@ def seed():
         status="pending",
     ))
 
-    # Sample question created from A001
+    # Sample open question created from A001
     db.add(Question(
         id="Q001",
         risk_id="R1043",
@@ -116,9 +122,48 @@ def seed():
             round=1,
         ))
 
+    # Past questions: REAL resolved ACAPS outcomes, SIMULATED expert forecasts
+    resolved = (
+        df[df["Status"].isin(["Materialised", "Not materialised"])]
+        .sort_values("Risk ID")
+        .head(8)
+    )
+    for n, (_, row) in enumerate(resolved.iterrows(), start=1):
+        question_id = f"H{n:03d}"
+        outcome = 1 if row["Status"] == "Materialised" else 0
+        db.add(Question(
+            id=question_id,
+            risk_id=row["Risk ID"],
+            alert_id=None,
+            text=f"Simulated past question: will this risk materialise? {row['Risk Title']}",
+            resolution_criteria="Resolved using the real ACAPS outcome.",
+            deadline=date(2026, 1, 1),
+            status="resolved",
+            outcome=outcome,
+        ))
+
+        for letter, skill in SKILLS.items():
+            expert_id = f"expert-{letter}"
+            # Skilled experts lean towards the real outcome; others stay near 50%
+            probability = skill * outcome + (1 - skill) * 0.5 + rng.gauss(0, 0.1)
+            probability = round(min(max(probability, 0.02), 0.98), 2)
+
+            db.add(Invite(
+                token=secrets.token_urlsafe(16),
+                question_id=question_id,
+                expert_id=expert_id,
+            ))
+            db.add(Response(
+                question_id=question_id,
+                expert_id=expert_id,
+                probability=probability,
+                reason="Simulated forecast for testing scores.",
+                round=1,
+            ))
+
     db.commit()
     db.close()
-    print(f"Seeded {len(df)} risks, 6 experts, 2 alerts and 1 question")
+    print(f"Seeded {len(df)} risks, 6 experts, 2 alerts, 1 open question and {len(resolved)} past questions")
 
 
 if __name__ == "__main__":

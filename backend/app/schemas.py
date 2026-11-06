@@ -30,3 +30,6 @@ class AlertDecision(BaseModel):
             if self.deadline <= date.today():
                 raise ValueError("Deadline must be in the future")
         return self
+
+class ResolveIn(BaseModel):
+    outcome: Literal[0, 1]  # 1 = happened, 0 = didn't

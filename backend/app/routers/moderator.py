@@ -15,9 +15,19 @@ from sqlalchemy.orm import Session
 
 from ..db import get_db
 from ..models import Expert, Invite, Question, Response, Risk
+from ..schemas import ResolveIn
 from ..services.anonymity import moderator_label
+from ..services.scoring import (
+    BASELINE_BRIER,
+    brier,
+    expert_scores,
+    latest_answers,
+    summarise_scores,
+)
 
 router = APIRouter(prefix="/moderator", tags=["moderator"])
+
+MIN_RESOLVED_FOR_RANKING = 3
 
 
 def summarise(values: list[float]):
@@ -70,6 +80,7 @@ def list_questions(db: Session = Depends(get_db)):
             "risk_id": question.risk_id,
             "text": question.text,
             "status": question.status,
+            "outcome": question.outcome,
             "deadline": question.deadline,
             "invited": invited_count(db, question.id),
             "answered": len(by_expert),
@@ -84,6 +95,7 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
     if question is None:
         raise HTTPException(status_code=404, detail="Question not found")
     risk = db.get(Risk, question.risk_id)
+    resolved = question.outcome is not None
 
     by_expert = answers_by_expert(db, question_id)
     experts = {
@@ -117,6 +129,7 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
             "latest_probability": latest_answer.probability,
             "revision_reason": revision.reason if revision else None,
             "revised": revision is not None,
+            "brier": brier(latest_answer.probability, question.outcome) if resolved else None,
         })
 
     first_summary = summarise(first)
@@ -125,6 +138,10 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
     if first_summary and latest_summary:
         median_shift = round(latest_summary["median"] - first_summary["median"], 2)
 
+    group_brier = None
+    if resolved and latest_summary:
+        group_brier = brier(latest_summary["median"], question.outcome)
+
     return {
         "question": {
             "id": question.id,
@@ -132,6 +149,7 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
             "resolution_criteria": question.resolution_criteria,
             "deadline": question.deadline,
             "status": question.status,
+            "outcome": question.outcome,
         },
         "risk": {
             "id": risk.id,
@@ -148,7 +166,66 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
         "first_round": first_summary,
         "latest": latest_summary,
         "median_shift": median_shift,
+        "group_median_brier": group_brier,
+        "baseline_brier": BASELINE_BRIER,
         "distribution": bands(latest),
         "responses": responses,
         "themes": {"agreement": [], "disagreement": [], "new_information": []},
+    }
+
+
+@router.post("/questions/{question_id}/resolve")
+def resolve_question(question_id: str, body: ResolveIn, db: Session = Depends(get_db)):
+    question = db.get(Question, question_id)
+    if question is None:
+        raise HTTPException(status_code=404, detail="Question not found")
+    if question.status == "resolved":
+        raise HTTPException(status_code=409, detail="Question already resolved")
+
+    question.outcome = body.outcome
+    question.status = "resolved"
+    db.commit()
+
+    answers = latest_answers(db, question_id)
+    if not answers:
+        return {"question_id": question_id, "outcome": body.outcome, "scored": 0}
+
+    probabilities = [response.probability for response in answers.values()]
+    scores = [brier(p, body.outcome) for p in probabilities]
+
+    return {
+        "question_id": question_id,
+        "outcome": body.outcome,
+        "scored": len(scores),
+        "mean_expert_brier": round(sum(scores) / len(scores), 4),
+        "group_median_brier": brier(statistics.median(probabilities), body.outcome),
+        "baseline_brier": BASELINE_BRIER,
+    }
+
+
+@router.get("/leaderboard")
+def leaderboard(db: Session = Depends(get_db)):
+    rows = []
+    for expert in db.scalars(select(Expert)).all():
+        # Ranking anonymous experts would link their answers across questions
+        if expert.anonymity_level == "anonymous":
+            continue
+        summary = summarise_scores(expert_scores(db, expert.id))
+        if summary["resolved"] < MIN_RESOLVED_FOR_RANKING:
+            continue
+        rows.append({
+            "label": expert.pseudonym,
+            "anonymity_level": expert.anonymity_level,
+            **summary,
+        })
+
+    rows.sort(key=lambda row: row["mean_brier"])
+    for rank, row in enumerate(rows, start=1):
+        row["rank"] = rank
+
+    return {
+        "baseline_brier": BASELINE_BRIER,
+        "min_resolved": MIN_RESOLVED_FOR_RANKING,
+        "experts": rows,
+        "note": "Anonymous experts are scored privately and not ranked.",
     }
