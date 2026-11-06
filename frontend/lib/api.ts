@@ -19,6 +19,7 @@ import {
   isPlaceholderSimilar,
   toAlert,
   toExpertQuestion,
+  toPublicOutcome,
   toLeaderboard,
   toQuestionDetail,
   toQuestionListItem,
@@ -26,7 +27,6 @@ import {
   toRiskDetail,
   toTrackRecord,
 } from './adapters';
-import { toPublicOutcome } from './anonymity';
 import { ApiError, NetworkError } from './api-error';
 import { mockRequest } from './server/mock-backend';
 import type {
@@ -35,6 +35,7 @@ import type {
   ApiAlert,
   ApiExpertQuestion,
   ApiExpertSettings,
+  ApiPublicQuestion,
   ApiLeaderboard,
   ApiQuestionDetail,
   ApiQuestionListItem,
@@ -211,14 +212,17 @@ export function getRankedRisks(): Promise<Loaded<RankedRisks>> {
 }
 
 // ---------------------------------------------------------------------------
-// Public: built on the server from the moderator view; only aggregates leave this function.
-// The backend has no public endpoint yet (requested in HANDOFF.md), so this server-side read uses the
-// moderator key. The key and the raw moderator JSON never reach the browser.
+// Public: GET /public/questions (no moderator key). Resolved questions only, aggregates only.
 // ---------------------------------------------------------------------------
 
-export function getPublicOutcome(questionId: string): Promise<Loaded<PublicOutcome>> {
-  return load(async (call) =>
-    toPublicOutcome(toQuestionDetail(await call<ApiQuestionDetail>('GET', `/moderator/questions/${enc(questionId)}`))),
-    'moderator',
-  );
+export function getPublicOutcomes(): Promise<Loaded<PublicOutcome[]>> {
+  return load(async (call) => (await call<ApiPublicQuestion[]>('GET', '/public/questions')).map(toPublicOutcome));
+}
+
+/** null = not published (unknown, or not resolved yet). */
+export function getPublicOutcome(questionId: string): Promise<Loaded<PublicOutcome | null>> {
+  return load(async (call) => {
+    const all = (await call<ApiPublicQuestion[]>('GET', '/public/questions')).map(toPublicOutcome);
+    return all.find((q) => q.questionId === questionId) ?? null;
+  });
 }

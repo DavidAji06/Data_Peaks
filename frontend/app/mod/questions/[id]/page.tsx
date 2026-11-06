@@ -3,14 +3,15 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { LevelTag, PageHeader, StatusTag, fmtBrier, fmtDate } from '@/components/mod/parts';
+import { AiThemes } from '@/components/mod/AiThemes';
 import { ResolvePanel } from '@/components/mod/ResolvePanel';
 import { ShiftAxis } from '@/components/mod/ShiftAxis';
-import { Card, Notice } from '@/components/ui/primitives';
+import { Card } from '@/components/ui/primitives';
 import { ApiError, getQuestionDetail } from '@/lib/api';
 import { canShowAggregate } from '@/lib/anonymity';
 import { mod } from '@/lib/i18n/mod';
 import { toPercent } from '@/lib/probability';
-import type { QuestionDetail, Themes } from '@/lib/types';
+import type { QuestionDetail } from '@/lib/types';
 import { ModSkeleton } from '../../loading';
 
 export const metadata: Metadata = { title: 'Question' };
@@ -56,12 +57,14 @@ async function QuestionView({ params }: { params: PageProps<'/mod/questions/[id]
             <p className="text-ink">{d.risk.title}</p>
             {d.risk.acapsProbability && <p className="mt-1 text-sm text-ink-muted">{t.acapsProbability(d.risk.acapsProbability)}</p>}
             {q.outcome !== null && <p className="mt-3 font-medium text-ink">{t.outcomeIs(q.outcome)}</p>}
+            {q.status === 'resolved' && (
             <Link
               href={`/outcomes/${encodeURIComponent(q.id)}`}
               className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-accent underline underline-offset-4"
             >
               {t.publicLink}
             </Link>
+            )}
           </Card>
 
           <Card>
@@ -107,7 +110,7 @@ async function QuestionView({ params }: { params: PageProps<'/mod/questions/[id]
               <p className="mt-1 text-sm text-ink-muted">{t.baseline(fmtBrier(d.baselineBrier))}</p>
             </Card>
           )}
-          <ThemesCard themes={d.themes} show={showFigures} />
+          <AiThemes questionId={q.id} themes={d.themes} canShow={showFigures} source={source} />
         </div>
       </div>
     </>
@@ -180,41 +183,3 @@ function Responses({ d }: { d: QuestionDetail }) {
   );
 }
 
-function ThemesCard({ themes, show }: { themes: Themes; show: boolean }) {
-  const groups = [
-    [t.themes.agreement, themes.agreement],
-    [t.themes.disagreement, themes.disagreement],
-    [t.themes.newInformation, themes.newInformation],
-  ] as const;
-  const empty = groups.every(([, items]) => items.length === 0);
-  return (
-    <Card>
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="text-base font-semibold text-ink">{t.themesTitle}</h2>
-        <StatusTag>{t.aiLabel}</StatusTag>
-      </div>
-      {!show ? (
-        <p className="mt-2 text-ink-muted">{t.suppressed}</p>
-      ) : empty ? (
-        <div className="mt-3">
-          <Notice>{t.aiPending}</Notice>
-        </div>
-      ) : (
-        <div className="mt-3 grid gap-3">
-          {groups.map(([label, items]) =>
-            items.length ? (
-              <div key={label}>
-                <h3 className="text-sm font-medium text-ink-muted">{label}</h3>
-                <ul className="mt-1 list-disc pl-5 text-ink">
-                  {items.map((x) => (
-                    <li key={x}>{x}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : null,
-          )}
-        </div>
-      )}
-    </Card>
-  );
-}

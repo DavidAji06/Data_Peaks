@@ -14,6 +14,7 @@ import type {
   ApiGroupView,
   ApiLeaderboard,
   ApiModeratorResponse,
+  ApiPublicQuestion,
   ApiQuestionDetail,
   ApiQuestionListItem,
   ApiRankedRisk,
@@ -29,6 +30,7 @@ import type {
   Leaderboard,
   ModeratorResponse,
   ParsedTrigger,
+  PublicOutcome,
   QuestionDetail,
   QuestionListItem,
   RankedRisk,
@@ -103,7 +105,7 @@ export const toThemes = (t: ApiThemes): Themes => ({
   newInformation: t.new_information,
 });
 
-/** Fewer than 3 answers, or figures withheld by the backend → no numbers at all. */
+/** Fewer than 5 answers, or figures withheld by the backend → no numbers at all. */
 export function toGroupView(g: ApiGroupView): GroupView {
   const base = { questionId: g.question_id, responseCount: g.response_count, themes: toThemes(g.themes) };
   if (!canShowAggregate(g.response_count) || g.median === null || g.min === null || g.max === null) {
@@ -296,3 +298,18 @@ export function parseTriggers(text: string | null): ParsedTrigger[] {
       };
     });
 }
+
+/** Public page. The backend withholds figures below 5 answers; the frontend checks the count again. */
+export const toPublicOutcome = (q: ApiPublicQuestion): PublicOutcome => ({
+  questionId: q.id,
+  questionText: q.text,
+  riskTitle: q.risk_title,
+  country: q.country,
+  deadline: q.deadline,
+  outcome: asBool(q.outcome),
+  simulated: q.simulated,
+  group:
+    q.group_median !== null && canShowAggregate(q.expert_count)
+      ? { expertCount: q.expert_count as number, median: q.group_median, medianBrier: q.group_median_brier }
+      : null,
+});

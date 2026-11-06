@@ -3,8 +3,8 @@
  * (a snapshot of the backend's seed; refresh with `npm run mocks:snapshot`).
  *
  * Same paths, JSON shapes, status codes and rules as backend/app/main.py and routers/moderator.py,
- * including the two fixes in frontend/handoff/backend-fixes.patch (multi-country routing; no group
- * figures below 3 answers). Used only when the real API is unreachable and NEXT_PUBLIC_DEMO_FALLBACK=true,
+ * as of backend commit d4d949d (multi-country routing; no group
+ * figures below 5 answers; public questions; AI summary). Used only when the real API is unreachable and NEXT_PUBLIC_DEMO_FALLBACK=true,
  * or when NEXT_PUBLIC_USE_MOCK is on. State lives in server memory until the dev server restarts.
  * Server-only: this data must never be bundled for the browser.
  */
@@ -17,6 +17,9 @@ import type {
   ApiDecisionOut,
   ApiExpertQuestion,
   ApiExpertSettings,
+  ApiPublicQuestion,
+  ApiSummariseOut,
+  ApiThemes,
   ApiGroupView,
   ApiLeaderboard,
   ApiModeratorResponse,
@@ -50,6 +53,7 @@ interface QuestionRow {
   deadline: string;
   status: QuestionStatus;
   outcome: Outcome | null;
+  themes?: string | null; // AI summary as JSON (backend Question.themes)
 }
 interface InviteRow {
   token: string;
@@ -116,7 +120,7 @@ const invalid = (field: string, msg: string, type = 'value_error'): never => {
 
 const r2 = (x: number) => roundLikePython(x, 2); // Python's round(x, 2)
 const r4 = (x: number) => roundLikePython(x, 4);
-const MIN_GROUP_SIZE = 3;
+const MIN_GROUP_SIZE = 5;
 const MAX_OPEN_INVITES = 3;
 const MAX_PANEL_SIZE = 10;
 const MIN_RESOLVED_FOR_RANKING = 3;
@@ -277,12 +281,24 @@ function submitRevision(token: string, body: unknown) {
   return { status: 'revised' };
 }
 
+const emptyThemes = (): ApiThemes => ({ agreement: [], disagreement: [], new_information: [] });
+
+/** Like ml_outputs.stored_themes: the saved AI summary, or empty. */
+function storedThemes(q: QuestionRow | undefined): ApiThemes {
+  if (!q?.themes) return emptyThemes();
+  try {
+    return JSON.parse(q.themes) as ApiThemes;
+  } catch {
+    return emptyThemes();
+  }
+}
+
 function groupView(token: string): ApiGroupView {
   const invite = getInvite(token);
   if (!getResponse(invite.question_id, invite.expert_id, 1)) fail(403, 'Submit your answer before seeing the group view');
   const probabilities = [...latestAnswers(invite.question_id).values()].map((r) => r.probability);
-  const themes = { agreement: [], disagreement: [], new_information: [] };
   if (probabilities.length < MIN_GROUP_SIZE) {
+    const themes = emptyThemes();
     return { question_id: invite.question_id, response_count: probabilities.length, median: null, min: null, max: null, themes };
   }
   return {
@@ -291,7 +307,7 @@ function groupView(token: string): ApiGroupView {
     median: r2(median(probabilities)),
     min: Math.min(...probabilities),
     max: Math.max(...probabilities),
-    themes,
+    themes: storedThemes(getQuestion(invite.question_id)),
   };
 }
 
@@ -449,7 +465,7 @@ function questionDetail(questionId: string): ApiQuestionDetail {
     baseline_brier: BASELINE_BRIER,
     distribution: counts.map((count, i) => ({ range: `${i * 20}-${(i + 1) * 20}%`, count })),
     responses,
-    themes: { agreement: [], disagreement: [], new_information: [] },
+    themes: storedThemes(q),
   };
 }
 
@@ -518,14 +534,50 @@ function route(method: string, path: string, body: unknown): unknown {
     if (a === 'moderator' && b === 'questions' && parts.length === 2) return listQuestions();
     if (a === 'moderator' && b === 'questions' && parts.length === 3) return questionDetail(c);
     if (a === 'moderator' && b === 'leaderboard' && parts.length === 2) return leaderboard();
+    if (a === 'public' && b === 'questions' && parts.length === 2) return publicQuestions();
   }
   if (method === 'POST') {
     if (a === 'alerts' && c === 'decision' && parts.length === 3) return decideAlert(b, body);
     if (a === 'q' && c === 'responses' && parts.length === 3) return submitAnswer(b, body);
     if (a === 'q' && c === 'revision' && parts.length === 3) return submitRevision(b, body);
     if (a === 'moderator' && b === 'questions' && d === 'resolve' && parts.length === 4) return resolveQuestion(c, body);
+    if (a === 'moderator' && b === 'questions' && d === 'summarise' && parts.length === 4) return summariseQuestion(c);
   }
   return fail(404, 'Not Found');
+}
+
+/** GET /public/questions (routers/public.py): resolved questions, figures only from 5 answers. */
+function publicQuestions(): ApiPublicQuestion[] {
+  return db.questions
+    .filter((q) => q.status === 'resolved')
+    .sort((x, y) => x.id.localeCompare(y.id))
+    .map((q) => {
+      const risk = getRisk(q.risk_id)!;
+      const probabilities = [...latestAnswers(q.id).values()].map((r) => r.probability);
+      const enough = probabilities.length >= MIN_GROUP_SIZE;
+      const med = enough ? r2(median(probabilities)) : null;
+      return {
+        id: q.id,
+        text: q.text,
+        country: risk.country,
+        risk_title: risk.title,
+        deadline: q.deadline,
+        outcome: q.outcome,
+        expert_count: enough ? probabilities.length : null,
+        group_median: med,
+        group_median_brier: med !== null && q.outcome !== null ? brier(med, q.outcome) : null,
+        simulated: q.id.startsWith('H'),
+      };
+    });
+}
+
+/** POST /moderator/questions/{id}/summarise. No ML code in the demo backend, so the summary is empty (as when ML fails). */
+function summariseQuestion(id: string): ApiSummariseOut {
+  const q = getQuestion(id) ?? fail(404, 'Question not found');
+  const reasonCount = db.responses.filter((r) => r.question_id === id).length;
+  const themes = emptyThemes();
+  q.themes = JSON.stringify(themes);
+  return { question_id: id, reason_count: reasonCount, themes };
 }
 
 /** Handle one request like the real API would: { status, body }. */

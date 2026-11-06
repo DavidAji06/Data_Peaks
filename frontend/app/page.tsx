@@ -26,9 +26,9 @@ const ENTRIES = [
     body: 'Whose forecasts hold up, by Brier score. Anonymous experts are never ranked.',
   },
   {
-    href: '/outcomes/Q001',
-    title: 'Public summary',
-    body: 'What the public sees: group figures only, never individual answers or names.',
+    href: '/outcomes',
+    title: 'Public results',
+    body: 'What the public sees once questions resolve: group figures only, never individual answers or names.',
   },
 ];
 

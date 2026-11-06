@@ -7,7 +7,7 @@
  * fails with a NetworkError and the screen keeps the input and offers a retry.
  * No mock data is imported here, so nothing private is bundled for the browser.
  */
-import { toDecisionResult, toGroupView, toResolveResult } from './adapters';
+import { toDecisionResult, toGroupView, toResolveResult, toThemes } from './adapters';
 import { ApiError, NetworkError } from './api-error';
 import type {
   ApiAnswerIn,
@@ -16,10 +16,12 @@ import type {
   ApiExpertQuestion,
   ApiGroupView,
   ApiResolveOut,
+  ApiSummariseOut,
   DataSource,
   DecisionResult,
   GroupView,
   ResolveResult,
+  Themes,
 } from './types';
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
@@ -87,4 +89,10 @@ export async function resolveQuestion(source: DataSource, questionId: string, ou
   return toResolveResult(
     await request<ApiResolveOut>(source, 'POST', `/moderator/questions/${enc(questionId)}/resolve`, { outcome }, moderatorBaseFor(source)),
   );
+}
+
+/** Ask the backend for an AI summary of the reasons (moderator only). Empty themes = the ML code isn't connected. */
+export async function summariseQuestion(source: DataSource, questionId: string): Promise<{ reasonCount: number; themes: Themes }> {
+  const r = await request<ApiSummariseOut>(source, 'POST', `/moderator/questions/${enc(questionId)}/summarise`, undefined, moderatorBaseFor(source));
+  return { reasonCount: r.reason_count, themes: toThemes(r.themes) };
 }

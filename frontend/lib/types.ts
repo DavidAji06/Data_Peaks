@@ -172,6 +172,27 @@ export interface ApiQuestionDetail {
   themes: ApiThemes;
 }
 
+/** GET /public/questions (no key): resolved questions only. Figures are null below 5 answers. */
+export interface ApiPublicQuestion {
+  id: string;
+  text: string;
+  country: string;
+  risk_title: string;
+  deadline: string;
+  outcome: Outcome | null;
+  expert_count: number | null;
+  group_median: number | null;
+  group_median_brier: number | null;
+  simulated: boolean;
+}
+
+/** POST /moderator/questions/{id}/summarise: AI themes from the reasons (empty if the ML code isn't connected). */
+export interface ApiSummariseOut {
+  question_id: string;
+  reason_count: number;
+  themes: ApiThemes;
+}
+
 /** Body of POST /moderator/questions/{id}/resolve */
 export interface ApiResolveIn {
   outcome: Outcome;
@@ -291,7 +312,7 @@ export interface Themes {
   newInformation: string[];
 }
 
-/** suppressed = fewer than 3 answers: no figures are shown. */
+/** suppressed = fewer than 5 answers: no figures are shown. */
 export type GroupView =
   | { questionId: string; responseCount: number; suppressed: true; themes: Themes }
   | { questionId: string; responseCount: number; suppressed: false; median: number; min: number; max: number; themes: Themes };
@@ -424,20 +445,18 @@ export interface RankedRisks {
   areDemo: boolean; // curated 28 active risks with placeholder scores, until the ML ranking lands
 }
 
-/** The public outcome page: aggregates only, built on the server from the moderator view. */
-export type PublicOutcome = {
+/** One resolved question on the public page. Group figures are null below 5 answers. */
+export interface PublicOutcome {
   questionId: string;
   questionText: string;
   riskTitle: string;
   country: string;
-  status: QuestionStatus;
+  deadline: string;
   outcome: boolean | null;
-} & (
-  | { suppressed: true; answered: number }
-  // range = the 20% bands the answers fall in (low edge of the lowest, high edge of the highest), never the
-  // exact min/max: with few answers those ARE individual answers.
-  | { suppressed: false; answered: number; median: number; rangeLow: number; rangeHigh: number; themes: Themes }
-);
+  simulated: boolean; // practice question with simulated answers
+  /** null = fewer than 5 answers: nothing is published */
+  group: { expertCount: number; median: number; medianBrier: number | null } | null;
+}
 
 /** Moderator's risk decision. No backend endpoint yet: kept in client state only. */
 export type DecisionKind = 'keep' | 'raise_probability' | 'lower_probability' | 'update_trigger' | 'add_trigger';
