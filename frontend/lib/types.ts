@@ -1,361 +1,431 @@
 /**
- * Domain types: the shapes every screen and helper in the frontend uses.
+ * Types for the Ground Truth frontend.
  *
- * Source: frontend/CLAUDE.md §3.2. The backend's wire format (contracts/*.json in the repo root:
- * snake_case, probabilities 0–1) is typed in lib/contracts.ts and converted in lib/adapters.ts,
- * so screens never see it.
+ * Two layers:
+ * - Api* types: exactly what David's FastAPI backend returns (snake_case). Source of truth: backend/app/main.py,
+ *   backend/app/routers/moderator.py, backend/app/schemas.py, and /openapi.json when the API runs.
+ *   The offline demo mock (lib/server/mock-backend.ts) returns the same shapes.
+ * - UI types (camelCase): what screens use. lib/adapters.ts is the only place that maps Api* → UI.
  *
- * Changes from CLAUDE.md §3.2 (all additive, or optional where the backend contract has no field yet):
- * - Trigger ids use the short form "T0618", as the backend contract does; `riskId` holds "R1043".
- * - Trigger: completion fields are optional; `sources` and `dateEntered` added.
- * - Risk: `lastReviewed` may be null (older records can lack any dated update; in the current export
- *   every selected risk has one, sometimes taken from its triggers' "Last update");
- *   optional `updates` (dated rationale updates) and `outcome` (resolved risks only).
- * - SimilarRisk.acapsProbability is optional.
- * - Question: optional `replay` (practice question built from a resolved risk) and `reviewDate`.
- * - Alert: `strengthScore` (0–1, what the contract sends), `confidence` optional, `synthetic` flag.
- * - Expert: synthetic `profile` and `promptsThisWeek` (for contact limits).
- * - ExpertResponse: optional `theme`, tagged by ACAPS after submission.
- * - GroupView is a union: when fewer than 3 experts answered it carries no numbers and no reasons.
- *   It never carries min/max (exact individual answers); peers get median, IQR and band counts.
- * - New: Invitation, Distribution, and the viewer-specific shapes at the end of this file.
+ * Probabilities are 0–1 floats everywhere in data. Convert to 0–100 only for display (lib/probability.ts).
  */
 
-export type ProbabilityBand = 'very_low' | 'low' | 'medium' | 'high' | 'very_high';
-export type RiskLevel = 'low' | 'medium' | 'high';
-export type RiskStatus = 'active' | 'materialised' | 'not_materialised';
-export type RiskTrend = 'improved' | 'stable' | 'deteriorated';
 export type AnonymityLevel = 'known_to_acaps' | 'pseudonymous' | 'anonymous';
-export type Viewer = 'expert' | 'moderator' | 'public';
 export type Locale = 'en' | 'fr';
-export type ReasonTheme = 'agree' | 'disagree' | 'new_info';
+export type AlertStatus = 'pending' | 'approved' | 'rejected';
+export type QuestionStatus = 'open' | 'closed' | 'resolved';
+export type Outcome = 0 | 1; // 1 = happened, 0 = didn't
 
-export interface SourceLink {
-  label: string; // e.g. "Reuters 27/08/2026"
-  url: string;
-}
+// ===========================================================================
+// Raw API types (snake_case, exactly as the backend sends them)
+// ===========================================================================
 
-export interface Trigger {
-  id: string; // "T0618"
-  riskId: string; // "R1043"
+export interface ApiReport {
   title: string;
-  description: string;
-  completionRate?: number; // 0–100, ACAPS "Completion rate"
-  completionHistory?: { date: string; rate: number }[]; // ISO dates, in export order
-  resolutionCriterion?: string; // ACAPS "Quantitative objective to meet 100%"
-  sources?: SourceLink[];
-  dateEntered?: string; // ISO date
-  lastUpdate?: string; // ISO date
+  source: string | null;
+  url: string | null;
+  published_at: string | null;
 }
 
-export interface RationaleUpdate {
-  date: string; // ISO date of "UPDATE dd/mm/yyyy"
+export interface ApiAlert {
+  id: string;
+  risk_id: string;
+  trigger_id: string | null;
+  report: ApiReport;
+  direction: string | null; // "escalating" in the seed
+  strength: number | null; // 0–1
+  evidence: string | null;
+  status: AlertStatus;
+}
+
+export interface ApiSimilarRisk {
+  risk_id: string;
+  title: string;
+  country: string;
+  similarity: number;
+  outcome: string; // "Materialised" | "Not materialised"
+  what_happened: string;
+  acaps_probability?: string; // curated extra (mock/curated.json), not sent by the API
+}
+
+/** GET /q/{token} */
+export interface ApiExpertQuestion {
+  question: { id: string; text: string; resolution_criteria: string; deadline: string; status: QuestionStatus };
+  risk: { id: string; title: string; country: string; risk_level: string | null };
+  trigger_update: ApiAlert | null;
+  similar_risks: ApiSimilarRisk[];
+  answered: boolean;
+  revised: boolean;
+}
+
+/** Body of POST /q/{token}/responses and /revision. probability 0–1, reason 1–280 characters. */
+export interface ApiAnswerIn {
+  probability: number;
+  reason: string;
+}
+
+export interface ApiThemes {
+  agreement: string[];
+  disagreement: string[];
+  new_information: string[];
+}
+
+/** GET /q/{token}/group (403 until the expert has answered). median/min/max are null below 3 answers. */
+export interface ApiGroupView {
+  question_id: string;
+  response_count: number;
+  median: number | null;
+  min: number | null;
+  max: number | null;
+  themes: ApiThemes;
+}
+
+export interface ApiScore {
+  question_id: string;
+  question_text: string;
+  probability: number;
+  outcome: Outcome;
+  brier: number;
+}
+
+/** GET /q/{token}/track-record */
+export interface ApiTrackRecord {
+  resolved: number;
+  mean_brier: number | null;
+  beats_baseline: boolean | null;
+  baseline_brier: number;
+  history: ApiScore[];
+}
+
+/** Body of POST /alerts/{id}/decision. Approving needs all three question fields and a future deadline. */
+export interface ApiDecisionIn {
+  status: 'approved' | 'rejected';
+  question_text?: string;
+  resolution_criteria?: string;
+  deadline?: string; // YYYY-MM-DD
+}
+
+export type ApiDecisionOut =
+  | { alert_id: string; status: 'rejected' }
+  | { alert_id: string; status: 'approved'; question_id: string; experts_invited: number };
+
+/** One item of GET /moderator/questions */
+export interface ApiQuestionListItem {
+  id: string;
+  risk_id: string;
   text: string;
-  sources?: SourceLink[];
+  status: QuestionStatus;
+  outcome: Outcome | null;
+  deadline: string;
+  invited: number;
+  answered: number;
+  median: number | null;
 }
 
-export interface RiskOutcome {
-  what?: 'hazard' | 'impact' | 'hazard_and_impact';
-  hazardText?: string; // ACAPS "Hazard materialisation"
-  impactText?: string; // ACAPS "Impact materialisation description"
-  closingNote?: string; // first sentences of the latest update, for risks with no materialisation text
+export interface ApiRoundSummary {
+  count: number;
+  median: number;
+  min: number;
+  max: number;
 }
 
-export interface Risk {
+export interface ApiModeratorResponse {
+  label: string; // pseudonym, or "Anonymous expert N"
+  anonymity_level: AnonymityLevel;
+  identity_known: boolean;
+  first_probability: number | null;
+  first_reason: string | null;
+  latest_probability: number;
+  revision_reason: string | null;
+  revised: boolean;
+  brier: number | null; // once resolved
+}
+
+/** GET /moderator/questions/{id} */
+export interface ApiQuestionDetail {
+  question: {
+    id: string;
+    text: string;
+    resolution_criteria: string;
+    deadline: string;
+    status: QuestionStatus;
+    outcome: Outcome | null;
+  };
+  risk: { id: string; title: string; country: string; risk_level: string | null; acaps_probability: string | null };
+  participation: { invited: number; answered: number; revised: number };
+  first_round: ApiRoundSummary | null;
+  latest: ApiRoundSummary | null;
+  median_shift: number | null;
+  group_median_brier: number | null;
+  baseline_brier: number;
+  distribution: { range: string; count: number }[]; // 5 bands of 20%
+  responses: ApiModeratorResponse[];
+  themes: ApiThemes;
+}
+
+/** Body of POST /moderator/questions/{id}/resolve */
+export interface ApiResolveIn {
+  outcome: Outcome;
+}
+
+/** Without answers the backend returns only question_id, outcome and scored: 0. */
+export interface ApiResolveOut {
+  question_id: string;
+  outcome: Outcome;
+  scored: number;
+  mean_expert_brier?: number;
+  group_median_brier?: number;
+  baseline_brier?: number;
+}
+
+/** GET /moderator/leaderboard. Anonymous experts are never ranked. */
+export interface ApiLeaderboard {
+  baseline_brier: number;
+  min_resolved: number;
+  experts: {
+    label: string;
+    anonymity_level: AnonymityLevel;
+    resolved: number;
+    mean_brier: number;
+    beats_baseline: boolean;
+    rank: number;
+  }[];
+  note: string;
+}
+
+/** GET /risks/{id}: the raw database row. */
+export interface ApiRisk {
   id: string;
   title: string;
   country: string;
   iso: string;
-  type: string; // e.g. "Marked deterioration in an existing crisis"
-  probability: ProbabilityBand;
-  impact: 1 | 2 | 3 | 4 | 5;
-  riskLevel: RiskLevel;
-  trend?: RiskTrend;
-  status: RiskStatus;
-  expectedExposure: string;
-  priorityNeeds: string[];
-  rationaleSummary: string; // first sentence of the ACAPS rationale; the full text stays in the CSV
-  lastReviewed: string | null; // ISO date of the latest "UPDATE dd/mm/yyyy" (else newest trigger update), null if none
-  triggerIds: string[];
-  updates?: RationaleUpdate[]; // newest first
-  outcome?: RiskOutcome; // resolved risks only
+  risk_type: string | null;
+  probability: string | null; // ACAPS label, e.g. "High"
+  impact: number | null;
+  risk_level: string | null;
+  status: string | null;
+  expected_exposure: string | null;
+  rationale: string | null;
+  triggers: string | null; // ACAPS structured text: "Trigger ID: … / Title: … / Description: …"
 }
 
-export interface ReportEvidence {
-  id: string;
+/** GET /risks/ranked (one contract sample until the ML ranking lands) */
+export interface ApiRankedRisk {
+  risk_id: string;
   title: string;
-  source: string;
-  url: string;
-  publishedAt: string; // ISO date
-  summary: string;
-  language: Locale | string;
-  synthetic: boolean; // true for demo reports
+  country: string;
+  p_materialise: number;
+  priority_score: number;
+  score_breakdown: { signal_strength: number; uncertainty: number; impact: number; review_age: number };
+  risk_level?: string; // curated extras (mock/curated.json), not sent by the API
+  acaps_probability?: string;
+  last_reviewed?: string | null;
+}
+
+// ===========================================================================
+// UI types (camelCase)
+// ===========================================================================
+
+/** Where a screen's data came from. 'demo' = the frontend's offline mock (shown with a badge). */
+export type DataSource = 'api' | 'demo';
+
+export interface Loaded<T> {
+  data: T;
+  source: DataSource;
+}
+
+export type StrengthWord = 'weak' | 'moderate' | 'strong';
+
+export interface Report {
+  title: string;
+  source: string | null;
+  url: string | null;
+  publishedAt: string | null;
+}
+
+export interface Alert {
+  id: string;
+  riskId: string;
+  triggerId: string | null;
+  report: Report;
+  direction: string | null;
+  strength: number | null; // 0–1
+  strengthWord: StrengthWord | null;
+  evidence: string | null;
+  status: AlertStatus;
 }
 
 export interface SimilarRisk {
   riskId: string;
   title: string;
   country: string;
-  similarity: number; // 0–1
-  acapsProbability?: ProbabilityBand; // ACAPS rating at the time
-  outcome: 'materialised' | 'not_materialised';
-  outcomeSummary: string;
+  similarity: number;
+  outcome: 'materialised' | 'not_materialised' | 'unknown';
+  whatHappened: string;
+  acapsProbability: string | null;
 }
 
-export interface Question {
-  id: string;
-  riskId: string;
-  triggerId?: string;
-  text: string; // binary, scoreable question
-  resolutionCriteria: string;
-  deadline: string; // ISO date (team default: 6 months)
-  status: 'open' | 'closed' | 'resolved';
-  outcome?: boolean; // set once resolved
-  context: { triggerUpdate: string; evidence: ReportEvidence[] };
+export interface ExpertQuestion {
+  question: { id: string; text: string; resolutionCriteria: string; deadline: string; status: QuestionStatus };
+  risk: { id: string; title: string; country: string; riskLevel: string | null };
+  triggerUpdate: Alert | null;
   similarRisks: SimilarRisk[];
-  acapsProbability: ProbabilityBand;
-  replay?: boolean; // practice question replayed from a resolved risk (track record)
-  reviewDate?: string; // ISO date ACAPS reviews this round (shown on the receipt)
+  similarRisksAreDemo: boolean; // curated real-data examples until the ML pipeline lands
+  answered: boolean;
+  revised: boolean;
 }
 
-export type AlertStrength = 'weak' | 'moderate' | 'strong';
+export interface Themes {
+  agreement: string[];
+  disagreement: string[];
+  newInformation: string[];
+}
 
-export interface Alert {
+/** suppressed = fewer than 3 answers: no figures are shown. */
+export type GroupView =
+  | { questionId: string; responseCount: number; suppressed: true; themes: Themes }
+  | { questionId: string; responseCount: number; suppressed: false; median: number; min: number; max: number; themes: Themes };
+
+export interface TrackRecord {
+  resolved: number;
+  meanBrier: number | null;
+  beatsBaseline: boolean | null;
+  baselineBrier: number;
+  history: { questionId: string; questionText: string; probability: number; outcome: boolean; brier: number }[];
+}
+
+export type DecisionResult =
+  | { alertId: string; status: 'rejected' }
+  | { alertId: string; status: 'approved'; questionId: string; expertsInvited: number };
+
+export interface QuestionListItem {
   id: string;
   riskId: string;
-  triggerId: string;
-  evidence: ReportEvidence;
-  direction: 'up' | 'down';
-  strength: AlertStrength;
-  strengthScore: number; // 0–1 pipeline score (the contract's "strength")
-  confidence?: number; // 0–1 from the LLM check (not in the contract yet)
-  machineRationale: string; // why the pipeline matched it
-  status: 'pending' | 'approved' | 'rejected';
-  draftQuestion: Pick<Question, 'text' | 'resolutionCriteria' | 'deadline'>;
-  createdAt: string;
-  decisionNote?: string; // moderator's reason when rejecting
-  questionId?: string; // set when approved and sent
-  synthetic: boolean;
+  text: string;
+  status: QuestionStatus;
+  outcome: boolean | null;
+  deadline: string;
+  invited: number;
+  answered: number;
+  median: number | null;
 }
 
-export interface ExpertProfile {
-  role: string; // e.g. "Local NGO leader"
-  basedIn: string; // e.g. "Abéché, Chad"
-  orgType: string; // e.g. "National NGO"
-}
-
-export interface Expert {
-  id: string; // private id, never shown outside the moderator view
-  pseudonymId: string; // e.g. "Amber Falcon"; used in responses
-  displayName?: string; // only shown to ACAPS if known_to_acaps
-  anonymity: AnonymityLevel;
-  countries: string[];
-  topics: string[];
-  locale: Locale;
-  maxPromptsPerWeek: number;
-  promptsThisWeek: number;
-  profile: ExpertProfile;
-  synthetic: true;
-}
-
-/** A personal link (/q/[token]) sent to one expert for one question. */
-export interface Invitation {
-  token: string;
-  questionId: string;
-  pseudonymId: string;
-  sentAt: string;
-}
-
-export interface ExpertResponse {
-  id: string;
-  questionId: string;
-  pseudonymId: string;
-  probability: number; // 0–100 integer
-  reason: string; // one line, ≤ 160 chars; for revisions the optional "what changed your mind"
-  kind: 'initial' | 'revision';
-  submittedAt: string;
-  theme?: ReasonTheme; // tagged by ACAPS after submission, never shown before answering
-  anonymity?: AnonymityLevel; // level when submitted; the stricter of this and the current level applies
-}
-
-/** Summary statistics over a set of 0–100 forecasts. */
-export interface Distribution {
-  n: number;
+export interface RoundSummary {
+  count: number;
   median: number;
-  iqr: [number, number];
   min: number;
   max: number;
-  histogram: number[]; // counts per ACAPS probability band (5 bins, very_low → very_high)
 }
 
-export interface PeerReason {
-  text: string;
-  pseudonymId?: string; // only when that expert chose "pseudonymous"
-  theme?: ReasonTheme;
+export interface ModeratorResponse {
+  label: string;
+  anonymityLevel: AnonymityLevel;
+  identityKnown: boolean;
+  firstProbability: number | null;
+  firstReason: string | null;
+  latestProbability: number;
+  revisionReason: string | null;
+  revised: boolean;
+  brier: number | null;
 }
 
-/** What an expert sees after answering. Unlocked only once their own initial answer exists. */
-export type GroupView =
-  | {
-      questionId: string;
-      suppressed: true; // fewer than 3 experts: no numbers, no reasons
-      n: number;
-      acapsProbability: ProbabilityBand;
-    }
-  | {
-      questionId: string;
-      suppressed: false;
-      n: number;
-      median: number;
-      iqr?: [number, number]; // optional: not in the backend contract yet
-      // No min/max on purpose: they are exact individual answers, and peers may only see aggregates.
-      histogram?: number[]; // optional: not in the backend contract yet
-      reasons: PeerReason[];
-      acapsProbability: ProbabilityBand;
-    };
+export interface QuestionDetail {
+  question: {
+    id: string;
+    text: string;
+    resolutionCriteria: string;
+    deadline: string;
+    status: QuestionStatus;
+    outcome: boolean | null;
+  };
+  risk: { id: string; title: string; country: string; riskLevel: string | null; acapsProbability: string | null };
+  participation: { invited: number; answered: number; revised: number };
+  firstRound: RoundSummary | null;
+  latest: RoundSummary | null;
+  medianShift: number | null;
+  groupMedianBrier: number | null;
+  baselineBrier: number;
+  distribution: { range: string; count: number }[];
+  responses: ModeratorResponse[];
+  themes: Themes;
+}
 
-export interface ScoreBreakdown {
-  signalStrength: number; // 0–1
-  uncertainty: number; // 0–1
-  impact: number; // 0–1
-  reviewAge: number; // 0–1
+export interface ResolveResult {
+  questionId: string;
+  outcome: boolean;
+  scored: number;
+  meanExpertBrier: number | null;
+  groupMedianBrier: number | null;
+  baselineBrier: number | null;
+}
+
+export interface Leaderboard {
+  baselineBrier: number;
+  minResolved: number;
+  experts: {
+    rank: number;
+    label: string;
+    anonymityLevel: AnonymityLevel;
+    resolved: number;
+    meanBrier: number;
+    beatsBaseline: boolean;
+  }[];
+  note: string;
+}
+
+export interface ParsedTrigger {
+  id: string; // "T0618"
+  title: string;
+  description: string;
+  completionRate: number | null; // 0–100, as ACAPS records it
+  objective: string | null; // "Quantitative objective to meet 100%"
+  lastUpdate: string | null; // ISO date
+}
+
+export interface RiskDetail {
+  id: string;
+  title: string;
+  country: string;
+  iso: string;
+  riskType: string | null;
+  acapsProbability: string | null;
+  impact: number | null;
+  riskLevel: string | null;
+  status: string | null;
+  expectedExposure: string | null;
+  rationale: string | null;
+  triggers: ParsedTrigger[];
 }
 
 export interface RankedRisk {
   riskId: string;
   title: string;
   country: string;
-  iso?: string;
-  score: number; // 0–1
-  breakdown: ScoreBreakdown;
-  modelProbability: number; // 0–1 from Vlad's model
-  acapsProbability: ProbabilityBand;
-  riskLevel: RiskLevel;
+  priorityScore: number;
+  breakdown: { signalStrength: number; uncertainty: number; impact: number; reviewAge: number };
+  modelProbability: number;
+  riskLevel: string | null;
+  acapsProbability: string | null;
   lastReviewed: string | null;
 }
 
-export interface ModeratorSummary {
-  questionId: string;
-  agreement: string[];
-  disagreement: string[];
-  newInformation: string[];
-  draft: string;
-  generatedBy: 'ai';
-  approvedByModerator: boolean;
+export interface RankedRisks {
+  items: RankedRisk[];
+  areDemo: boolean; // curated 28 active risks with placeholder scores, until the ML ranking lands
 }
 
-export type DecisionKind =
-  | 'keep'
-  | 'raise_probability'
-  | 'lower_probability'
-  | 'update_trigger'
-  | 'add_trigger';
-
-export interface UpdateDecision {
-  riskId: string;
-  questionId?: string;
-  decision: DecisionKind;
-  note: string;
-  decidedAt: string;
-  triggerId?: string; // for update_trigger
-  fromRate?: number; // trigger completion before, 0–100
-  toRate?: number; // trigger completion after, 0–100
-}
-
-export interface TrackRecord {
-  pseudonymId: string;
-  resolvedCount: number;
-  meanBrier: number | null; // lower is better; 0.25 = always answering 50%
-  calibration: { band: ProbabilityBand; meanForecast: number; observedRate: number; n: number }[];
-  contributions: {
-    questionId: string;
-    usedFor: string; // plain-English fallback; the UI renders `decision` in the viewer's language when present
-    decision?: Pick<UpdateDecision, 'decision' | 'decidedAt' | 'triggerId' | 'fromRate' | 'toRate'>;
-  }[];
-}
-
-// ---------------------------------------------------------------------------
-// Viewer-specific shapes. lib/api.ts returns these, already filtered by
-// lib/anonymity.ts, so UI components never receive fields their viewer may not see.
-// ---------------------------------------------------------------------------
-
-/** The answering expert's own settings (they always see their own data). */
-export interface SelfView {
-  pseudonymId: string;
-  anonymity: AnonymityLevel;
-  locale: Locale;
-}
-
-/** What /q/[token] receives before answering. Contains no other expert's data. */
-export interface ExpertQuestionView {
-  token: string;
-  question: Question;
-  risk: Pick<Risk, 'id' | 'title' | 'country' | 'probability' | 'impact' | 'riskLevel' | 'trend'>;
-  trigger?: Pick<Trigger, 'id' | 'title' | 'completionRate' | 'completionHistory' | 'lastUpdate'>;
-  self: SelfView;
-}
-
-/** One expert's answers as ACAPS moderators see them. */
-export interface ModeratorResponseRow {
-  pseudonymId: string;
-  anonymity: AnonymityLevel;
-  displayName?: string; // only when known_to_acaps
-  profile?: ExpertProfile; // only when known_to_acaps
-  initial?: Pick<ExpertResponse, 'probability' | 'reason' | 'submittedAt' | 'theme'>;
-  revision?: Pick<ExpertResponse, 'probability' | 'reason' | 'submittedAt'>;
-}
-
-export interface ModeratorQuestionView {
-  question: Question;
-  initial: Distribution | null; // first answers
-  revised: Distribution | null; // latest answer per expert
-  rows: ModeratorResponseRow[];
-}
-
-/** Who an approved alert would reach: counts, never names. */
-export interface AudiencePreview {
-  total: number;
-  groups: { label: string; count: number }[]; // e.g. { label: "Chad", count: 6 }
-  topics: string[]; // topics covered by at least 3 of the experts reached
-  skippedForContactLimit: number;
-}
-
-/** The /me page: the expert's own data (they may see all of it), history and track record. */
-export interface MyProfileView {
-  self: SelfView & {
-    displayName?: string;
-    profile: ExpertProfile;
-    countries: string[];
-    topics: string[];
-    maxPromptsPerWeek: number;
-  };
-  history: {
-    questionId: string;
-    questionText: string;
-    riskId: string;
-    replay: boolean;
-    status: Question['status'];
-    outcome?: boolean;
-    initial?: number;
-    revision?: number;
-    reason?: string;
-    submittedAt?: string;
-  }[];
-  trackRecord: TrackRecord;
-}
-
-/** The public outcome page: aggregates and moderator-approved themes only. */
+/** The public outcome page: aggregates only, built on the server from the moderator view. */
 export type PublicOutcome = {
   questionId: string;
   questionText: string;
-  riskId: string;
   riskTitle: string;
   country: string;
-  deadline: string;
-  status: Question['status'];
-  decision?: Pick<UpdateDecision, 'decision' | 'decidedAt' | 'triggerId' | 'fromRate' | 'toRate'>; // no free-text note
-  themes: { agreement: string[]; disagreement: string[]; newInformation: string[] };
+  status: QuestionStatus;
+  outcome: boolean | null;
 } & (
-  | { suppressed: true; n: number }
-  | { suppressed: false; n: number; median: number; range: [number, number] } // range = middle half (IQR)
+  | { suppressed: true; answered: number }
+  | { suppressed: false; answered: number; median: number; min: number; max: number; themes: Themes }
 );
+
+/** Moderator's risk decision. No backend endpoint yet: kept in client state only. */
+export type DecisionKind = 'keep' | 'raise_probability' | 'lower_probability' | 'update_trigger' | 'add_trigger';

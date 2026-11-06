@@ -2,7 +2,7 @@
 // Extracts real ACAPS Risk Radar data into mock JSON for the frontend.
 //   node scripts/extract-risk-radar.mjs
 // Reads  ../../data/risk-radar-export.csv  (read-only)
-// Writes mock/risks.json, mock/triggers.json, mock/similar_risks.json, mock/ranked_risks.json
+// Writes mock/curated.json: curated similar risks and ranked risks in the backend API's shapes
 // Deterministic: no Date.now(), no randomness. Target types: lib/types.ts.
 
 import fs from 'node:fs';
@@ -374,41 +374,51 @@ const ranked = risks
 // Write
 // ---------------------------------------------------------------------------
 
-const SOURCE = 'ACAPS Risk Radar export (data/risk-radar-export.csv), used under ACAPS terms of use';
-function write(name, meta, items) {
-  const body = { _meta: { source: SOURCE, generatedBy: 'scripts/extract-risk-radar.mjs', ...meta }, items };
-  fs.mkdirSync(OUT_DIR, { recursive: true });
-  fs.writeFileSync(new URL(name, OUT_DIR), JSON.stringify(body, null, 2) + '\n');
-}
-
-write(
-  'risks.json',
-  {
-    synthetic: false,
-    note: `Real ACAPS data. ${activeRecords.length} active risks, plus R0248, R0998, R1002 (similar past risks for R1043) and two resolved risks for practice replay questions (R0002 Sudan, materialised; R0995 Libya, not materialised). rationaleSummary is the first sentence of the ACAPS rationale. Dated rationale updates are included for R1043, R1066 and R1055 only.`,
-  },
-  risks,
-);
-write(
-  'triggers.json',
-  { synthetic: false, note: `Real ACAPS triggers for all ${risks.length} risks in risks.json. Completion rates and histories are as exported; source URLs are cleaned of the trailing escape character.` },
-  triggers,
-);
-write(
-  'similar_risks.json',
-  {
+// Output: mock/curated.json in the backend API's own shapes (snake_case, as in contracts/similar_risk.json and
+// contracts/ranked_risk.json), so it goes through the same adapter as real API data. The frontend swaps these in
+// while the backend still returns the contract placeholder samples for /similar and /risks/ranked.
+const LABEL = { 'very_low': 'Very Low', low: 'Low', medium: 'Medium', high: 'High', very_high: 'Very High' };
+const OUTCOME = { materialised: 'Materialised', not_materialised: 'Not materialised' };
+const curated = {
+  _meta: {
+    source: 'ACAPS Risk Radar export (data/risk-radar-export.csv), used under ACAPS terms of use',
+    generatedBy: 'scripts/extract-risk-radar.mjs',
     synthetic: 'partly',
-    note: 'Real risk IDs, titles, ACAPS ratings and outcome text from the Risk Radar export. similarity scores are placeholders until similar_risk.json arrives from the ML pipeline.',
+    note:
+      `Real risk IDs, titles, ratings and outcome text. similarity, priority_score, score_breakdown and p_materialise are placeholders until the ML pipeline lands. ` +
+      `Ranked placeholder formula: mid = {very_low:0.05, low:0.2, medium:0.5, high:0.78, very_high:0.95}[probability]; impact = Impact/5; uncertainty = round2(1 - abs(mid - 0.5) * 2); ` +
+      `review_age = round2(min(1, days(last review to ${REFERENCE_DATE}) / 90)); signal_strength = 0.82 for R1043, 0.55 for R1066, else 0.2; ` +
+      `priority_score = round2(0.4*signal + 0.2*uncertainty + 0.25*impact + 0.15*review_age); p_materialise = mid. ` +
+      `risk_level, acaps_probability and last_reviewed are curated extras the API's ranked items don't have yet.`,
   },
-  similar,
-);
-write(
-  'ranked_risks.json',
-  {
-    synthetic: 'partly',
-    note: `Real IDs, titles and ratings from the Risk Radar export; scores are placeholders until ranked_risk.json arrives from the risk-ranking model. Placeholder formula: mid = {very_low:0.05, low:0.2, medium:0.5, high:0.78, very_high:0.95}[probability]; impact = Impact/5; uncertainty = round2(1 - abs(mid - 0.5) * 2); reviewAge = 1 if never reviewed, else round2(min(1, days(lastReviewed to ${REFERENCE_DATE}) / 90)); signalStrength = 0.82 for R1043, 0.55 for R1066, 0.2 for every other risk; score = round2(0.4*signalStrength + 0.2*uncertainty + 0.25*impact + 0.15*reviewAge); modelProbability = mid. Sorted by score, descending.`,
+  similar_risks: {
+    R1043: similar.map((s) => ({
+      risk_id: s.riskId,
+      title: s.title,
+      country: s.country,
+      similarity: s.similarity,
+      outcome: OUTCOME[s.outcome],
+      what_happened: s.outcomeSummary,
+      acaps_probability: LABEL[s.acapsProbability],
+    })),
   },
-  ranked,
-);
-
-console.log(`risks ${risks.length}, triggers ${triggers.length}, similar ${similar.length}, ranked ${ranked.length}`);
+  ranked_risks: ranked.map((r) => ({
+    risk_id: r.riskId,
+    title: r.title,
+    country: r.country,
+    p_materialise: r.modelProbability,
+    priority_score: r.score,
+    score_breakdown: {
+      signal_strength: r.breakdown.signalStrength,
+      uncertainty: r.breakdown.uncertainty,
+      impact: r.breakdown.impact,
+      review_age: r.breakdown.reviewAge,
+    },
+    risk_level: r.riskLevel.charAt(0).toUpperCase() + r.riskLevel.slice(1),
+    acaps_probability: LABEL[r.acapsProbability],
+    last_reviewed: r.lastReviewed,
+  })),
+};
+fs.mkdirSync(OUT_DIR, { recursive: true });
+fs.writeFileSync(new URL('curated.json', OUT_DIR), JSON.stringify(curated, null, 2) + '\n');
+console.log(`curated.json: similar ${curated.similar_risks.R1043.length} (for R1043), ranked ${curated.ranked_risks.length} (from ${risks.length} risks, ${triggers.length} triggers)`);

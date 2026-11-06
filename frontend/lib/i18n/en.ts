@@ -3,7 +3,7 @@
  * Tone: calm and plain. No gamification (no points, streaks or badges). Never call a low probability
  * "unlikely": show the number and the band name.
  */
-import type { AnonymityLevel, DecisionKind, ProbabilityBand, ReasonTheme, RiskLevel } from '../types';
+import type { AnonymityLevel, DecisionKind } from '../types';
 
 export const en = {
   meta: {
@@ -35,13 +35,13 @@ export const en = {
     medium: 'Medium',
     high: 'High',
     very_high: 'Very high',
-  } satisfies Record<ProbabilityBand, string>,
+  },
   bandWithRange: (band: string, min: number, max: number) => `${band} (${min}–${max}%)`,
   riskLevels: {
     low: 'Low risk',
     medium: 'Medium risk',
     high: 'High risk',
-  } satisfies Record<RiskLevel, string>,
+  },
   acapsRating: (band: string) => `ACAPS rating: ${band}`,
   outcomes: {
     materialised: 'Materialised',
@@ -126,7 +126,7 @@ export const en = {
       agree: 'Agree',
       disagree: 'Disagree',
       new_info: 'New information',
-    } satisfies Record<ReasonTheme, string>,
+    },
     themesNote: "Grouped by ACAPS: agreeing or disagreeing with the current analysis, or adding something new.",
     otherReasons: 'Other reasons',
     anExpert: 'An expert',

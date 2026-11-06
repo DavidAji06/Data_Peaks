@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "check:contrast": "node scripts/check-contrast.mjs",
-    "check:contracts": "tsc --noEmit -p tsconfig.contracts.json",
-    "mocks:extract": "node scripts/extract-risk-radar.mjs"
+    "mocks:extract": "node scripts/extract-risk-radar.mjs",
+    "mocks:snapshot": "node --no-warnings scripts/snapshot-backend-db.mjs"
   },
   "dependencies": {
     "next": "16.4.5",
