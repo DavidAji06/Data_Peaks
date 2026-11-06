@@ -1,16 +1,15 @@
 /**
- * Device storage for the demo: this device's own answers, drafts, language choice and the offline outbox.
+ * Device storage for the demo: this device's own answers, drafts and the offline outbox.
  *
  * Safe to import from client components. Every access is wrapped in try/catch because storage can be
  * missing, full or blocked (private browsing); the app must work when it is empty.
  * Never store other experts' data here, only what this device's user typed or chose.
  */
-import type { AnonymityLevel, Locale } from './types';
+import type { AnonymityLevel } from './types';
 
 const PREFIX = 'gt:';
 
 export const KEYS = {
-  locale: `${PREFIX}locale`,
   anonymity: `${PREFIX}anonymity`,
   draft: (token: string) => `${PREFIX}draft:${token}`,
   answer: (token: string) => `${PREFIX}answer:${token}`,
@@ -53,11 +52,6 @@ export function removeKey(key: string): void {
     // nothing to do
   }
 }
-
-export const readLocale = (): Locale | null => {
-  const v = readJSON<string>(KEYS.locale);
-  return v === 'en' || v === 'fr' ? v : null;
-};
 
 export const readAnonymity = (): AnonymityLevel | null => {
   const v = readJSON<string>(KEYS.anonymity);

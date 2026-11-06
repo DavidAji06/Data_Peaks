@@ -43,14 +43,14 @@ Checks: `npm run lint`, `npm run build`, `npm run check:contrast`.
 | URL | Who | What |
 |---|---|---|
 | `/` | Pitch | Demo hub with one link per view |
-| `/q/demo-expert-a` | Expert | Context → blind estimate → group view → revise → receipt. EN/FR |
+| `/q/demo-expert-a` | Expert | Context → blind estimate → group view → revise → receipt |
 | `/q/demo-expert-b` | Expert | Same question, already answered: opens on the group view |
 | `/q/[token]/record` | Expert | Track record (Brier scores) |
 | `/mod` | ACAPS | Alert queue (pending/approved/rejected), approve with an editable question, or reject |
 | `/mod/questions`, `/mod/questions/[id]` | ACAPS | Participation, first vs latest median, 5-band distribution, labelled answers, resolve |
 | `/mod/leaderboard` | ACAPS | Calibration (anonymous experts never ranked) |
 | `/mod/risks`, `/mod/risks/[id]` | ACAPS | Ranked risks with score breakdown; risk detail with triggers and a decision panel |
-| `/outcomes/[questionId]` | Public | Group figures only. EN/FR |
+| `/outcomes/[questionId]` | Public | Group figures only |
 
 ## How the code is organised
 
@@ -62,7 +62,7 @@ Checks: `npm run lint`, `npm run build`, `npm run check:contrast`.
 - `lib/server/mock-backend.ts` + `mock/db.json`: TypeScript copy of the backend over a snapshot of its seed, for the offline fallback. Refresh with `npm run mocks:snapshot` after `python -m app.seed`.
 - `mock/curated.json`: real Risk Radar data shown while the API still returns placeholder samples (similar risks, ranking), labelled "Demo data until the ML pipeline lands". Rebuild with `npm run mocks:extract`.
 - `lib/anonymity.ts`: small-n rule (no figures below 3 answers) and the public view builder.
-- Text: `lib/i18n/en.ts` + `fr.ts` (expert and public, same keys), `lib/i18n/mod.ts` (moderator, English only).
+- Text (English only): `lib/i18n/en.ts` (expert and public), `lib/i18n/mod.ts` (moderator).
 - Design tokens: `app/globals.css` (`@theme`). Hana: restyle there.
 
 ## Endpoints used
@@ -102,13 +102,6 @@ Not used yet: `/join/{token}` (sign-up), `PATCH /q/{token}/settings`, `POST /mod
 - **Probability bands:** we use five equal 20% bands like the backend. Confirm which bands ACAPS uses now.
 - **Resolution criteria:** should 6-month questions resolve against a trigger's "Quantitative objective" text? Only some triggers have one.
 
-## French review (Hana or a native speaker)
-
-`lib/i18n/fr.ts` is machine-translated and marked "needs review". Please check all of it, especially:
-- the expert flow wording (estimate, group view, revise),
-- `record` (track record) and the Brier explanation,
-- `public` (public summary page) and `whoSees.yourLevel`, added last,
-- typography: narrow no-break space before `% ; ? !`, no-break space before `:`.
 
 ## Demo path (about 3 minutes)
 

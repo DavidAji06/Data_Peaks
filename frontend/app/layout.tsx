@@ -14,15 +14,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: strings.en.meta.title,
-  description: strings.en.meta.description,
+  title: strings.meta.title,
+  description: strings.meta.description,
 };
 
 export const viewport: Viewport = {
   themeColor: "#f8fafc", // matches --color-canvas
 };
 
-// lang is the default; pages mark their own content with the expert's language (EN/FR toggle).
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html

@@ -4,8 +4,7 @@ export default function OutcomeNotFound() {
   return (
     <main className="mx-auto w-full max-w-xl flex-1 px-4 pt-10">
       <div className="rounded-xl border border-line bg-surface p-5">
-        <h1 className="text-lg font-semibold text-ink">{strings.en.public.notFound}</h1>
-        <p lang="fr" className="mt-2 text-ink-muted">{strings.fr.public.notFound}</p>
+        <h1 className="text-lg font-semibold text-ink">{strings.public.notFound}</h1>
       </div>
     </main>
   );

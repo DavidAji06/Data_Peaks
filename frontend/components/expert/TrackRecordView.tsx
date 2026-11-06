@@ -1,11 +1,8 @@
-'use client';
-
 import Link from 'next/link';
 import { toPercent } from '@/lib/probability';
 import type { DataSource, TrackRecord } from '@/lib/types';
 import { buttonClass, Card, DemoBadge } from '@/components/ui/primitives';
-import { LanguageToggle } from '@/components/ui/LanguageToggle';
-import { useLocale } from './use-locale';
+import { strings as s } from '@/lib/strings';
 
 /** The backend prefixes practice questions with this; the section heading says it instead. */
 const PRACTICE_PREFIX = /^Simulated past question: will this risk materialise\?\s*/i;
@@ -13,12 +10,11 @@ const isPractice = (id: string) => id.startsWith('H');
 
 /** Calm calibration feedback: no points, badges or streaks. */
 export function TrackRecordView({ token, data, source }: { token: string; data: TrackRecord; source: DataSource }) {
-  const { locale, setLocale, s } = useLocale();
   const practice = data.history.filter((h) => isPractice(h.questionId));
   const own = data.history.filter((h) => !isPractice(h.questionId));
   const num = (x: number) =>
-    x.toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
-  const pct = (p: number) => `${toPercent(p)}${locale === 'fr' ? ' ' : ''}%`;
+    x.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+  const pct = (p: number) => `${toPercent(p)}%`;
 
   const table = (rows: TrackRecord['history']) => (
     <ul className="mt-3 grid gap-3">
@@ -46,13 +42,10 @@ export function TrackRecordView({ token, data, source }: { token: string; data: 
   );
 
   return (
-    <div lang={locale} className="mx-auto w-full max-w-xl px-4 pb-16 pt-4">
+    <div className="mx-auto w-full max-w-xl px-4 pb-16 pt-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <span className="font-semibold text-ink">{s.common.appName}</span>
-        <div className="flex items-center gap-2">
-          {source === 'demo' && <DemoBadge>{s.common.demoOffline}</DemoBadge>}
-          <LanguageToggle locale={locale} onChange={setLocale} label={s.language.label} />
-        </div>
+        {source === 'demo' && <DemoBadge>{s.common.demoOffline}</DemoBadge>}
       </header>
 
       <Card className="mt-4">

@@ -1,5 +1,5 @@
 /**
- * English UI text. Every user-facing string lives here or in fr.ts (same keys, enforced by the Strings type).
+ * English UI text for the expert and public pages. Every user-facing string lives here (moderator text: mod.ts).
  * Tone: calm and plain. No gamification (no points, streaks or badges). Never call a low probability
  * "unlikely": show the number and the band. Never show an expert's link (token) in any text.
  */
@@ -19,11 +19,6 @@ export const en = {
     continue: 'Continue',
     opensInNewTab: '(opens in a new tab)',
     tryAgain: 'Try again',
-  },
-  language: {
-    label: 'Language',
-    en: 'English',
-    fr: 'Français',
   },
   strength: {
     weak: 'Weak signal',

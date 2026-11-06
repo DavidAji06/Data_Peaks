@@ -6,12 +6,11 @@ import { ApiError } from '@/lib/api-error';
 import { fetchGroupView, fetchProgress, submitAnswer, submitRevision } from '@/lib/client-api';
 import { bandLabel, fromPercent, toPercent } from '@/lib/probability';
 import { readJSON, writeJSON } from '@/lib/storage';
-import { formatDate, type Strings } from '@/lib/strings';
-import type { AnonymityLevel, DataSource, ExpertQuestion, GroupView, Locale } from '@/lib/types';
+import { formatDate, strings, type Strings } from '@/lib/strings';
+import type { AnonymityLevel, DataSource, ExpertQuestion, GroupView } from '@/lib/types';
 import { buttonClass, Card, Chip, DemoBadge, Notice, RiskChip } from '@/components/ui/primitives';
 import { GroupAxis } from './GroupAxis';
 import { ProbabilitySlider } from './ProbabilitySlider';
-import { useLocale } from './use-locale';
 
 type Step = 'context' | 'estimate' | 'group' | 'revise' | 'receipt';
 const MAX_REASON = 280;
@@ -24,7 +23,7 @@ const myAnswerKey = (questionId: string) => `gt:my-answer:${questionId}`;
 type MyAnswer = { first: number; revised?: number }; // 0–1
 
 export function ExpertFlow({ token, data, source }: { token: string; data: ExpertQuestion; source: DataSource }) {
-  const { locale, setLocale, s } = useLocale();
+  const s = strings;
   const [step, setStep] = useState<Step>(stepFromFlags(data.answered, data.revised));
   const [percent, setPercent] = useState<number | null>(null);
   const [reason, setReason] = useState('');
@@ -141,13 +140,10 @@ export function ExpertFlow({ token, data, source }: { token: string; data: Exper
   const closed = data.question.status !== 'open';
 
   return (
-    <div lang={locale} className="mx-auto w-full max-w-xl px-4 pb-16 pt-4">
+    <div className="mx-auto w-full max-w-xl px-4 pb-16 pt-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <span className="font-semibold text-ink">{s.common.appName}</span>
-        <div className="flex items-center gap-2">
-          {source === 'demo' && <DemoBadge>{s.common.demoOffline}</DemoBadge>}
-          <LanguageToggle locale={locale} setLocale={setLocale} s={s} />
-        </div>
+        {source === 'demo' && <DemoBadge>{s.common.demoOffline}</DemoBadge>}
       </header>
 
       <p className="mt-4 text-sm text-ink-muted">
@@ -167,11 +163,11 @@ export function ExpertFlow({ token, data, source }: { token: string; data: Exper
         </div>
       )}
 
-      {(step === 'context' || step === 'estimate') && <ContextHeader data={data} s={s} locale={locale} />}
+      {(step === 'context' || step === 'estimate') && <ContextHeader data={data} s={s} />}
 
       {step === 'context' && (
         <>
-          <TriggerUpdate data={data} s={s} locale={locale} />
+          <TriggerUpdate data={data} s={s} />
           <SimilarRisks data={data} s={s} />
           <button type="button" onClick={() => go('estimate')} className={`${buttonClass.primary} mt-6 w-full`}>
             {s.context.start}
@@ -287,26 +283,7 @@ export function ExpertFlow({ token, data, source }: { token: string; data: Exper
   );
 }
 
-function LanguageToggle({ locale, setLocale, s }: { locale: Locale; setLocale: (l: Locale) => void; s: Strings }) {
-  return (
-    <div role="group" aria-label={s.language.label} className="flex rounded-lg border border-line-strong">
-      {(['en', 'fr'] as const).map((l) => (
-        <button
-          key={l}
-          type="button"
-          lang={l}
-          aria-pressed={locale === l}
-          onClick={() => setLocale(l)}
-          className={`min-h-11 min-w-11 px-3 text-sm font-medium ${locale === l ? 'bg-accent text-on-accent' : 'text-ink'} first:rounded-l-lg last:rounded-r-lg`}
-        >
-          {l.toUpperCase()}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function ContextHeader({ data, s, locale }: { data: ExpertQuestion; s: Strings; locale: Locale }) {
+function ContextHeader({ data, s }: { data: ExpertQuestion; s: Strings }) {
   return (
     <Card className="mt-4">
       <p className="text-sm text-ink-muted">
@@ -320,7 +297,7 @@ function ContextHeader({ data, s, locale }: { data: ExpertQuestion; s: Strings; 
       )}
       <h2 className="mt-5 text-sm font-medium uppercase tracking-wide text-ink-muted">{s.estimate.questionLabel}</h2>
       <p className="mt-1 font-medium text-ink">{data.question.text}</p>
-      <p className="mt-2 text-sm text-ink-muted">{s.context.resolvesBy(formatDate(data.question.deadline, locale))}</p>
+      <p className="mt-2 text-sm text-ink-muted">{s.context.resolvesBy(formatDate(data.question.deadline))}</p>
       <details className="mt-3 rounded-lg bg-surface-muted p-3">
         <summary className="min-h-11 cursor-pointer content-center font-medium text-ink">{s.context.howResolves}</summary>
         <p className="mt-2 text-ink">{data.question.resolutionCriteria}</p>
@@ -329,7 +306,7 @@ function ContextHeader({ data, s, locale }: { data: ExpertQuestion; s: Strings; 
   );
 }
 
-function TriggerUpdate({ data, s, locale }: { data: ExpertQuestion; s: Strings; locale: Locale }) {
+function TriggerUpdate({ data, s }: { data: ExpertQuestion; s: Strings }) {
   const u = data.triggerUpdate;
   return (
     <Card className="mt-4">
@@ -346,7 +323,7 @@ function TriggerUpdate({ data, s, locale }: { data: ExpertQuestion; s: Strings; 
             <p className="font-medium text-ink">{u.report.title}</p>
           )}
           <p className="text-sm text-ink-muted">
-            {s.context.reportMeta(u.report.source ?? '—', u.report.publishedAt ? formatDate(u.report.publishedAt, locale) : '—')}
+            {s.context.reportMeta(u.report.source ?? '—', u.report.publishedAt ? formatDate(u.report.publishedAt) : '—')}
           </p>
           <div className="flex flex-wrap gap-2">
             {u.direction && <Chip>{/escalat/i.test(u.direction) && !/de-?escalat/i.test(u.direction) ? s.direction.escalating : s.direction.easing}</Chip>}

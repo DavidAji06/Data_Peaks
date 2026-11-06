@@ -11,7 +11,6 @@
  */
 
 export type AnonymityLevel = 'known_to_acaps' | 'pseudonymous' | 'anonymous';
-export type Locale = 'en' | 'fr';
 export type AlertStatus = 'pending' | 'approved' | 'rejected';
 export type QuestionStatus = 'open' | 'closed' | 'resolved';
 export type Outcome = 0 | 1; // 1 = happened, 0 = didn't

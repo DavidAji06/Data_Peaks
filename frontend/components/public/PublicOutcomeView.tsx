@@ -1,16 +1,12 @@
-'use client';
-
 import { Card, DemoBadge, Notice } from '@/components/ui/primitives';
-import { LanguageToggle } from '@/components/ui/LanguageToggle';
-import { useLocale } from '@/components/expert/use-locale';
+import { strings as s } from '@/lib/strings';
 import { toPercent } from '@/lib/probability';
 import type { DataSource, PublicOutcome } from '@/lib/types';
 
 /** Public, anonymised summary. Receives aggregates only (lib/anonymity.ts toPublicOutcome). */
 export function PublicOutcomeView({ data, source }: { data: PublicOutcome; source: DataSource }) {
-  const { locale, setLocale, s } = useLocale();
   const p = s.public;
-  const pct = (x: number) => `${toPercent(x)}${locale === 'fr' ? ' ' : ''}%`;
+  const pct = (x: number) => `${toPercent(x)}%`;
   const themes = data.suppressed
     ? []
     : ([
@@ -20,13 +16,10 @@ export function PublicOutcomeView({ data, source }: { data: PublicOutcome; sourc
       ] as const).filter(([, items]) => items.length > 0);
 
   return (
-    <div lang={locale} className="mx-auto w-full max-w-xl px-4 pb-16 pt-4">
+    <div className="mx-auto w-full max-w-xl px-4 pb-16 pt-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <span className="font-semibold text-ink">{s.common.appName}</span>
-        <div className="flex items-center gap-2">
-          {source === 'demo' && <DemoBadge>{s.common.demoOffline}</DemoBadge>}
-          <LanguageToggle locale={locale} onChange={setLocale} label={s.language.label} />
-        </div>
+        {source === 'demo' && <DemoBadge>{s.common.demoOffline}</DemoBadge>}
       </header>
 
       <Card className="mt-4">

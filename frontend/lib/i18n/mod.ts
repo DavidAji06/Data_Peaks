@@ -1,5 +1,5 @@
 /**
- * Moderator dashboard text (English only: ACAPS staff work in English; the expert app is EN/FR).
+ * Moderator dashboard text. All UI text in this app is English.
  * Same tone rules as en.ts: calm, plain, no gamification. AI output is labelled and moderator-only.
  */
 export const mod = {
