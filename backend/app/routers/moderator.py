@@ -8,11 +8,13 @@ Moderator view gives ACAPS:
 
 
 import statistics
+import json
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from ..services import ml_outputs
 from ..services.auth import require_moderator
 from ..db import get_db
 from ..models import Expert, Invite, Question, Response, Risk
@@ -175,7 +177,7 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
         "baseline_brier": BASELINE_BRIER,
         "distribution": bands(latest),
         "responses": responses,
-        "themes": {"agreement": [], "disagreement": [], "new_information": []},
+        "themes": ml_outputs.stored_themes(question),
     }
 
 
@@ -234,3 +236,21 @@ def leaderboard(db: Session = Depends(get_db)):
         "experts": rows,
         "note": "Anonymous experts are scored privately and not ranked.",
     }
+
+@router.post("/questions/{question_id}/summarise")
+def summarise_question(question_id: str, db: Session = Depends(get_db)):
+    question = db.get(Question, question_id)
+    if question is None:
+        raise HTTPException(status_code=404, detail="Question not found")
+
+    # Sorted so the order doesn't reveal who answered when
+    reasons = sorted(
+        response.reason
+        for response in db.scalars(
+            select(Response).where(Response.question_id == question_id)
+        ).all()
+    )
+    themes = ml_outputs.summarise_reasons(reasons)
+    question.themes = json.dumps(themes)
+    db.commit()
+    return {"question_id": question_id, "reason_count": len(reasons), "themes": themes}

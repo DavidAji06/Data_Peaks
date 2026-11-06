@@ -56,3 +56,15 @@ class SettingsUpdate(BaseModel):
     topics: list[str] | None = Field(default=None, max_length=10)
     language: str | None = Field(default=None, min_length=2, max_length=10)
     max_open_questions: int | None = Field(default=None, ge=1, le=5)
+
+class AlertImport(BaseModel):
+    id: str = Field(min_length=1, max_length=50)
+    risk_id: str
+    trigger_id: str | None = None
+    report_title: str = Field(min_length=1)
+    report_source: str | None = None
+    report_url: str | None = None
+    published_at: str | None = None
+    direction: str | None = None
+    strength: float | None = Field(default=None, ge=0, le=1)
+    evidence: str | None = None

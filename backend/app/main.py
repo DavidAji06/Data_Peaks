@@ -4,25 +4,32 @@ Group view returns 403 until the expert has submitted an answer
 Never includes expert IDs
 """
 
-import json
 import secrets
 import statistics
-from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .db import Base, engine, get_db
 from .models import Alert, Expert, Invite, PanelInvite, Question, Response, Risk
 from .routers.moderator import router as moderator_router
-from .schemas import AlertDecision, AnswerIn, JoinIn, PanelInviteIn, SettingsUpdate
+from .routers.public import router as public_router
+from .schemas import (
+    AlertDecision,
+    AlertImport,
+    AnswerIn,
+    JoinIn,
+    PanelInviteIn,
+    SettingsUpdate,
+)
+from .services import ml_outputs
 from .services.auth import require_moderator
 from .services.routing import route_question
 from .services.scoring import BASELINE_BRIER, expert_scores, summarise_scores
 
-CONTRACTS = Path(__file__).resolve().parents[2] / "contracts"
 FRONTEND_URL = "http://localhost:3000"
 MODERATOR_ONLY = [Depends(require_moderator)]
 
@@ -38,16 +45,10 @@ app.add_middleware(
 )
 
 app.include_router(moderator_router)
+app.include_router(public_router)
 
 
 # Helpers
-
-def load_sample(name: str):
-    path = CONTRACTS / f"{name}.json"
-    if not path.exists():
-        raise HTTPException(status_code=500, detail=f"Missing {path.name}")
-    return json.loads(path.read_text(encoding="utf-8"))
-
 
 def to_dict(obj):
     return {column.name: getattr(obj, column.name) for column in obj.__table__.columns}
@@ -162,6 +163,35 @@ def list_alerts(status: str = "pending", db: Session = Depends(get_db)):
     return [alert_to_dict(alert) for alert in alerts]
 
 
+@app.post("/alerts/import", dependencies=MODERATOR_ONLY)
+def import_alerts(db: Session = Depends(get_db)):
+    imported = 0
+    skipped = []
+    seen = set()
+
+    for item in ml_outputs.alerts_from_file():
+        try:
+            alert = AlertImport.model_validate(item)
+        except ValidationError:
+            item_id = item.get("id") if isinstance(item, dict) else None
+            skipped.append({"id": item_id, "reason": "Invalid or missing fields"})
+            continue
+
+        if alert.id in seen or db.get(Alert, alert.id):
+            skipped.append({"id": alert.id, "reason": "Already exists"})
+            continue
+        if db.get(Risk, alert.risk_id) is None:
+            skipped.append({"id": alert.id, "reason": "Unknown risk"})
+            continue
+
+        db.add(Alert(**alert.model_dump(), status="pending"))
+        seen.add(alert.id)
+        imported += 1
+
+    db.commit()
+    return {"imported": imported, "skipped": skipped}
+
+
 @app.post("/alerts/{alert_id}/decision", dependencies=MODERATOR_ONLY)
 def decide_alert(alert_id: str, body: AlertDecision, db: Session = Depends(get_db)):
     alert = db.get(Alert, alert_id)
@@ -208,12 +238,12 @@ def decide_alert(alert_id: str, body: AlertDecision, db: Session = Depends(get_d
 
 @app.get("/risks/ranked", dependencies=MODERATOR_ONLY)
 def ranked_risks():
-    return [load_sample("ranked_risk")]  # Mock until ML is ready
+    return ml_outputs.ranked_risks()
 
 
 @app.get("/risks/{risk_id}/similar", dependencies=MODERATOR_ONLY)
 def similar_risks(risk_id: str):
-    return [load_sample("similar_risk")]  # Mock until ML is ready
+    return ml_outputs.similar_risks(risk_id)
 
 
 @app.get("/risks/{risk_id}", dependencies=MODERATOR_ONLY)
@@ -283,7 +313,7 @@ def expert_question(token: str, db: Session = Depends(get_db)):
             "risk_level": risk.risk_level,
         },
         "trigger_update": alert_to_dict(alert) if alert else None,
-        "similar_risks": [load_sample("similar_risk")],  # Mock until ML is ready
+        "similar_risks": ml_outputs.similar_risks(risk.id),
         "answered": get_response(db, question.id, invite.expert_id, 1) is not None,
         "revised": get_response(db, question.id, invite.expert_id, 2) is not None,
     }
@@ -351,7 +381,7 @@ def group_view(token: str, db: Session = Depends(get_db)):
         "median": round(statistics.median(probabilities), 2),
         "min": min(probabilities),
         "max": max(probabilities),
-        "themes": {"agreement": [], "disagreement": [], "new_information": []},
+        "themes": ml_outputs.stored_themes(db.get(Question, invite.question_id)),
     }
 
 

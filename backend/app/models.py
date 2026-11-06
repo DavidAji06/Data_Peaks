@@ -4,13 +4,14 @@ Psudononym ID, not directly to a real name.
 Each expert can submit one answer per round of Q's
 """
 
-from datetime import date, datetime
-
+from datetime import date, datetime, timezone
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .db import Base
 
+def utc_now():
+    return datetime.now(timezone.utc)
 
 class Risk(Base):
     __tablename__ = "risks"
@@ -49,7 +50,7 @@ class PanelInvite(Base):
     email: Mapped[str]
     country: Mapped[str]
     used: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
 
 class Alert(Base):
@@ -89,7 +90,7 @@ class Invite(Base):
     token: Mapped[str] = mapped_column(String, primary_key=True)
     question_id: Mapped[str] = mapped_column(ForeignKey("questions.id"))
     expert_id: Mapped[str] = mapped_column(ForeignKey("experts.id"))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
 
 class Response(Base):
@@ -102,4 +103,4 @@ class Response(Base):
     probability: Mapped[float] = mapped_column(Float)
     reason: Mapped[str] = mapped_column(Text)
     round: Mapped[int]  # 1 = blind answer, 2 = revision
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
