@@ -9,6 +9,7 @@
  * - Expert tokens are credentials: never rendered, logged, put in a <title>, or sent to moderator pages.
  * Rules only, no data: safe to import from client components.
  */
+import { BANDS, bandIndex } from './probability';
 import type { AnonymityLevel, PublicOutcome, QuestionDetail } from './types';
 
 export const MIN_GROUP_SIZE = 3;
@@ -16,7 +17,7 @@ export const MIN_GROUP_SIZE = 3;
 export const canShowAggregate = (n: unknown): boolean =>
   typeof n === 'number' && Number.isFinite(n) && n >= MIN_GROUP_SIZE;
 
-/** Public view of a question: answered count, latest median and range, outcome, themes. Nothing individual. */
+/** Public view of a question: answered count, latest median, range in 20% bands, outcome, themes. Nothing individual. */
 export function toPublicOutcome(d: QuestionDetail): PublicOutcome {
   const base = {
     questionId: d.question.id,
@@ -33,8 +34,8 @@ export function toPublicOutcome(d: QuestionDetail): PublicOutcome {
     suppressed: false,
     answered,
     median: d.latest.median,
-    min: d.latest.min,
-    max: d.latest.max,
+    rangeLow: BANDS[bandIndex(d.latest.min)].min,
+    rangeHigh: BANDS[bandIndex(d.latest.max)].max,
     themes: d.themes,
   };
 }

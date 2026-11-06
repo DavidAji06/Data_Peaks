@@ -26,10 +26,19 @@ const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
 
 export const baseFor = (source: DataSource): string => (source === 'api' ? API_URL : '/api/demo');
 
-async function request<T>(source: DataSource, method: 'GET' | 'POST', path: string, body?: unknown): Promise<T> {
+/** Moderator actions never call the API directly: /api/mod adds the server-only moderator key. */
+const moderatorBaseFor = (source: DataSource): string => (source === 'api' ? '/api/mod' : '/api/demo');
+
+async function request<T>(
+  source: DataSource,
+  method: 'GET' | 'POST',
+  path: string,
+  body?: unknown,
+  base: string = baseFor(source),
+): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`${baseFor(source)}${path}`, {
+    res = await fetch(`${base}${path}`, {
       method,
       cache: 'no-store',
       ...(body !== undefined ? { headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {}),
@@ -37,6 +46,7 @@ async function request<T>(source: DataSource, method: 'GET' | 'POST', path: stri
   } catch {
     throw new NetworkError();
   }
+  if (res.status === 502 && base === '/api/mod') throw new NetworkError(); // /api/mod couldn't reach the API
   if (!res.ok) throw await ApiError.fromResponse(res);
   return (await res.json()) as T;
 }
@@ -69,12 +79,12 @@ export async function fetchProgress(source: DataSource, token: string): Promise<
 
 /** Approve (all question fields, future deadline) or reject. 409 = already decided, 422 = invalid. */
 export async function decideAlert(source: DataSource, alertId: string, decision: ApiDecisionIn): Promise<DecisionResult> {
-  return toDecisionResult(await request<ApiDecisionOut>(source, 'POST', `/alerts/${enc(alertId)}/decision`, decision));
+  return toDecisionResult(await request<ApiDecisionOut>(source, 'POST', `/alerts/${enc(alertId)}/decision`, decision, moderatorBaseFor(source)));
 }
 
 /** 409 = already resolved. */
 export async function resolveQuestion(source: DataSource, questionId: string, outcome: 0 | 1): Promise<ResolveResult> {
   return toResolveResult(
-    await request<ApiResolveOut>(source, 'POST', `/moderator/questions/${enc(questionId)}/resolve`, { outcome }),
+    await request<ApiResolveOut>(source, 'POST', `/moderator/questions/${enc(questionId)}/resolve`, { outcome }, moderatorBaseFor(source)),
   );
 }

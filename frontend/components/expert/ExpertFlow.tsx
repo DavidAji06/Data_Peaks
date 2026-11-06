@@ -7,7 +7,7 @@ import { fetchGroupView, fetchProgress, submitAnswer, submitRevision } from '@/l
 import { bandLabel, fromPercent, toPercent } from '@/lib/probability';
 import { readJSON, writeJSON } from '@/lib/storage';
 import { formatDate, type Strings } from '@/lib/strings';
-import type { DataSource, ExpertQuestion, GroupView, Locale } from '@/lib/types';
+import type { AnonymityLevel, DataSource, ExpertQuestion, GroupView, Locale } from '@/lib/types';
 import { buttonClass, Card, Chip, DemoBadge, Notice, RiskChip } from '@/components/ui/primitives';
 import { GroupAxis } from './GroupAxis';
 import { ProbabilitySlider } from './ProbabilitySlider';
@@ -217,7 +217,7 @@ export function ExpertFlow({ token, data, source }: { token: string; data: Exper
                   {s.estimate.reasonCount(reason.length, MAX_REASON)}
                 </p>
               </div>
-              {step === 'estimate' && <WhoSees s={s} />}
+              {step === 'estimate' && <WhoSees s={s} level={data.anonymityLevel} />}
               {step === 'revise' && <p className="text-sm text-ink-muted">{s.revise.firstAnswerKept}</p>}
               <div className="grid gap-2">
                 <button type="submit" disabled={busy} className={buttonClass.primary}>
@@ -398,14 +398,16 @@ function SimilarRisks({ data, s }: { data: ExpertQuestion; s: Strings }) {
   );
 }
 
-function WhoSees({ s }: { s: Strings }) {
-  // TODO: GET /q/{token} doesn't return the expert's anonymity level yet (requested from David in HANDOFF.md);
-  // until it does, this line stays generic and true for every level.
+function WhoSees({ s, level }: { s: Strings; level: AnonymityLevel | null }) {
+  // The level comes from GET /q/{token}/settings. On a backend without that endpoint it is null,
+  // and the ACAPS line stays generic (true for every level).
+  const info = level ? s.anonymity.levels[level] : null;
   return (
     <div className="rounded-lg bg-surface-muted p-3 text-sm">
       <p className="font-medium text-ink">{s.whoSees.title}</p>
+      {info && <p className="mt-1 text-ink">{s.whoSees.yourLevel(info.label)}</p>}
       <ul className="mt-1 grid gap-0.5 text-ink-muted">
-        <li>{s.whoSees.acaps}</li>
+        <li>{info ? info.description : s.whoSees.acaps}</li>
         <li>{s.whoSees.peers}</li>
         <li>{s.whoSees.public}</li>
       </ul>

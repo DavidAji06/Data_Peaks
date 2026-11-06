@@ -58,6 +58,16 @@ export interface ApiExpertQuestion {
   revised: boolean;
 }
 
+/** GET /q/{token}/settings (backend commit 3220fc0). Not on older backends: then 404. */
+export interface ApiExpertSettings {
+  pseudonym: string;
+  anonymity_level: AnonymityLevel;
+  country: string;
+  topics: string[];
+  language: string;
+  max_open_questions: number;
+}
+
 /** Body of POST /q/{token}/responses and /revision. probability 0–1, reason 1–280 characters. */
 export interface ApiAnswerIn {
   probability: number;
@@ -271,6 +281,7 @@ export interface ExpertQuestion {
   triggerUpdate: Alert | null;
   similarRisks: SimilarRisk[];
   similarRisksAreDemo: boolean; // curated real-data examples until the ML pipeline lands
+  anonymityLevel: AnonymityLevel | null; // from /q/{token}/settings; null when the backend doesn't have it yet
   answered: boolean;
   revised: boolean;
 }
@@ -424,7 +435,9 @@ export type PublicOutcome = {
   outcome: boolean | null;
 } & (
   | { suppressed: true; answered: number }
-  | { suppressed: false; answered: number; median: number; min: number; max: number; themes: Themes }
+  // range = the 20% bands the answers fall in (low edge of the lowest, high edge of the highest), never the
+  // exact min/max: with few answers those ARE individual answers.
+  | { suppressed: false; answered: number; median: number; rangeLow: number; rangeHigh: number; themes: Themes }
 );
 
 /** Moderator's risk decision. No backend endpoint yet: kept in client state only. */

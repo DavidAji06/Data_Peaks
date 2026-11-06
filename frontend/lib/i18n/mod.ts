@@ -16,7 +16,8 @@ export const mod = {
   demoUntilMl: 'Demo data until the ML pipeline lands',
   tryAgain: 'Try again',
   errorTitle: 'Something went wrong loading this page.',
-  errorHelp: "Couldn't reach the server. Check that the backend is running, then try again.",
+  errorHelp:
+    "Couldn't load from the server. Check that the backend is running and that MODERATOR_KEY in frontend/.env.local matches the backend's key, then try again.",
   notFound: 'Not found.',
   backTo: (where: string) => `Back to ${where}`,
 
@@ -134,6 +135,7 @@ export const mod = {
     noneScored: 'Nobody answered, so nothing was scored.',
     meanExpert: 'Average expert Brier',
     alreadyResolved: 'This question was already resolved. Showing the latest state.',
+    publicLink: 'Preview the public summary',
     outcomeIs: (yes: boolean) => `Outcome: ${yes ? 'it happened' : "it didn't happen"}`,
   },
 

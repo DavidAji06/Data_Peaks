@@ -7,6 +7,7 @@ import { canShowAggregate } from './anonymity';
 import { strengthWord } from './probability';
 import type {
   Alert,
+  AnonymityLevel,
   ApiAlert,
   ApiDecisionOut,
   ApiExpertQuestion,
@@ -73,7 +74,11 @@ export const isPlaceholderSimilar = (items: readonly ApiSimilarRisk[]): boolean 
 /** The API returns one contract sample until the ML ranking lands. */
 export const isPlaceholderRanked = (items: readonly ApiRankedRisk[]): boolean => items.length <= 1;
 
-export function toExpertQuestion(q: ApiExpertQuestion, similar: { items: ApiSimilarRisk[]; areDemo: boolean }): ExpertQuestion {
+export function toExpertQuestion(
+  q: ApiExpertQuestion,
+  similar: { items: ApiSimilarRisk[]; areDemo: boolean },
+  anonymityLevel: AnonymityLevel | null = null,
+): ExpertQuestion {
   return {
     question: {
       id: q.question.id,
@@ -86,6 +91,7 @@ export function toExpertQuestion(q: ApiExpertQuestion, similar: { items: ApiSimi
     triggerUpdate: q.trigger_update ? toAlert(q.trigger_update) : null,
     similarRisks: similar.items.map(toSimilarRisk),
     similarRisksAreDemo: similar.areDemo,
+    anonymityLevel,
     answered: q.answered,
     revised: q.revised,
   };

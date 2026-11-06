@@ -16,6 +16,7 @@ import type {
   ApiAlert,
   ApiDecisionOut,
   ApiExpertQuestion,
+  ApiExpertSettings,
   ApiGroupView,
   ApiLeaderboard,
   ApiModeratorResponse,
@@ -222,6 +223,20 @@ function checkAnswer(body: unknown): { probability: number; reason: string } {
 // ---------------------------------------------------------------------------
 // Endpoints
 // ---------------------------------------------------------------------------
+
+/** GET /q/{token}/settings, as in backend commit 3220fc0 (language and limit use its defaults). */
+function expertSettings(token: string): ApiExpertSettings {
+  const invite = getInvite(token);
+  const e = db.experts.find((x) => x.id === invite.expert_id)!;
+  return {
+    pseudonym: e.pseudonym,
+    anonymity_level: e.anonymity_level,
+    country: e.country,
+    topics: e.topics.split(',').filter(Boolean),
+    language: 'en',
+    max_open_questions: 3,
+  };
+}
 
 function expertQuestion(token: string): ApiExpertQuestion {
   const invite = getInvite(token);
@@ -499,6 +514,7 @@ function route(method: string, path: string, body: unknown): unknown {
     if (a === 'q' && parts.length === 2) return expertQuestion(b);
     if (a === 'q' && c === 'group' && parts.length === 3) return groupView(b);
     if (a === 'q' && c === 'track-record' && parts.length === 3) return trackRecord(b);
+    if (a === 'q' && c === 'settings' && parts.length === 3) return expertSettings(b);
     if (a === 'moderator' && b === 'questions' && parts.length === 2) return listQuestions();
     if (a === 'moderator' && b === 'questions' && parts.length === 3) return questionDetail(c);
     if (a === 'moderator' && b === 'leaderboard' && parts.length === 2) return leaderboard();

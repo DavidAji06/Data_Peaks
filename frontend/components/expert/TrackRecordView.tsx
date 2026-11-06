@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { toPercent } from '@/lib/probability';
 import type { DataSource, TrackRecord } from '@/lib/types';
 import { buttonClass, Card, DemoBadge } from '@/components/ui/primitives';
+import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useLocale } from './use-locale';
 
 /** The backend prefixes practice questions with this; the section heading says it instead. */
@@ -50,20 +51,7 @@ export function TrackRecordView({ token, data, source }: { token: string; data: 
         <span className="font-semibold text-ink">{s.common.appName}</span>
         <div className="flex items-center gap-2">
           {source === 'demo' && <DemoBadge>{s.common.demoOffline}</DemoBadge>}
-          <div role="group" aria-label={s.language.label} className="flex rounded-lg border border-line-strong">
-            {(['en', 'fr'] as const).map((l) => (
-              <button
-                key={l}
-                type="button"
-                lang={l}
-                aria-pressed={locale === l}
-                onClick={() => setLocale(l)}
-                className={`min-h-11 min-w-11 px-3 text-sm font-medium ${locale === l ? 'bg-accent text-on-accent' : 'text-ink'} first:rounded-l-lg last:rounded-r-lg`}
-              >
-                {l.toUpperCase()}
-              </button>
-            ))}
-          </div>
+          <LanguageToggle locale={locale} onChange={setLocale} label={s.language.label} />
         </div>
       </header>
 

@@ -56,6 +56,12 @@ async function QuestionView({ params }: { params: PageProps<'/mod/questions/[id]
             <p className="text-ink">{d.risk.title}</p>
             {d.risk.acapsProbability && <p className="mt-1 text-sm text-ink-muted">{t.acapsProbability(d.risk.acapsProbability)}</p>}
             {q.outcome !== null && <p className="mt-3 font-medium text-ink">{t.outcomeIs(q.outcome)}</p>}
+            <Link
+              href={`/outcomes/${encodeURIComponent(q.id)}`}
+              className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-accent underline underline-offset-4"
+            >
+              {t.publicLink}
+            </Link>
           </Card>
 
           <Card>

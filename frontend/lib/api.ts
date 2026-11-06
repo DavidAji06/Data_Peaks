@@ -34,6 +34,7 @@ import type {
   AlertStatus,
   ApiAlert,
   ApiExpertQuestion,
+  ApiExpertSettings,
   ApiLeaderboard,
   ApiQuestionDetail,
   ApiQuestionListItem,
@@ -67,14 +68,23 @@ const curated = curatedFile as unknown as {
 
 type Call = <T>(method: 'GET' | 'POST', path: string, body?: unknown) => Promise<T>;
 
-const realCall: Call = async <T>(method: 'GET' | 'POST', path: string, body?: unknown) => {
+/** Server-only. Sent ONLY on moderator requests, never on expert or public ones. */
+const MODERATOR_KEY = process.env.MODERATOR_KEY ?? '';
+
+export type Audience = 'expert' | 'moderator';
+
+const realCallFor = (audience: Audience): Call => async <T>(method: 'GET' | 'POST', path: string, body?: unknown) => {
+  const headers: Record<string, string> = {};
+  if (body !== undefined) headers['content-type'] = 'application/json';
+  if (audience === 'moderator' && MODERATOR_KEY) headers['x-moderator-key'] = MODERATOR_KEY;
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}`, {
       method,
       cache: 'no-store', // expert- and moderator-specific data: never cache
       signal: AbortSignal.timeout(TIMEOUT_MS),
-      ...(body !== undefined ? { headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) } : {}),
+      headers,
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     });
   } catch {
     throw new NetworkError();
@@ -90,10 +100,10 @@ const mockCall: Call = async <T>(method: 'GET' | 'POST', path: string, body?: un
 };
 
 /** Runs one screen's loader on the real API, or wholly on the demo backend (never a mix). */
-async function load<T>(loader: (call: Call) => Promise<T>): Promise<Loaded<T>> {
+async function load<T>(loader: (call: Call) => Promise<T>, audience: Audience = 'expert'): Promise<Loaded<T>> {
   if (USE_MOCK) return { data: await loader(mockCall), source: 'demo' };
   try {
-    return { data: await loader(realCall), source: 'api' };
+    return { data: await loader(realCallFor(audience)), source: 'api' };
   } catch (e) {
     if (e instanceof NetworkError && DEMO_FALLBACK) return { data: await loader(mockCall), source: 'demo' };
     throw e;
@@ -112,7 +122,15 @@ export function getExpertQuestion(token: string): Promise<Loaded<ExpertQuestion>
     const similar = isPlaceholderSimilar(raw.similar_risks)
       ? { items: curated.similar_risks[raw.risk.id] ?? [], areDemo: true }
       : { items: raw.similar_risks, areDemo: false };
-    return toExpertQuestion(raw, similar);
+    // Only the anonymity level is used from the settings; the pseudonym and topics stay on the server.
+    let level: ExpertQuestion['anonymityLevel'] = null;
+    try {
+      level = (await call<ApiExpertSettings>('GET', `/q/${enc(token)}/settings`)).anonymity_level;
+    } catch (e) {
+      // 404/405: a backend without the settings endpoint yet. Show the generic "who sees" line.
+      if (!(e instanceof ApiError && (e.status === 404 || e.status === 405))) throw e;
+    }
+    return toExpertQuestion(raw, similar, level);
   });
 }
 
@@ -125,7 +143,7 @@ export function getTrackRecord(token: string): Promise<Loaded<TrackRecord>> {
 // ---------------------------------------------------------------------------
 
 export function getAlerts(status: AlertStatus): Promise<Loaded<Alert[]>> {
-  return load(async (call) => (await call<ApiAlert[]>('GET', `/alerts?status=${status}`)).map(toAlert));
+  return load(async (call) => (await call<ApiAlert[]>('GET', `/alerts?status=${status}`)).map(toAlert), 'moderator');
 }
 
 export interface AlertDetail {
@@ -148,23 +166,23 @@ export function getAlertDetail(id: string): Promise<Loaded<AlertDetail | null>> 
       return { alert: toAlert(hit), risk };
     }
     return null;
-  });
+  }, 'moderator');
 }
 
 export function getModeratorQuestions(): Promise<Loaded<QuestionListItem[]>> {
-  return load(async (call) => (await call<ApiQuestionListItem[]>('GET', '/moderator/questions')).map(toQuestionListItem));
+  return load(async (call) => (await call<ApiQuestionListItem[]>('GET', '/moderator/questions')).map(toQuestionListItem), 'moderator');
 }
 
 export function getQuestionDetail(id: string): Promise<Loaded<QuestionDetail>> {
-  return load(async (call) => toQuestionDetail(await call<ApiQuestionDetail>('GET', `/moderator/questions/${enc(id)}`)));
+  return load(async (call) => toQuestionDetail(await call<ApiQuestionDetail>('GET', `/moderator/questions/${enc(id)}`)), 'moderator');
 }
 
 export function getLeaderboard(): Promise<Loaded<Leaderboard>> {
-  return load(async (call) => toLeaderboard(await call<ApiLeaderboard>('GET', '/moderator/leaderboard')));
+  return load(async (call) => toLeaderboard(await call<ApiLeaderboard>('GET', '/moderator/leaderboard')), 'moderator');
 }
 
 export function getRisk(id: string): Promise<Loaded<RiskDetail>> {
-  return load(async (call) => toRiskDetail(await call<ApiRisk>('GET', `/risks/${enc(id)}`)));
+  return load(async (call) => toRiskDetail(await call<ApiRisk>('GET', `/risks/${enc(id)}`)), 'moderator');
 }
 
 export interface RiskOverview {
@@ -180,7 +198,7 @@ export function getRiskOverview(id: string): Promise<Loaded<RiskOverview>> {
       .map(toQuestionListItem)
       .filter((q) => q.riskId === risk.id);
     return { risk, questions };
-  });
+  }, 'moderator');
 }
 
 export function getRankedRisks(): Promise<Loaded<RankedRisks>> {
@@ -189,15 +207,18 @@ export function getRankedRisks(): Promise<Loaded<RankedRisks>> {
     return isPlaceholderRanked(raw)
       ? { items: curated.ranked_risks.map(toRankedRisk), areDemo: true }
       : { items: raw.map(toRankedRisk), areDemo: false };
-  });
+  }, 'moderator');
 }
 
 // ---------------------------------------------------------------------------
 // Public: built on the server from the moderator view; only aggregates leave this function.
+// The backend has no public endpoint yet (requested in HANDOFF.md), so this server-side read uses the
+// moderator key. The key and the raw moderator JSON never reach the browser.
 // ---------------------------------------------------------------------------
 
 export function getPublicOutcome(questionId: string): Promise<Loaded<PublicOutcome>> {
   return load(async (call) =>
     toPublicOutcome(toQuestionDetail(await call<ApiQuestionDetail>('GET', `/moderator/questions/${enc(questionId)}`))),
+    'moderator',
   );
 }
