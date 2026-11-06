@@ -10,7 +10,7 @@ from ..services.scoring import brier, latest_answers
 
 router = APIRouter(prefix="/public", tags=["public"])
 
-MIN_PUBLIC_GROUP = 3  # Hide group results below this, so no one can be singled out
+MIN_PUBLIC_GROUP = 5  # Hide group results below this, so no one can be singled out
 
 
 @router.get("/questions")

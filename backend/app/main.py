@@ -32,6 +32,7 @@ from .services.scoring import BASELINE_BRIER, expert_scores, summarise_scores
 
 FRONTEND_URL = "http://localhost:3000"
 MODERATOR_ONLY = [Depends(require_moderator)]
+MIN_GROUP_SIZE = 5  # Below this, group figures could reveal individual answers
 
 Base.metadata.create_all(engine)
 
@@ -374,6 +375,17 @@ def group_view(token: str, db: Session = Depends(get_db)):
             latest[response.expert_id] = response
 
     probabilities = [r.probability for r in latest.values()]
+
+    # Small groups: min, max and median would expose other experts' exact answers
+    if len(probabilities) < MIN_GROUP_SIZE:
+        return {
+            "question_id": invite.question_id,
+            "response_count": len(probabilities),
+            "median": None,
+            "min": None,
+            "max": None,
+            "themes": ml_outputs.empty_themes(),
+        }
 
     return {
         "question_id": invite.question_id,

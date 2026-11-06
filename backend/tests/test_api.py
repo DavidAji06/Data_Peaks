@@ -16,6 +16,8 @@ from app.db import Base, get_db
 from app.main import app
 from app.models import Expert, Invite, PanelInvite, Question, Response, Risk
 from app.services.auth import MODERATOR_KEY
+from app.models import Alert
+from app.services.routing import parse_countries
 
 MOD = {"X-Moderator-Key": MODERATOR_KEY}
 ANSWER = {"probability": 0.6, "reason": "Test reason"}
@@ -76,7 +78,8 @@ def test_group_view_locked_until_answered(client):
 
     group = client.get("/q/tok-a/group").json()
     assert group["response_count"] == 3
-    assert group["median"] == 0.6
+    assert group["median"] is None  # Below the minimum group size
+    assert group["min"] is None
 
 
 def test_cannot_answer_twice(client):
@@ -163,3 +166,26 @@ def test_anonymous_experts_not_ranked(client):
     # Below the 3-question minimum, so nobody is ranked yet, but the route must work
     board = client.get("/moderator/leaderboard", headers=MOD).json()
     assert all(row["anonymity_level"] != "anonymous" for row in board["experts"])
+
+def test_parse_countries():
+    assert parse_countries("Chad, Niger, Cameroon") == {"chad", "niger", "cameroon"}
+    assert parse_countries("Chad") == {"chad"}
+
+
+def test_multi_country_risk_reaches_experts(client):
+    # Add a risk covering several countries, plus an alert for it
+    override = app.dependency_overrides[get_db]
+    db = next(override())
+    db.add(Risk(id="R2", title="Lake Chad risk", country="Chad, Niger, Nigeria", iso="TCD, NER, NGA"))
+    db.add(Alert(id="A9", risk_id="R2", report_title="Test report"))
+    db.commit()
+    db.close()
+
+    body = {
+        "status": "approved",
+        "question_text": "Test multi-country question?",
+        "resolution_criteria": "Test criteria",
+        "deadline": "2030-01-01",
+    }
+    result = client.post("/alerts/A9/decision", json=body, headers=MOD).json()
+    assert result["experts_invited"] == 3  # All three test experts are in Chad

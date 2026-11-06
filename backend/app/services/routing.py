@@ -23,9 +23,15 @@ def open_invite_count(db: Session, expert_id: str) -> int:
     )
 
 
+def parse_countries(country: str) -> set[str]:
+    # Multi-country risks are stored like "Chad, Niger, Cameroon, Nigeria"
+    return {name.strip().lower() for name in country.split(",") if name.strip()}
+
+
 def route_question(db: Session, question: Question, country: str) -> list[Invite]:
+    countries = parse_countries(country)
     experts = db.scalars(
-        select(Expert).where(func.lower(Expert.country) == country.lower())
+        select(Expert).where(func.lower(Expert.country).in_(countries))
     ).all()
 
     candidates = []
