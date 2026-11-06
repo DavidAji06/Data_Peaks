@@ -45,3 +45,8 @@ yarn.lock
 .env.local
 *.key
 *.pem
+
+.env
+*.db
+ml/artifacts/
+__pycache__/
