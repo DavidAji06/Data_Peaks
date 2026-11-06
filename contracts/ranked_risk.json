@@ -1,0 +1,13 @@
+{
+  "risk_id": "R1043",
+  "title": "Cross-border insecurity in eastern Chad",
+  "country": "Chad",
+  "p_materialise": 0.62,
+  "priority_score": 0.78,
+  "score_breakdown": {
+    "signal_strength": 0.82,
+    "uncertainty": 0.94,
+    "impact": 0.8,
+    "review_age": 0.35
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "question_id": "Q001",
+  "response_count": 6,
+  "median": 0.68,
+  "min": 0.45,
+  "max": 0.85,
+  "themes": {
+    "agreement": ["Sample point most experts agree on"],
+    "disagreement": ["Sample point experts disagree on"],
+    "new_information": ["Sample point missing from the analysis"]
+  }
+}

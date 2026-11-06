@@ -1,0 +1,8 @@
+{
+  "id": "RS001",
+  "question_id": "Q001",
+  "pseudonym_id": "expert-a",
+  "probability": 0.7,
+  "reason": "Sample one-line reason.",
+  "round": 1
+}

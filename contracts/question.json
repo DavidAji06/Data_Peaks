@@ -1,0 +1,9 @@
+{
+  "id": "Q001",
+  "risk_id": "R1043",
+  "alert_id": "A001",
+  "text": "Sample: Will a defined cross-border event occur in eastern Chad by 6 May 2027?",
+  "resolution_criteria": "Sample: resolves yes if the agreed source reports the defined event by the deadline.",
+  "deadline": "2027-05-06",
+  "status": "open"
+}

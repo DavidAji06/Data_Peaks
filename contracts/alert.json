@@ -1,0 +1,15 @@
+{
+  "id": "A001",
+  "risk_id": "R1043",
+  "trigger_id": "T0001",
+  "report": {
+    "title": "Sample report on clashes near the Chad-Sudan border",
+    "source": "Sample source",
+    "url": "https://example.org/sample-report",
+    "published_at": "2026-11-05"
+  },
+  "direction": "escalating",
+  "strength": 0.82,
+  "evidence": "Sample sentence explaining why the report matches the trigger.",
+  "status": "pending"
+}

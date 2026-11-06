@@ -1,0 +1,8 @@
+{
+  "risk_id": "R0000",
+  "title": "Sample past risk with a similar pattern",
+  "country": "Sample country",
+  "similarity": 0.74,
+  "outcome": "Materialised",
+  "what_happened": "Sample summary of what happened."
+}
