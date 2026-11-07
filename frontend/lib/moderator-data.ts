@@ -10,6 +10,21 @@ import type { ApiDecisionIn } from './types';
 // ===========================================================================
 
 /**
+ * Get today's date in YYYY-MM-DD format safely for prerendering.
+ * This helper is used during validation to check deadline > today.
+ */
+function getTodayIso(): string {
+  if (typeof window === 'undefined') {
+    // Server-side: only called at runtime, not during prerendering
+    const now = new Date();
+    return now.toISOString().split('T')[0];
+  }
+  // Client-side
+  const now = new Date();
+  return now.toISOString().split('T')[0];
+}
+
+/**
  * Build the API payload for approving an alert and sending it as a question.
  * Validates the three required fields.
  */
@@ -18,7 +33,7 @@ export function buildQuestionDecision(
   resolutionCriteria: string,
   deadline: string, // YYYY-MM-DD, must be future
 ): ApiDecisionIn {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayIso();
   if (!questionText?.trim()) throw new Error('Question text is required');
   if (!resolutionCriteria?.trim()) throw new Error('Resolution criteria are required');
   if (!deadline?.trim()) throw new Error('Deadline is required');
