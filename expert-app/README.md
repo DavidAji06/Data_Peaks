@@ -42,9 +42,9 @@ Data layer: `src/lib/api.ts` (HTTP client) and `src/components/datapeaks/useExpe
 | Screen | Source |
 | --- | --- |
 | Home globe | `GET /public/contexts` — `data/processed/ranked_risks.json` (Data Peaks ranking) joined with the ACAPS Risk Radar (`data/risk-radar-export.csv`) |
-| Question (Q001) | Seeded by `backend/app/seed.py` from the top-ranked risk R1049 (Sudan) and its trigger T0634, quoted from the Risk Radar CSV |
+| Question (Q001) | Seeded by `backend/app/seed.py` from the top-ranked risk R1049 (Sudan): the question names ACAPS trigger T0634 by its title and the criteria quote its description, both from the Risk Radar CSV. No wording is invented |
 | What's changed | Strongest real ML alert for R1049 from `data/processed/alerts.json` (ACAPS humanitarian access events scored by the LLM). Matched by country only, so it is labelled "Related reporting in Sudan" |
-| Relevant past cases | `data/processed/similar_risks.json` from `ml/find_similar_past_events/find_top_three.py` (real resolved ACAPS risks) |
+| Relevant past cases | `data/processed/similar_risks.json` from `ml/find_similar_past_events/find_top_three_v2.py` (dual embeddings; real resolved ACAPS risks that have evolution data). Tap a case for how it evolved: outcome, trend, hazard and impact materialisation, rationale updates and source links, from the Risk Radar CSV |
 | Group view | Median and range from the backend; "AI summary of expert reasons" from GreenPT (`ml/pipeline/llm.py`), generated once in the background after the 5th answer |
 | Experts, their answers and the practice track record | Synthetic (seed data). Practice questions use real ACAPS outcomes with simulated forecasts |
 

@@ -98,16 +98,10 @@ def seed():
         id="Q001",
         risk_id=DEMO_RISK,
         alert_id=linked.id if linked else None,
-        text=(
-            f"Will the RSF re-establish an encirclement of Al Obeid (North Kordofan) "
-            f"by {DEMO_DEADLINE.day} {DEMO_DEADLINE:%B %Y}, through further deployment west or "
-            f"south of the city, road interdiction, or attacks on its access routes?"
-        ),
-        resolution_criteria=(
-            f"Resolves yes if, by {DEMO_DEADLINE.day} {DEMO_DEADLINE:%B %Y}, ACAPS assesses that "
-            f"trigger {DEMO_TRIGGER} \"{trigger['title']}\" has been met. "
-            f"ACAPS trigger description: \"{trigger['description']}\""
-        ),
+        # Only ACAPS wording: the trigger title and description from the Risk Radar CSV.
+        # In the real flow a moderator writes the question when approving an alert.
+        text=f"Will ACAPS trigger {DEMO_TRIGGER}, \"{trigger['title']}\", be met by {DEMO_DEADLINE.day} {DEMO_DEADLINE:%B %Y}?",
+        resolution_criteria=f"ACAPS trigger description ({DEMO_RISK} - {DEMO_TRIGGER}): {trigger['description']}",
         deadline=DEMO_DEADLINE,
     ))
 

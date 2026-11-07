@@ -31,6 +31,14 @@ export interface ApiSimilarRisk {
   what_happened_full?: string;
   /** Source links recorded by ACAPS for what happened. */
   sources?: string[];
+  /** How the past risk evolved, from the Risk Radar (empty strings when not recorded). */
+  evolution?: {
+    trend: string;
+    what_materialised: string;
+    hazard_materialisation: string;
+    impact_materialisation: string;
+    rationale_update: string;
+  };
 }
 
 export interface ApiExpertQuestion {

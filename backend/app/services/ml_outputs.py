@@ -48,7 +48,17 @@ def past_case_details() -> dict:
     for _, row in df.iterrows():
         full = text(row.get("Impact materialisation description")) or text(row.get("Hazard materialisation"))
         urls = list(dict.fromkeys(URL.findall(text(row.get("Materialisation sources")))))
-        details[str(row["Risk ID"])] = {"what_happened_full": full, "sources": urls}
+        details[str(row["Risk ID"])] = {
+            "what_happened_full": full,
+            "sources": urls,
+            "evolution": {
+                "trend": text(row.get("Risk trend")),
+                "what_materialised": text(row.get("What materialised?")),
+                "hazard_materialisation": text(row.get("Hazard materialisation")),
+                "impact_materialisation": text(row.get("Impact materialisation description")),
+                "rationale_update": text(row.get("Rationale update")),
+            },
+        }
     return details
 
 
@@ -58,7 +68,7 @@ def similar_risks(risk_id: str) -> list:
         return sample("similar_risk")
     details = past_case_details()
     return [
-        {**match, **details.get(str(match.get("risk_id")), {"what_happened_full": "", "sources": []})}
+        {**details.get(str(match.get("risk_id")), {"what_happened_full": "", "sources": [], "evolution": {}}), **match}
         for match in data.get(risk_id, [])[:3]
     ]
 

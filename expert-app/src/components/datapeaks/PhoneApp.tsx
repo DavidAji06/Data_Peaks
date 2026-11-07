@@ -9,7 +9,7 @@ import convoyImg from "@/assets/convoy_chad.jpg";
 import { Badge, Button, Card, LangToggle, SectionLabel, Wordmark, beatsGuessing, type Lang } from "./shared";
 import { useExpert, type Expert } from "./useExpert";
 import { useContexts, type ConflictContext } from "./contexts";
-import type { AnonymityLevel } from "@/lib/api";
+import type { AnonymityLevel, ApiSimilarRisk } from "@/lib/api";
 
 const Globe = lazy(() => import("./Globe"));
 
@@ -465,7 +465,7 @@ function Question(p: { t: T; lang: Lang; ex: Expert; answer: number; setAnswer: 
   const level = d.risk.risk_level ? `${d.risk.risk_level} risk` : "";
   const update = d.trigger_update;
   const cases = d.similar_risks.length
-    ? d.similar_risks.map((s) => ({ place: s.country, code: s.risk_id, status: s.outcome, text: s.what_happened || s.title, full: s.what_happened_full || "", title: s.title, sources: s.sources ?? [] }))
+    ? d.similar_risks.map((s) => ({ place: s.country, code: s.risk_id, status: s.outcome, text: s.what_happened || s.title, full: s.what_happened_full || "", title: s.title, sources: s.sources ?? [], evolution: s.evolution }))
     : t.cases;
 
   const submit = async () => {
@@ -531,7 +531,21 @@ function Question(p: { t: T; lang: Lang; ex: Expert; answer: number; setAnswer: 
   );
 }
 
-type Case = { place: string; code: string; status: string; text: string; full?: string; title?: string; sources?: string[] };
+/** Renders ACAPS text, turning markdown links like [OCHA 13/11/2025](https://...) into real links. */
+function LinkedText({ text }: { text: string }) {
+  const parts: ReactNode[] = [];
+  const re = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+  let last = 0;
+  for (const m of text.matchAll(re)) {
+    parts.push(text.slice(last, m.index));
+    parts.push(<a key={m.index} href={m[2]} target="_blank" rel="noreferrer" className="text-primary-strong underline">{m[1]}</a>);
+    last = (m.index ?? 0) + m[0].length;
+  }
+  parts.push(text.slice(last));
+  return <>{parts}</>;
+}
+
+type Case = { place: string; code: string; status: string; text: string; full?: string; title?: string; sources?: string[]; evolution?: ApiSimilarRisk["evolution"] };
 
 function CasesCarousel({ t, cases }: { t: T; cases: Case[] }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -550,13 +564,32 @@ function CasesCarousel({ t, cases }: { t: T; cases: Case[] }) {
         {cases.map((c, i) => (
           <div key={c.code + i} className="w-full shrink-0 snap-center px-1 py-1" aria-label={`${i + 1} / ${cases.length}`}>
             <Card className="h-full">
-              <button onClick={() => setExpanded(expanded === i ? null : i)} aria-expanded={expanded === i} className="w-full text-left">
+              <div>
                 <p className="text-2xl font-medium text-navy">{c.place}</p>
                 <p className="font-condensed text-xs text-muted-foreground">{c.code} · {c.status}</p>
                 {expanded === i && c.title && <p className="mt-3 font-bold leading-snug">{c.title}</p>}
-                <p className="mt-3 text-base leading-relaxed">{expanded === i && c.full ? c.full : c.text}</p>
-                {(c.full || c.title) && <span className="mt-2 flex items-center gap-1 text-sm font-medium text-primary-strong">{expanded === i ? "Show less" : "Read the full case"}<ChevronDown className={`h-4 w-4 transition-transform ${expanded === i ? "rotate-180" : ""}`} /></span>}
-              </button>
+                {expanded === i && c.evolution && (c.evolution.hazard_materialisation || c.evolution.impact_materialisation || c.evolution.rationale_update) ? (
+                  <div className="mt-3 space-y-3">
+                    <p className="font-condensed text-xs font-bold uppercase tracking-widest text-muted-foreground">How it evolved</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge tone="muted">Outcome: {c.status}</Badge>
+                      {c.evolution.what_materialised && <Badge tone="muted">Materialised: {c.evolution.what_materialised}</Badge>}
+                      {c.evolution.trend && <Badge tone="muted">Trend: {c.evolution.trend}</Badge>}
+                    </div>
+                    {([["Hazard", c.evolution.hazard_materialisation], ["Impact", c.evolution.impact_materialisation], ["Updates", c.evolution.rationale_update]] as const)
+                      .filter(([, v]) => v)
+                      .map(([label, v]) => (
+                        <div key={label}>
+                          <p className="text-sm font-bold text-navy">{label}</p>
+                          <p className="whitespace-pre-line text-base leading-relaxed"><LinkedText text={v} /></p>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-base leading-relaxed">{expanded === i && c.full ? c.full : c.text}</p>
+                )}
+                {(c.full || c.title) && <button onClick={() => setExpanded(expanded === i ? null : i)} aria-expanded={expanded === i} className="mt-2 flex min-h-11 items-center gap-1 text-sm font-medium text-primary-strong">{expanded === i ? "Show less" : "Read the full case"}<ChevronDown className={`h-4 w-4 transition-transform ${expanded === i ? "rotate-180" : ""}`} /></button>}
+              </div>
               {expanded === i && !!c.sources?.length && (
                 <div className="mt-3 space-y-1 border-t pt-2">
                   <p className="font-condensed text-xs text-muted-foreground">Sources</p>
