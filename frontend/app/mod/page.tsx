@@ -21,13 +21,19 @@ export default function AlertQueuePage({ searchParams }: PageProps<'/mod'>) {
   );
 }
 
+function getCurrentDates() {
+  const now = new Date();
+  return {
+    today: now.toISOString().slice(0, 10),
+    minDeadline: new Date(now.getTime() + 86_400_000).toISOString().slice(0, 10),
+  };
+}
+
 async function AlertQueue({ searchParams }: { searchParams: PageProps<'/mod'>['searchParams'] }) {
   const status = asStatus((await searchParams).status);
   const { data: alerts, source } = await getAlerts(status);
 
-  const now = new Date();
-  const today = now.toISOString().slice(0, 10);
-  const minDeadline = new Date(now.getTime() + 86_400_000).toISOString().slice(0, 10);
+  const { today, minDeadline } = getCurrentDates();
 
   return (
     <>

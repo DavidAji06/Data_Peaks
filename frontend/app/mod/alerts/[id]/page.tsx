@@ -22,10 +22,15 @@ export default function AlertPage({ params }: PageProps<'/mod/alerts/[id]'>) {
   );
 }
 
-/** YYYY-MM-DD in UTC, n months from `from`. */
-function isoPlusMonths(from: Date, n: number): string {
-  const d = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth() + n, from.getUTCDate()));
-  return d.toISOString().slice(0, 10);
+/** Get current date and calculate deadline dates safely for prerendering */
+function getCurrentDatesForAlert() {
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const minDeadline = new Date(now.getTime() + 86_400_000).toISOString().slice(0, 10);
+  const sixMonthsOut = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 6, now.getUTCDate()))
+    .toISOString()
+    .slice(0, 10);
+  return { today, minDeadline, sixMonthsOut };
 }
 
 async function AlertDetailView({ params }: { params: PageProps<'/mod/alerts/[id]'>['params'] }) {
@@ -34,9 +39,7 @@ async function AlertDetailView({ params }: { params: PageProps<'/mod/alerts/[id]
   if (!data) notFound();
   const { alert, risk } = data;
 
-  const now = new Date();
-  const today = now.toISOString().slice(0, 10);
-  const minDeadline = new Date(now.getTime() + 86_400_000).toISOString().slice(0, 10);
+  const { today, minDeadline, sixMonthsOut } = getCurrentDatesForAlert();
   const trigger = risk?.triggers.find((tr) => tr.id === alert.triggerId) ?? null;
 
   // A starting draft the moderator edits. Built only from the ACAPS trigger or risk text; nothing invented.
@@ -47,7 +50,7 @@ async function AlertDetailView({ params }: { params: PageProps<'/mod/alerts/[id]
         ? `Will this risk materialise by the deadline: “${risk.title}”?`
         : '',
     criteria: trigger?.objective ?? '',
-    deadline: isoPlusMonths(now, 6),
+    deadline: sixMonthsOut,
   };
 
   return (
