@@ -56,6 +56,8 @@ export interface ApiExpertQuestion {
   similar_risks: ApiSimilarRisk[];
   answered: boolean;
   revised: boolean;
+  /** The expert's own answers, probabilities 0–1 (older backends omit this). */
+  own?: { first: number | null; latest: number | null; first_reason: string };
 }
 
 /** GET /q/{token}/questions: every question the expert was invited to, open ones first. */

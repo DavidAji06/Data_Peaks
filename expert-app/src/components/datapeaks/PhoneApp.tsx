@@ -50,7 +50,7 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
   };
 
   const titles: Record<Screen, [string, string]> = {
-    profile: [L(lang, "My profile", "Mon profil"), L(lang, "Your panel settings and track record", "Vos préférences et votre historique")],
+    profile: [L(lang, "My profile", "Mon profil"), L(lang, "Your panel preferences", "Vos préférences")],
     home: [L(lang, "Expert panel", "Panel d'experts"), L(lang, "See what's changing", "Ce qui évolue")],
     questions: [L(lang, "Questions", "Questions"), L(lang, "Share your view on a developing risk", "Votre avis sur un risque émergent")],
     group: [L(lang, "Group view", "Avis du groupe"), L(lang, "How does your view compare?", "Comparez votre réponse")],
@@ -103,10 +103,10 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
       <main className="flex-1 overflow-y-auto px-5 py-6">
         {/* Home stays mounted so the globe keeps its camera and selection between tabs. */}
         <div hidden={screen !== "home"}>
-          <Home t={t} lang={lang} ex={ex} active={screen === "home"} prefs={prefs} onQuestions={() => go("questions")} onGroup={() => go("group")} onOpen={openQuestion} />
+          <Home t={t} lang={lang} ex={ex} active={screen === "home"} prefs={prefs} onOpen={openQuestion} />
         </div>
         {blocked && <LoadNotice lang={lang} t={t} ex={ex} />}
-        {!blocked && needsData && <QuestionSwitcher lang={lang} ex={ex} />}
+        {!blocked && screen === "group" && <QuestionSwitcher lang={lang} ex={ex} />}
         {!blocked && screen === "questions" && (
           <Question t={t} lang={lang} ex={ex} answer={answer} setAnswer={setAnswer} reason={reason} setReason={setReason}
             onSubmitted={() => go("group")} onGroup={() => go("group")} />
@@ -115,7 +115,7 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
           <Group t={t} lang={lang} ex={ex} view={groupView} setView={setGroupView}
             onQuestion={() => go("questions")} onHome={() => go("home")} onProfile={() => go("profile")} />
         )}
-        {screen === "profile" && <Profile t={t} lang={lang} ex={ex} onOpen={openQuestion} />}
+        {screen === "profile" && <Profile t={t} lang={lang} ex={ex} />}
       </main>
     </div>
   );
@@ -133,29 +133,147 @@ function questionStatus(lang: Lang, q: { status: string; answered: boolean; revi
 /** Open and closed questions. Resolved ones are listed under Track record instead. */
 const liveQuestions = (ex: Expert) => ex.questions.filter((q) => q.status !== "resolved" || q.question_id === ex.data?.question.id);
 
-/** Lets the expert move between all their questions; shown on Questions and Group when there is more than one. */
-function QuestionSwitcher({ lang, ex }: { lang: Lang; ex: Expert }) {
+/** Shared selection state: the tapped/swiped question is marked at once; details follow when it has loaded. */
+function useQuestionPicker(ex: Expert) {
   const live = liveQuestions(ex);
-  if (live.length < 2) return null;
+  const shownId = ex.data?.question.id;
+  const [picked, setPicked] = useState<string | null>(null);
+  const current = picked ?? shownId;
+  useEffect(() => {
+    if (picked && picked === shownId) setPicked(null);
+  }, [picked, shownId]);
+  const pick = (id: string) => {
+    if (id === current) return;
+    setPicked(id);
+    ex.selectQuestion(id);
+  };
+  return { live, current, loading: picked !== null, pick };
+}
+
+function Dots({ ids, current, onPick, dark = false }: { ids: string[]; current: string | undefined; onPick?: (id: string) => void; dark?: boolean }) {
   return (
-    <div className="mb-5">
-      <Eyebrow>{L(lang, `Your questions (${live.length})`, `Vos questions (${live.length})`)}</Eyebrow>
-      <div className="-mx-5 mt-2 flex gap-2 overflow-x-auto px-5 pb-1" role="tablist" aria-label={L(lang, "Your questions", "Vos questions")}>
+    <div className="flex justify-center gap-1.5">
+      {ids.map((id, i) => (
+        <button key={id} onClick={() => onPick?.(id)} aria-label={`${i + 1} / ${ids.length}`}
+          className={`h-1.5 rounded-full transition-all ${id === current ? (dark ? "w-5 bg-highlight" : "w-5 bg-primary") : dark ? "w-1.5 bg-navy-foreground/40" : "w-1.5 bg-input"}`} />
+      ))}
+    </div>
+  );
+}
+
+/** Questions tab: the navy title block is itself the selector. Swipe (or use the arrows) to move between questions; everything below follows. */
+function QuestionHeaderCarousel({ lang, ex }: { lang: Lang; ex: Expert }) {
+  const { live, current, loading, pick } = useQuestionPicker(ex);
+  const d = ex.data!;
+  const railRef = useRef<HTMLDivElement>(null);
+  const settle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const slides = live.length
+    ? live
+    : [{ question_id: d.question.id, text: d.question.text, risk: { country: d.risk.country, id: d.risk.id }, status: d.question.status, answered: d.answered, revised: d.revised }];
+  const idx = Math.max(0, slides.findIndex((q) => q.question_id === current));
+  // Keep the rail on the selected slide (after a dot/arrow tap or a reload).
+  useEffect(() => {
+    const el = railRef.current;
+    if (el && el.clientWidth && Math.round(el.scrollLeft / el.clientWidth) !== idx) el.scrollTo({ left: idx * el.clientWidth, behavior: "smooth" });
+  }, [idx]);
+  // The block fits the visible question instead of the longest one.
+  const [height, setHeight] = useState<number | undefined>(undefined);
+  useEffect(() => {
+    const slide = railRef.current?.children[idx] as HTMLElement | undefined;
+    if (!slide) return;
+    const measure = () => setHeight(slide.offsetHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(slide);
+    return () => ro.disconnect();
+  }, [idx, slides.length]);
+  const onScroll = () => {
+    if (settle.current) clearTimeout(settle.current);
+    settle.current = setTimeout(() => {
+      const el = railRef.current;
+      if (!el || !el.clientWidth) return;
+      const q = slides[Math.round(el.scrollLeft / el.clientWidth)];
+      if (q) pick(q.question_id);
+    }, 140);
+  };
+  const go = (i: number) => {
+    const q = slides[Math.max(0, Math.min(slides.length - 1, i))];
+    if (q) pick(q.question_id);
+  };
+  return (
+    <div className="-mx-5 -mt-6 bg-navy pt-5 pb-4 text-navy-foreground">
+      <div ref={railRef} onScroll={onScroll} role="tablist" aria-label={L(lang, "Your questions", "Vos questions")} style={{ height }}
+        className="flex snap-x snap-mandatory items-start overflow-x-auto overflow-y-hidden transition-[height] duration-200 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {slides.map((q) => {
+          const on = q.question_id === current;
+          const level = d.question.id === q.question_id && d.risk.risk_level ? ` · ${d.risk.risk_level} risk` : "";
+          return (
+            <div key={q.question_id} role="tab" aria-selected={on} className="w-full shrink-0 snap-center px-5">
+              <p className="flex items-center justify-between gap-2 font-condensed text-xs font-bold uppercase tracking-widest">
+                <span className="truncate">{q.risk.country} · Risk {q.risk.id}{level}</span>
+                <span className="shrink-0 opacity-80">{questionStatus(lang, q)}</span>
+              </p>
+              <h1 className="mt-2 font-display text-3xl leading-tight tracking-wide">{q.text}</h1>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-4 flex items-center justify-between px-5">
+        <span className="block h-1.5 w-10 bg-foreground" />
+        {slides.length > 1 && (
+          <div className="flex items-center gap-2">
+            {loading && <Loader2 className="h-4 w-4 animate-spin opacity-80" aria-label={L(lang, "Loading", "Chargement")} />}
+            <button onClick={() => go(idx - 1)} disabled={idx === 0} aria-label={L(lang, "Previous question", "Question précédente")} className="flex h-9 w-9 items-center justify-center rounded-full border border-navy-foreground/40 disabled:opacity-30"><ChevronLeft className="h-4 w-4" /></button>
+            <Dots ids={slides.map((q) => q.question_id)} current={current} onPick={pick} dark />
+            <button onClick={() => go(idx + 1)} disabled={idx === slides.length - 1} aria-label={L(lang, "Next question", "Question suivante")} className="flex h-9 w-9 items-center justify-center rounded-full border border-navy-foreground/40 disabled:opacity-30"><ChevronRight className="h-4 w-4" /></button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Group tab: a rail of question cards. Tap a card to switch to it; tap the selected card to read the full question. */
+function QuestionSwitcher({ lang, ex }: { lang: Lang; ex: Expert }) {
+  const { live, current, loading, pick } = useQuestionPicker(ex);
+  const [expanded, setExpanded] = useState(false);
+  const railRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    setExpanded(false);
+    const el = railRef.current?.querySelector<HTMLElement>('[aria-selected="true"]');
+    el?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+  }, [current]);
+  if (!live.length) return null;
+  return (
+    <div className="-mx-5 -mt-6 mb-6 border-b bg-card pt-4 pb-3">
+      <div className="flex items-center justify-between px-5">
+        <Eyebrow>{L(lang, `Your questions (${live.length})`, `Vos questions (${live.length})`)}</Eyebrow>
+        {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-label={L(lang, "Loading", "Chargement")} />}
+      </div>
+      <div ref={railRef} className="mt-2 flex snap-x snap-mandatory scroll-px-5 items-start gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        role="tablist" aria-label={L(lang, "Your questions", "Vos questions")}>
         {live.map((q) => {
-          const on = q.question_id === ex.data?.question.id;
+          const on = q.question_id === current;
+          const open = on && expanded;
           const todo = q.status === "open" && !q.answered;
           return (
-            <button key={q.question_id} role="tab" aria-selected={on} onClick={() => ex.selectQuestion(q.question_id)}
-              className={`min-h-11 w-44 shrink-0 rounded-lg border px-3 py-2 text-left ${on ? "border-primary bg-accent" : "bg-card"}`}>
-              <span className="flex items-center justify-between gap-2 font-condensed text-xs font-bold text-navy">
-                <span className="truncate">{q.risk.country}</span>
-                <span className={todo ? "text-risk" : "text-muted-foreground"}>{questionStatus(lang, q)}</span>
+            <button key={q.question_id} role="tab" aria-selected={on} aria-expanded={on ? expanded : undefined}
+              onClick={() => (on ? setExpanded(!expanded) : pick(q.question_id))}
+              className={`flex shrink-0 snap-start flex-col justify-start rounded-lg border-2 p-3 text-left transition-colors ${live.length > 1 ? "w-[72%]" : "w-full"} ${open ? "min-h-32" : "h-32"} ${on ? "border-primary bg-accent" : "border-border bg-card"}`}>
+              <span className="flex w-full items-center justify-between gap-2 font-condensed text-xs font-bold text-navy">
+                <span className="truncate">{q.risk.country} · {q.risk.id}</span>
+                <span className={`shrink-0 ${todo ? "text-risk" : "text-muted-foreground"}`}>{questionStatus(lang, q)}</span>
               </span>
-              <span className="mt-1 line-clamp-2 block text-xs leading-snug">{q.text}</span>
+              <span className={`mt-1.5 block text-sm leading-snug ${open ? "" : "line-clamp-3"}`}>{q.text}</span>
+              <span className="mt-auto flex w-full items-center justify-between pt-1 font-condensed text-[11px] text-muted-foreground">
+                <span>{L(lang, "Outcome by", "Résultat le")} {fmtDate(lang, q.deadline)}</span>
+                {on && <span className="flex items-center gap-0.5 text-primary-strong">{open ? L(lang, "Show less", "Réduire") : L(lang, "Full question", "Question complète")}<ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden /></span>}
+              </span>
             </button>
           );
         })}
       </div>
+      {live.length > 1 && <div className="mt-2"><Dots ids={live.map((q) => q.question_id)} current={current} onPick={pick} /></div>}
     </div>
   );
 }
@@ -246,7 +364,7 @@ function hasWebGL() {
   }
 }
 
-function Home({ t, lang, ex, active, prefs, onQuestions, onGroup, onOpen }: { t: T; lang: Lang; ex: Expert; active: boolean; prefs: Prefs; onQuestions: () => void; onGroup: () => void; onOpen: (id: string, s: Screen) => void }) {
+function Home({ t, lang, ex, active, prefs, onOpen }: { t: T; lang: Lang; ex: Expert; active: boolean; prefs: Prefs; onOpen: (id: string, s: Screen) => void }) {
   const [filter, setFilter] = useState<0 | 1 | 2>(0); // all, following, my questions
   const [followError, setFollowError] = useState(false);
   // Follows live on the server (by country name) so they survive reloads and devices.
@@ -398,8 +516,6 @@ function Home({ t, lang, ex, active, prefs, onQuestions, onGroup, onOpen }: { t:
             onClose={() => setSelectedId(null)} />
         )}
       </section>
-
-      <NextContribution lang={lang} t={t} ex={ex} onQuestions={onQuestions} onGroup={onGroup} />
     </div>
   );
 }
@@ -461,27 +577,6 @@ function ContextSheet({ lang, ex, ctx, rankedLabel, question, following, followE
   );
 }
 
-function NextContribution({ lang, t, ex, onQuestions, onGroup }: { lang: Lang; t: T; ex: Expert; onQuestions: () => void; onGroup: () => void }) {
-  if (ex.state === "loading") return <Card className="h-40 animate-pulse" ><span className="sr-only">Loading</span></Card>;
-  if (ex.state === "invalid") return <InvalidLink t={t} lang={lang} />;
-  if (ex.state === "offline") return <OfflineCard lang={lang} ex={ex} />;
-  const d = ex.data;
-  if (!d) return <UpToDate lang={lang} />;
-  const closed = d.question.status !== "open";
-  const status = closed ? L(lang, "Closed", "Close") : d.revised ? L(lang, "Revised", "Révisée") : d.answered ? L(lang, "Answered", "Répondue") : L(lang, "Open", "Ouverte");
-  return (
-    <Card className="space-y-3">
-      <div className="flex items-center justify-between"><Eyebrow>{L(lang, "Your next contribution", "Votre prochaine contribution")}</Eyebrow><Badge tone={closed ? "muted" : "primary"}>{status}</Badge></div>
-      <p className="font-condensed text-sm font-bold text-navy">{d.risk.country} · Risk {d.risk.id}</p>
-      <p className="line-clamp-2 font-medium leading-snug">{d.question.text}</p>
-      <p className="font-condensed text-xs text-muted-foreground">{L(lang, "About 2 minutes", "Environ 2 minutes")} · {L(lang, "Outcome by", "Résultat le")} {fmtDate(lang, d.question.deadline)}</p>
-      {closed ? <p className="text-sm text-muted-foreground">{t.e2}</p>
-        : d.answered ? <Button className="h-14 w-full text-lg" onClick={onGroup}>{L(lang, "View group insight", "Voir l'avis du groupe")}</Button>
-          : <Button className="h-14 w-full text-lg" onClick={onQuestions}>{L(lang, "Share your view", "Donner mon avis")}</Button>}
-    </Card>
-  );
-}
-
 /* ------------------------------------------------------------------ QUESTIONS (unchanged design) */
 
 function AnswerFields({ t, lang, answer, setAnswer, reason, setReason, disabled = false, whyLabel }: { t: T; lang: Lang; answer: number; setAnswer: (n: number) => void; reason: string; setReason: (s: string) => void; disabled?: boolean; whyLabel?: string }) {
@@ -511,7 +606,6 @@ function Question(p: { t: T; lang: Lang; ex: Expert; answer: number; setAnswer: 
   const [err, setErr] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const closed = d.question.status !== "open";
-  const level = d.risk.risk_level ? `${d.risk.risk_level} risk` : "";
   const update = d.trigger_update;
   const cases = d.similar_risks.length
     ? d.similar_risks.map((s) => ({ place: s.country, code: s.risk_id, status: s.outcome, text: s.what_happened || s.title, full: s.what_happened_full || "", title: s.title, sources: s.sources ?? [], evolution: s.evolution }))
@@ -533,6 +627,7 @@ function Question(p: { t: T; lang: Lang; ex: Expert; answer: number; setAnswer: 
 
   return (
     <div className="space-y-6">
+      <QuestionHeaderCarousel lang={lang} ex={ex} />
       {d.answered && (
         <Card className="space-y-3 p-5">
           <CircleCheck className="h-6 w-6 text-primary" /><h2 className="text-lg font-bold">{t.e3}</h2><p className="text-sm text-muted-foreground">{t.e3T}</p>
@@ -542,11 +637,6 @@ function Question(p: { t: T; lang: Lang; ex: Expert; answer: number; setAnswer: 
       {closed && (
         <Card className="space-y-2 p-5"><Clock className="h-6 w-6 text-primary" /><h2 className="text-lg font-bold">{t.e2}</h2><p className="text-sm text-muted-foreground">{L(lang, "Answers are no longer being collected.", "Les réponses ne sont plus collectées.")}</p></Card>
       )}
-      <div className="-mx-5 -mt-6 bg-navy px-5 pt-5 pb-6 text-navy-foreground">
-        <p className="font-condensed text-xs font-bold uppercase tracking-widest">{d.risk.country} · Risk {d.risk.id}{level && ` · ${level}`}</p>
-        <h1 className="mt-2 font-display text-3xl leading-tight tracking-wide">{d.question.text}</h1>
-        <span className="mt-3 block h-1.5 w-10 bg-foreground" />
-      </div>
       <div>
         <p className="mt-2 font-condensed text-sm text-muted-foreground">{L(lang, "Outcome by", "Résultat le")} {fmtDate(lang, d.question.deadline)}</p>
         <button onClick={() => setOpen(!open)} aria-expanded={open} className="mt-2 flex items-center gap-1 text-sm font-medium text-primary-strong">
@@ -699,7 +789,6 @@ function Group({ t, lang, ex, view, setView, onQuestion, onHome, onProfile }: {
 
   return (
     <div className="space-y-6">
-      <GroupContext lang={lang} ex={ex} />
       <h1 className="font-display text-3xl leading-tight tracking-wide text-navy">{L(lang, "How does your view compare?", "Comment votre avis se situe-t-il ?")}</h1>
       <div className={`grid gap-3 text-center ${revisedValue ? "grid-cols-3" : "grid-cols-2"}`}>
         <StatTile label={L(lang, "Your first estimate", "Votre 1re estimation")} value={first !== null ? pct(lang, first) : "—"} />
@@ -738,21 +827,6 @@ function Group({ t, lang, ex, view, setView, onQuestion, onHome, onProfile }: {
         )}
         <Button variant="ghost" className="w-full" onClick={onQuestion}>{L(lang, "View context", "Voir le contexte")}</Button>
       </div>
-    </div>
-  );
-}
-
-function GroupContext({ lang, ex }: { lang: Lang; ex: Expert }) {
-  const d = ex.data!;
-  const [open, setOpen] = useState(false);
-  const status = d.question.status !== "open" ? L(lang, "Closed", "Close") : L(lang, "Open", "Ouverte");
-  return (
-    <div className="-mx-5 -mt-6 border-b bg-card px-5 py-4">
-      <Eyebrow>{d.risk.country} · Risk {d.risk.id} · {status}</Eyebrow>
-      <p className={`mt-1 text-sm font-medium leading-snug ${open ? "" : "line-clamp-2"}`}>{d.question.text}</p>
-      <button onClick={() => setOpen(!open)} aria-expanded={open} className="mt-1 flex items-center gap-1 text-xs font-medium text-primary-strong">
-        {open ? L(lang, "Show less", "Réduire") : L(lang, "Show full question", "Voir toute la question")}<ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
     </div>
   );
 }
@@ -844,7 +918,7 @@ function Done({ t, lang, ex, onGroup, onHome, onProfile }: { t: T; lang: Lang; e
 
 /* ------------------------------------------------------------------ PROFILE */
 
-function Profile({ t, lang, ex, onOpen }: { t: T; lang: Lang; ex: Expert; onOpen: (id: string, s: Screen) => void }) {
+function Profile({ t, lang, ex }: { t: T; lang: Lang; ex: Expert }) {
   const s = ex.settings;
   const [privacy, setPrivacy] = useState<Privacy>("nickname");
   const [saving, setSaving] = useState(false);
@@ -875,9 +949,6 @@ function Profile({ t, lang, ex, onOpen }: { t: T; lang: Lang; ex: Expert; onOpen
   const savedPrivacy: Privacy = s ? fromApiPrivacy[s.anonymity_level] : privacy;
   const name = savedPrivacy === "anonymous" ? L(lang, "Anonymous expert", "Expert anonyme") : s?.pseudonym ?? "—";
   const initials = savedPrivacy === "anonymous" ? null : (s?.pseudonym ?? "").split(" ").map((w) => w[0]).join("").slice(0, 2);
-  const tr = ex.track;
-  const rows = tr?.history ?? [];
-  const d = ex.data;
 
   const startRename = () => {
     setNick(s?.pseudonym ?? "");
@@ -957,48 +1028,6 @@ function Profile({ t, lang, ex, onOpen }: { t: T; lang: Lang; ex: Expert; onOpen
         {saved === "err" && <p className="text-sm text-risk">{L(lang, "Couldn't save. Your choices are still here — try again.", "Échec de l'enregistrement. Vos choix sont conservés — réessayez.")}</p>}
       </div>
 
-      {/* C. Contribution history: every question, so none disappears when a new one arrives */}
-      {liveQuestions(ex).length > 0 && (
-        <section className="space-y-3">
-          <Eyebrow>{L(lang, "Your contributions", "Vos contributions")}</Eyebrow>
-          {liveQuestions(ex).map((q) => (
-            <button key={q.question_id} onClick={() => onOpen(q.question_id, q.answered ? "group" : "questions")} className="w-full text-left">
-              <Card className="py-3">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="line-clamp-2 text-sm font-medium leading-snug">{q.text}</p>
-                  <Badge tone={q.answered ? "primary" : "muted"}>{questionStatus(lang, q)}</Badge>
-                </div>
-                <p className="mt-2 font-condensed text-xs text-muted-foreground">
-                  {q.risk.country} · Risk {q.risk.id} · {L(lang, "Outcome by", "Résultat le")} {fmtDate(lang, q.deadline)}
-                </p>
-              </Card>
-            </button>
-          ))}
-        </section>
-      )}
-
-      {/* D. Track record */}
-      <section>
-        <SectionLabel>{t.track}</SectionLabel>
-        <div className="grid grid-cols-2 gap-3">
-          <Card><p className="font-condensed text-sm text-muted-foreground">{t.answered}</p><p className="font-display text-5xl leading-none text-navy">{tr?.answered ?? 0}</p></Card>
-          <Card><p className="font-condensed text-sm text-muted-foreground">{L(lang, "Questions resolved", "Questions résolues")}</p><p className="font-display text-5xl leading-none text-navy">{tr?.resolved ?? 0}</p></Card>
-        </div>
-        <div className="mt-3 space-y-2">
-          {rows.map((r) => (
-            <Card key={r.question_id} className="py-3">
-              <div className="flex items-start justify-between gap-2"><p className="text-sm font-medium leading-snug">{r.question_text}</p><Badge tone="muted">{L(lang, "Practice", "Exercice")}</Badge></div>
-              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-condensed text-xs text-muted-foreground">
-                <span>{r.outcome ? t.itHappened : t.itDidnt}</span>
-              </div>
-            </Card>
-          ))}
-          {rows.length > 0 && <p className="text-xs text-muted-foreground">{L(lang, "Practice questions use real ACAPS outcomes with simulated answers.", "Les questions d'exercice utilisent des résultats ACAPS réels et des réponses simulées.")}</p>}
-        </div>
-      </section>
-
-      {/* E. How input was used */}
-      <section><SectionLabel>{t.used}</SectionLabel><Card className="border-l-4 border-l-primary text-sm">{t.usedT} <span className="text-muted-foreground">({L(lang, "simulated example", "exemple simulé")})</span></Card></section>
     </div>
   );
 }

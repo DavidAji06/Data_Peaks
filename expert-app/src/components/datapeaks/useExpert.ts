@@ -109,7 +109,13 @@ export function useExpert() {
       }
       const q = await api.getQuestion(token, id);
       setData(q);
-      setOwn(readOwn(q.question.id));
+      // The server's record wins; the browser copy only covers an older backend.
+      const o = q.own;
+      setOwn(
+        o && o.first !== null
+          ? { first: Math.round(o.first * 100), latest: o.latest === null ? null : Math.round(o.latest * 100), firstReason: o.first_reason }
+          : readOwn(q.question.id),
+      );
       if (q.answered) await loadGroup(token, id);
       else {
         setGroup(null);

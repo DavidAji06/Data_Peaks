@@ -374,8 +374,16 @@ def expert_question(token: str, question_id: str | None = None, db: Session = De
     question = db.get(Question, invite.question_id)
     risk = db.get(Risk, question.risk_id)
     alert = db.get(Alert, question.alert_id) if question.alert_id else None
+    first = get_response(db, question.id, invite.expert_id, 1)
+    revision = get_response(db, question.id, invite.expert_id, 2)
 
     return {
+        # The expert's own answers (probabilities 0-1), so they show on any device or browser
+        "own": {
+            "first": first.probability if first else None,
+            "latest": (revision or first).probability if first else None,
+            "first_reason": first.reason if first else "",
+        },
         "question": {
             "id": question.id,
             "text": question.text,
@@ -391,8 +399,8 @@ def expert_question(token: str, question_id: str | None = None, db: Session = De
         },
         "trigger_update": alert_to_dict(alert) if alert else None,
         "similar_risks": ml_outputs.similar_risks(risk.id),
-        "answered": get_response(db, question.id, invite.expert_id, 1) is not None,
-        "revised": get_response(db, question.id, invite.expert_id, 2) is not None,
+        "answered": first is not None,
+        "revised": revision is not None,
     }
 
 
