@@ -1,13 +1,11 @@
-"""Silver-standard labels from the LLM (knowledge-distillation teacher).
+"""Shared LLM labelling helpers: events, prompt building, batching, parsing, label files.
 
-    python -m ml.pipeline.silver_labels --dry-run          # sample + show first prompt, no API call
-    python -m ml.pipeline.silver_labels --n 1000           # label the stratified sample
-    python -m ml.pipeline.silver_labels --max-calls 4      # small paid test run
+Used by relabel_all (label every event), prompt_eval (gold runs) and score_text (live).
+LABELS_JSONL = data/processed/llm_labels_all.jsonl, the current LLM label for every event.
 
-Steps
-  1. Stratified sample over (subindicator, country_wide): every stratum gets at least
-     MIN_PER_STRATUM events (or all it has), the rest is allocated proportionally.
-     Saved to data/processed/silver_sample.csv so the sample is fixed across runs.
+  1. Stratified sample over (subindicator, country_wide) (`get_sample`, kept for the gold set):
+     every stratum gets at least MIN_PER_STRATUM events, the rest proportionally;
+     saved to data/processed/silver_sample.csv so the sample is fixed.
   2. Only the fields the rubric needs are sent (event_id, country, country_wide,
      adm1_name, indicator, subindicator, targeting_specific_population_groups,
      description).
@@ -15,12 +13,11 @@ Steps
      ml/prompts/silver_labels.md.
   4. The reply is parsed and validated against the schema. Events missing or invalid in
      a reply are retried in smaller batches; a batch that still fails is logged.
-  5. Valid labels are appended to data/processed/silver_labels.jsonl. Re-running skips
-     events that already have a label, so the job can be resumed safely.
+  5. Valid labels are appended to a JSONL file; re-running skips events that already
+     have a label, so jobs can be resumed safely.
 """
 from __future__ import annotations
 
-import argparse
 import json
 import math
 import re
@@ -33,7 +30,7 @@ EVENTS_CSV = ROOT / "data" / "raw" / "acaps" / "humanitarian_access_events.csv"
 PROMPT_PATH = ROOT / "ml" / "prompts" / "silver_labels.md"
 PROCESSED = ROOT / "data" / "processed"
 SAMPLE_CSV = PROCESSED / "silver_sample.csv"
-LABELS_JSONL = PROCESSED / "silver_labels.jsonl"
+LABELS_JSONL = PROCESSED / "llm_labels_all.jsonl"
 PLACEHOLDER = "{{INSERT_BATCH_OF_EVENTS_JSON_HERE}}"
 
 PROMPT_FIELDS = ["event_id", "country", "country_wide", "adm1_name", "indicator", "subindicator",
@@ -211,32 +208,3 @@ def read_labels(path: Path = LABELS_JSONL) -> pd.DataFrame:
         return pd.DataFrame(columns=["event_id"])
     rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
     return pd.DataFrame(rows).drop_duplicates("event_id", keep="last")
-
-
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--n", type=int, default=1000)
-    ap.add_argument("--max-calls", type=int, default=None)
-    ap.add_argument("--dry-run", action="store_true")
-    args = ap.parse_args()
-
-    sample = get_sample(args.n)
-    print(f"sample: {len(sample)} events, {sample['stratum'].nunique()} strata")
-    if args.dry_run:
-        prompt = build_prompt(to_prompt_records(sample.iloc[:BATCH_SIZE]))
-        n_calls = math.ceil(len(sample) / BATCH_SIZE)
-        print(prompt[-1500:])
-        print(f"\n~{len(prompt) // 4} input tokens per call, {n_calls} calls "
-              f"=> ~{len(prompt) // 4 * n_calls:,} input tokens total (estimate: chars/4)")
-        return
-
-    from ml.pipeline.greenpt import GreenPT, usage_summary
-    labels = label_events(GreenPT(), sample, LABELS_JSONL, args.max_calls)
-    print(f"silver labels: {len(labels)}  |  usage: {usage_summary()}")
-    if len(labels):
-        print(labels[["exposure_score", "intensity_score"]].apply(
-            lambda s: s.value_counts().sort_index().to_dict()).to_dict())
-
-
-if __name__ == "__main__":
-    main()

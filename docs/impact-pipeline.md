@@ -18,7 +18,8 @@ File: `data/processed/access_events_scored_v7.csv` (columns: scores, `explicit_p
 for the 3,909 events that mention deaths/killings or lost food aid (re-scored with v7),
 `llm_v5` for the other 10,938 (v7 only changes those rules, so their v5 label stands).
 Earlier labels: `llm_labels_all_before_llm_v6.jsonl` (v5), `llm_labels_all_before_llm_v7.jsonl`
-(v6), and `access_events_scored_v5.csv` / `_v6.csv`.
+(v6). The v5/v6 scored CSVs were removed from the working tree (in git history; rebuild with
+`relabel_all --export-only` on a copy of the backup labels if needed).
 
 ```
 all 14,847 events ──► GreenPT deepseek-v4.1-flash, prompt v5, thinking OFF ──► I, E
@@ -36,8 +37,21 @@ Moderate 2,185 → 1,376 · Significant 876 → 587 · Major 71 → 28. Half of 
 the same impact; where it changes v5 is more often lower (vague country-wide texts are no
 longer inflated).
 
-**New events (~230/month):** label them with the LLM (≈ $0.04/month). The LightGBM student
-is only an offline fallback (see below); it is not needed for cost.
+**New events (~230/month):** label them with the LLM (≈ $0.001 each, ≈ $0.25/month). The
+LightGBM student is only an offline fallback and second opinion (see below); it is not
+needed for cost.
+
+**Score one news item yourself** (project venv; in PowerShell keep `$` and `"` out of the text):
+
+```bash
+venv/Scripts/python.exe -m ml.pipeline.score_text --student --country "Chad" --subindicator "S6.1 - Aid workers killed" --text "..."
+venv/Scripts/python.exe -m ml.pipeline.score_text --offline --country "Chad" --text "..."   # student only, free
+venv/Scripts/python.exe -c 'from ml.pipeline.greenpt import spent_usd; print(round(spent_usd(), 2))'
+```
+
+`--student` prints the LLM score, the student's score, and flags a review when impact is
+Significant/Major or the two differ by 2+ levels. A GreenPT `HTTP 503 Service temporarily
+degraded` is an outage on their side (not billed): wait a minute and rerun.
 
 ## How the prompt was chosen
 
@@ -141,7 +155,10 @@ validation slice (5s recall 0.21 → 0.43, same QWK). `student_timesplit --no-ru
 
 Routing 20% of events to the LLM: 74% / 72% exact on the accepted rest (I / E).
 Use: offline fallback, and a second opinion — events where student and LLM differ by 2+
-levels are good candidates for expert review.
+levels are good candidates for expert review. **Saved model:** `python -m ml.pipeline.student`
+trains on all 14,765 LLM labels (gold excluded, ~30 s) and writes `ml/artifacts/student.joblib` (gitignored: run this once after cloning);
+`Student.scores()` applies the ev_bal rounding and the rule floor; `score_text --student` /
+`--offline` use it.
 
 ## v6: killing rule (2026-11-07, superseded by v7)
 
@@ -248,9 +265,9 @@ The LLM is within one level of Vlad on every intensity score and slightly conser
 largest misses: F01 small landslide (I 1 vs 2, E 1 vs 3), F06 IED killings (I 3 vs 4).
 The student systematically under-rates severe events, so it should not score the main dataset.
 
-## Student (offline fallback only)
+## Student (v5 labels; superseded by the v7 student above)
 
-`python -m ml.pipeline.student_timesplit --labels data/processed/llm_labels_all.jsonl`
+`python -m ml.pipeline.student_timesplit` (default labels: `llm_labels_all.jsonl`)
 (needs the project `venv`: lightgbm is not in system Python). Time split: oldest 80% train
 (to 2025-07-09), newest 20% test (2,955 events); every choice (model variant, routing rule,
 thresholds) tuned on the newest 20% of the training period only; gold events excluded.
@@ -288,11 +305,14 @@ GreenPT dashboard): $0.50 earlier, ~$0.20 prompt testing, ~$2.72 full relabel (5
 | `ml/pipeline/gold_labeler.py` | Local blind scoring page, saves to `gold_labels.csv` (`python -m ml.pipeline.gold_labeler`, port 8765); `--handcheck` scores `handcheck_v7.csv` (`HANDCHECK_FILE=` for another) |
 | `ml/pipeline/gold_eval.py` | LLM labels vs gold: exact, within-1, QWK, bias, disagreements |
 | `ml/pipeline/prompt_eval.py` | Run a prompt on a gold split (`--split test*` requires `--final`), `--shuffle` for noise |
-| `ml/pipeline/relabel_all.py` | Label all events with the frozen prompt, parallel, resumable, budget-capped; `--subset killings`, `--export-only` |
+| `ml/pipeline/relabel_all.py` | Label all events with the frozen prompt, parallel, resumable, budget-capped; `--subset killings` / `killings_aid`, `--tag`, `--export-only` |
 | `ml/pipeline/student_timesplit.py` | Time-split student evaluation and routing (v7 rule features + rule floor; `--no-rules` ablation) |
 | `ml/pipeline/greenpt.py` | GreenPT client: cache, usage log, thinking off, budget cap |
 | `ml/prompts/silver_labels.md` | Frozen v7 prompt (history in `ml/prompts/versions/`) |
-| `ml/pipeline/score_text.py` | Live scoring of one text, or `--csv` for a file (hand checks: `data/processed/handcheck_v6.csv`, `handcheck_v7.csv`) |
+| `ml/pipeline/score_text.py` | Live scoring of one text, or `--csv` for a file (hand checks: `data/processed/handcheck_v6.csv`, `handcheck_v7.csv`); `--student` / `--offline` |
+| `ml/pipeline/student.py` | Student features, rule features/floor, train and save `ml/artifacts/student.joblib` |
+| `ml/pipeline/silver_labels.py` | Shared helpers: events, prompt building, batching, parsing; `LABELS_JSONL` = `llm_labels_all.jsonl` |
+| `.env.example` | Settings needed in `.env` (names only) |
 
 ```bash
 GREENPT_MODEL=deepseek-v4.1-flash python -m ml.pipeline.prompt_eval ml/prompts/silver_labels.md --dry-run
@@ -300,13 +320,16 @@ GREENPT_MODEL=deepseek-v4.1-flash GREENPT_BUDGET_USD=5 python -m ml.pipeline.rel
 python -m ml.pipeline.gold_eval --labels data/processed/llm_labels_all.jsonl --split test2
 ```
 
-The old pipeline (`student.py`, `score_events.py`, `access_events_scored.csv`) is kept for
-reference; `score_events.py` does not yet use the v5 labels.
+Removed 2026-11-07 (superseded, still in git history): the old student-first pipeline
+(`score_events.py`, `access_events_scored.csv`, `student_report.json`), the v1 labels
+(`silver_labels.jsonl`, `llm_fallback_labels.jsonl`), and the v5/v6 scored CSVs. The empty
+files in `ml/pipeline` (`detect.py`, `llm.py`, …) are the team scaffold from `main` and stay.
 
 ## Open items
 
 1. Most gold labels are Claude's: a second human rater (or Vlad on the 20 `test` events
    scored by Claude) would make the evaluation stronger.
 2. Wire `access_events_scored_v7.csv` into ranking/backend; label new events with the LLM.
-3. LLM tends to be slightly conservative (bias −0.1 to −0.3): fine for ranking, note it in the pitch.
-4. `pytest` is not installed, so `ml/tests` was not run after this session's changes.
+3. Known LLM limits for the pitch: the 300-death line is sometimes missed (400 killed → 4);
+   exposure on texts without numbers can be one level off; reruns can differ by one level.
+4. Tests: `venv/Scripts/python.exe -m pytest ml/tests` (9 pass, 2026-11-07).

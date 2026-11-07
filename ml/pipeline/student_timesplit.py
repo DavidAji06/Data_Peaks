@@ -19,8 +19,9 @@ end). Inside train, the newest 20% is a validation slice used for every choice:
 Then the chosen variants are refit on all training rows and applied, with the frozen thresholds,
 to test. Report: data/processed/student_timesplit_report.json.
 
-Labels are the old-prompt LLM labels (stratified silver sample + hard-case fallback), so the
-numbers are provisional until the relabel with the chosen prompt.
+Labels: data/processed/llm_labels_all.jsonl (current LLM labels, prompt v7 / v5, see
+docs/impact-pipeline.md). The intensity model uses the v7 rule features and rule floor
+(--no-rules for the ablation).
 """
 from __future__ import annotations
 
@@ -36,8 +37,6 @@ from sklearn.metrics import confusion_matrix
 from ml.pipeline.silver_labels import LABELS_JSONL, PROCESSED, load_events, read_labels
 from ml.pipeline.student import TARGETS, Featurizer, accept, make_model, metrics, proba5, rule_floor
 
-FALLBACK_JSONL = PROCESSED / "llm_fallback_labels.jsonl"
-ALL_V5_JSONL = PROCESSED / "llm_labels_all.jsonl"  # full relabel with the frozen v5 prompt
 GOLD_CSV = PROCESSED / "gold_labels.csv"
 REPORT = PROCESSED / "student_timesplit_report.json"
 RULES = True  # v7 rule features in the intensity model (student.rule_features); --no-rules to ablate
@@ -47,7 +46,7 @@ DEFAULT_RATE = 0.2
 VARIANTS = ["clf_bal", "clf", "ev_bal", "ordinal"]
 
 
-def labelled_frame(labels_paths=(FALLBACK_JSONL, LABELS_JSONL)) -> pd.DataFrame:
+def labelled_frame(labels_paths=(LABELS_JSONL,)) -> pd.DataFrame:
     labs = pd.concat([read_labels(p) for p in labels_paths]).drop_duplicates("event_id", keep="last")
     df = load_events().merge(labs[["event_id", *TARGETS.values()]], on="event_id")
     gold = set(pd.read_csv(GOLD_CSV, dtype=str)["event_id"]) if GOLD_CSV.exists() else set()
@@ -160,7 +159,7 @@ def acc_accepted(res, frame, ok) -> float:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--labels", type=Path, nargs="*", default=None,
-                    help="label files (default: old silver + fallback)")
+                    help="label files (default: llm_labels_all.jsonl)")
     ap.add_argument("--no-rules", action="store_true",
                     help="ablation: intensity model without the v7 rule features (report *_norules.json)")
     args = ap.parse_args()
@@ -171,7 +170,7 @@ def main() -> None:
     train, test = time_split(df, TEST_FRAC)
     core, val = time_split(train, VAL_FRAC)
     rep: dict = {
-        "labels": [str(x) for x in (args.labels or [FALLBACK_JSONL, LABELS_JSONL])],
+        "labels": [str(x) for x in (args.labels or [LABELS_JSONL])],
         "n": {"labelled_non_gold": len(df), "train": len(train), "train_core": len(core),
               "validation": len(val), "test": len(test)},
         "dates": {"train": [str(train["_date"].min().date()), str(train["_date"].max().date())],

@@ -1,22 +1,23 @@
-"""Student models: TF-IDF + LightGBM trained on the LLM silver labels.
+"""Student models (offline fallback): TF-IDF + LightGBM trained on the LLM's v7 labels.
 
-    python -m ml.pipeline.student      # 80/20 evaluation, then refit on all labels and save
+    python -m ml.pipeline.student      # train on all LLM labels (gold events excluded) and save
+    python -m ml.pipeline.score_text --offline --country Chad --text "..."   # use it on one text
 
-Two classifiers, each predicting a 1-5 score:
+Evaluation lives in ml.pipeline.student_timesplit (time split, variant and routing choice).
+Two classifiers (class_weight=balanced), each predicting a 1-5 score as the rounded expected
+value of its probabilities (variant `ev_bal`, chosen on the time-split validation slice):
   intensity: TF-IDF(1-2 grams, 3000) on description + one-hot indicator & subindicator
              + INFORM Risk Vulnerability and Lack of Coping Capacity (country)
+             + v7 rule features (death count, destruction, displacement, food-aid loss, famine)
+             then the v7 rule floor: 300+ dead or famine deaths -> at least 5, 4+ dead -> at least 4
   exposure:  regex people-numbers from the description + country population
              + country_wide + number of adm1 regions + one-hot targeted groups
              + TF-IDF on description
 
-Confidence rule (per prediction): accept if max(proba) >= 0.55, or if the two most likely
-scores are adjacent (e.g. 3 and 4) and together >= 0.85. Otherwise route to the LLM.
-
-Outputs: ml/artifacts/student.joblib, data/processed/student_report.json
+Output: ml/artifacts/student.joblib
 """
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -27,17 +28,14 @@ import pandas as pd
 from lightgbm import LGBMClassifier
 from scipy import sparse
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import cohen_kappa_score, confusion_matrix
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import cohen_kappa_score
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from ml.pipeline.country_context import country_table
 from ml.pipeline.impact import band
-from ml.pipeline.silver_labels import LABELS_JSONL, load_events, read_labels
 
 ROOT = Path(__file__).resolve().parents[2]
 MODEL_PATH = ROOT / "ml" / "artifacts" / "student.joblib"
-REPORT_PATH = ROOT / "data" / "processed" / "student_report.json"
 TARGETS = {"intensity": "intensity_score", "exposure": "exposure_score"}
 ACCEPT_MAX = 0.55
 ACCEPT_ADJACENT_SUM = 0.85
@@ -258,7 +256,18 @@ class Student:
         return cls(fz, models)
 
     def predict(self, df: pd.DataFrame) -> dict[str, np.ndarray]:
+        """(n, 5) probabilities per target."""
         return {t: proba5(m, self.featurizer.transform(df, t)) for t, m in self.models.items()}
+
+    def scores(self, df: pd.DataFrame) -> dict[str, np.ndarray]:
+        """1-5 scores per target: rounded expected value (ev_bal), plus the v7 floor on intensity."""
+        out = {}
+        for t, p in self.predict(df).items():
+            pred = np.clip(np.rint(p @ np.arange(1, 6) / p.sum(1)), 1, 5).astype(int)
+            if t == "intensity":
+                pred = np.maximum(pred, rule_floor(df["description"]))
+            out[t] = pred
+        return out
 
     def save(self, path: Path = MODEL_PATH) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -266,65 +275,23 @@ class Student:
 
     @staticmethod
     def load(path: Path = MODEL_PATH) -> "Student":
+        if not path.exists():
+            raise SystemExit(f"{path} not found: train it with python -m ml.pipeline.student")
         return joblib.load(path)
 
 
-def training_frame() -> pd.DataFrame:
-    labels = read_labels(LABELS_JSONL)
-    if labels.empty:
-        raise SystemExit("no silver labels yet: run python -m ml.pipeline.silver_labels")
-    return load_events().merge(labels, on="event_id", how="inner")
-
-
-def regex_check(df: pd.DataFrame) -> dict:
-    """Regex people-number vs the LLM's explicit_pin_extracted."""
-    rx = df["description"].map(regex_pin)
-    llm = pd.to_numeric(df["explicit_pin_extracted"], errors="coerce")
-    has = llm.notna()
-    both = has & rx.notna()
-    return {
-        "llm_found_pin": int(has.sum()),
-        "regex_found_when_llm_found": round(float(rx[has].notna().mean()), 3) if has.any() else None,
-        "exact_match_when_both": round(float((rx[both] == llm[both]).mean()), 3) if both.any() else None,
-        "same_band_when_both": round(float((rx[both].map(band) == llm[both].map(band)).mean()), 3)
-        if both.any() else None,
-        "regex_found_when_llm_null": round(float(rx[~has].notna().mean()), 3) if (~has).any() else None,
-    }
-
-
 def main() -> None:
-    df = training_frame()
-    strat = df["intensity_score"] if df["intensity_score"].value_counts().min() >= 2 else None
-    train, val = train_test_split(df, test_size=0.2, random_state=SEED, stratify=strat)
-    student = Student.fit(train)
-    probs = student.predict(val)
-
-    report: dict = {"n_labels": int(len(df)), "n_train": int(len(train)), "n_val": int(len(val)),
-                    "label_distribution": {t: df[c].value_counts().sort_index().to_dict()
-                                           for t, c in TARGETS.items()},
-                    "regex_vs_llm_pin": regex_check(df)}
-    for t, col in TARGETS.items():
-        p, y = probs[t], val[col].astype(int).to_numpy()
-        pred = p.argmax(1) + 1
-        ok = accept(p)
-        report[t] = {
-            "validation": metrics(y, pred),
-            "confusion_true_x_pred": confusion_matrix(y, pred, labels=[1, 2, 3, 4, 5]).tolist(),
-            "accepted_share": round(float(ok.mean()), 3),
-            "accepted": metrics(y[ok], pred[ok]),
-            "routed_to_llm": metrics(y[~ok], pred[~ok]),
-        }
-    both_ok = accept(probs["intensity"]) & accept(probs["exposure"])
-    report["accepted_both_share"] = round(float(both_ok.mean()), 3)
-
-    Student.fit(df).save()  # production model uses every silver label
-    REPORT_PATH.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    print(json.dumps(report, indent=2))
+    from ml.pipeline.student_timesplit import labelled_frame  # all LLM labels, gold excluded
+    df = labelled_frame()
+    print(f"training on {len(df):,} LLM-labelled events (gold excluded) ...", flush=True)
+    Student.fit(df).save()
+    print(f"saved {MODEL_PATH.relative_to(ROOT)}; label distribution:",
+          {t: df[c].value_counts().sort_index().to_dict() for t, c in TARGETS.items()})
 
 
 if __name__ == "__main__":
     # run through the importable module so the pickled classes resolve to
-    # ml.pipeline.student (not __main__) when score_events loads the model
+    # ml.pipeline.student (not __main__) when the model is loaded elsewhere
     from ml.pipeline import student
 
     student.main()
