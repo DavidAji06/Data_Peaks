@@ -1,26 +1,112 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Design tokens for Ground Truth. Hana owns the design system: change values here and every screen follows.
+ * Components use the semantic names (bg-surface, text-ink, text-risk-high, …), never raw palette colours.
+ * `npm run check:contrast` checks every text/background pair below against WCAG AA.
+ * Light theme only for now: calm neutrals (slate), one accent (blue), status colours for ACAPS risk levels.
+ * Tap targets: use min-h-11 (44px) on anything tappable.
+ */
+@theme {
+  /* Neutrals */
+  --color-canvas: #f8fafc; /* page background */
+  --color-surface: #ffffff; /* cards, inputs */
+  --color-surface-muted: #f1f5f9; /* quiet panels */
+  --color-ink: #0f172a; /* main text */
+  --color-ink-muted: #475569; /* secondary text, AA on canvas, surface and surface-muted */
+  --color-line: #e2e8f0; /* decorative dividers only */
+  --color-line-strong: #64748b; /* form-control borders, at least 3:1 on surface */
+
+  /* The one accent: links, primary buttons, focus outline, the expert's own mark */
+  --color-accent: #1d4ed8;
+  --color-accent-hover: #1e40af;
+  --color-accent-soft: #eff6ff;
+  --color-on-accent: #ffffff;
+
+  /* ACAPS's probability band, shaded on the 0–100 axis (always labelled too) */
+  --color-band: #dbeafe;
+
+  /* Risk levels: text on the -soft background; -solid for bars and marks. Never colour alone: pair with a label. */
+  --color-risk-low: #166534;
+  --color-risk-low-soft: #f0fdf4;
+  --color-risk-low-solid: #15803d;
+  --color-risk-medium: #92400e;
+  --color-risk-medium-soft: #fffbeb;
+  --color-risk-medium-solid: #b45309;
+  --color-risk-high: #991b1b;
+  --color-risk-high-soft: #fef2f2;
+  --color-risk-high-solid: #b91c1c;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    background: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/*
+ * Probability slider: a 44px-tall touch target with our own track, so nothing is filled until the expert
+ * sets a value (no visual anchor at 50). --fill is set inline to the chosen percent.
+ */
+.probability-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2.75rem;
+  background: transparent;
+  cursor: pointer;
+  --track: linear-gradient(to right, var(--color-accent) var(--fill, 0%), var(--color-line) var(--fill, 0%));
+}
+.probability-range.is-unset {
+  --track: var(--color-line);
+}
+.probability-range::-webkit-slider-runnable-track {
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--track);
+  box-shadow: inset 0 0 0 1px var(--color-line-strong);
+}
+.probability-range::-moz-range-track {
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--track);
+  box-shadow: inset 0 0 0 1px var(--color-line-strong);
+}
+.probability-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: -0.625rem;
+  border-radius: 9999px;
+  border: 3px solid var(--color-surface);
+  background: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+.probability-range::-moz-range-thumb {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  border: 3px solid var(--color-surface);
+  background: var(--color-accent);
+}
+.probability-range.is-unset::-webkit-slider-thumb {
+  opacity: 0;
+}
+.probability-range.is-unset::-moz-range-thumb {
+  opacity: 0;
 }

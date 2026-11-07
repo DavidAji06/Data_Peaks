@@ -1,0 +1,489 @@
+{
+  "_meta": {
+    "source": "ACAPS Risk Radar export (data/risk-radar-export.csv), used under ACAPS terms of use",
+    "generatedBy": "scripts/extract-risk-radar.mjs",
+    "synthetic": "partly",
+    "note": "Real risk IDs, titles, ratings and outcome text. similarity, priority_score, score_breakdown and p_materialise are placeholders until the ML pipeline lands. Ranked placeholder formula: mid = {very_low:0.05, low:0.2, medium:0.5, high:0.78, very_high:0.95}[probability]; impact = Impact/5; uncertainty = round2(1 - abs(mid - 0.5) * 2); review_age = round2(min(1, days(last review to 2026-11-06) / 90)); signal_strength = 0.82 for R1043, 0.55 for R1066, else 0.2; priority_score = round2(0.4*signal + 0.2*uncertainty + 0.25*impact + 0.15*review_age); p_materialise = mid. risk_level, acaps_probability and last_reviewed are curated extras the API's ranked items don't have yet."
+  },
+  "similar_risks": {
+    "R1043": [
+      {
+        "risk_id": "R0248",
+        "title": "Camps and basic services in East Darfur state are stretched beyond capacity following the influx of up to 100,000 South Sudanese refugees by June 2016",
+        "country": "Sudan",
+        "similarity": 0.81,
+        "outcome": "Materialised",
+        "what_happened": "The refugee population in East Darfur state had dramatically increased by 2016, with numbers rising from 164 individuals in December 2015 to over 47,000 by June.",
+        "acaps_probability": "High"
+      },
+      {
+        "risk_id": "R0998",
+        "title": "Intensifying humanitarian and security crisis in Kenya worsens conditions in refugee camps",
+        "country": "Kenya",
+        "similarity": 0.74,
+        "outcome": "Materialised",
+        "what_happened": "Kenya’s humanitarian and security situation deteriorates, particularly in refugee-hosting areas such as Garissa and Turkana counties.",
+        "acaps_probability": "High"
+      },
+      {
+        "risk_id": "R1002",
+        "title": "A prolonged Syria–Lebanon border conflict results in displacement and increases shelter and livelihood needs",
+        "country": "Syria",
+        "similarity": 0.69,
+        "outcome": "Not materialised",
+        "what_happened": "The risk improved slightly in April 2026 after tensions rose in March with an escalation between Hezbollah and Israel.",
+        "acaps_probability": "Medium"
+      }
+    ]
+  },
+  "ranked_risks": [
+    {
+      "risk_id": "R1043",
+      "title": "Escalating cross-border insecurity linked to the Sudan conflict increases protection risks and humanitarian needs in eastern Chad",
+      "country": "Chad",
+      "p_materialise": 0.78,
+      "priority_score": 0.68,
+      "score_breakdown": {
+        "signal_strength": 0.82,
+        "uncertainty": 0.44,
+        "impact": 0.8,
+        "review_age": 0.41
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-09-30"
+    },
+    {
+      "risk_id": "R1065",
+      "title": "Renewed cross-border strikes collapse the 2022 Houthi–Saudi truce, driving new displacement, disrupting imports, and reducing humanitarian access across Yemen",
+      "country": "Yemen",
+      "p_materialise": 0.5,
+      "priority_score": 0.68,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 1,
+        "impact": 1,
+        "review_age": 1
+      },
+      "risk_level": "Medium",
+      "acaps_probability": "Medium",
+      "last_reviewed": "2026-08-05"
+    },
+    {
+      "risk_id": "R1049",
+      "title": "RSF restoration of siege on Al Obeid, North Kordofan drives widescale displacement towards White Nile state",
+      "country": "Sudan",
+      "p_materialise": 0.5,
+      "priority_score": 0.62,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 1,
+        "impact": 1,
+        "review_age": 0.6
+      },
+      "risk_level": "Medium",
+      "acaps_probability": "Medium",
+      "last_reviewed": "2026-09-13"
+    },
+    {
+      "risk_id": "R1051",
+      "title": "Interregional trade restrictions disrupt markets and deepen food insecurity in West Kordofan",
+      "country": "Sudan",
+      "p_materialise": 0.5,
+      "priority_score": 0.62,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 1,
+        "impact": 1,
+        "review_age": 0.6
+      },
+      "risk_level": "Medium",
+      "acaps_probability": "Medium",
+      "last_reviewed": "2026-09-13"
+    },
+    {
+      "risk_id": "R1055",
+      "title": "Mass returns from eastern Chad exacerbate humanitarian needs in West Darfur State",
+      "country": "Sudan",
+      "p_materialise": 0.5,
+      "priority_score": 0.58,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 1,
+        "impact": 0.6,
+        "review_age": 1
+      },
+      "risk_level": "Medium",
+      "acaps_probability": "Medium",
+      "last_reviewed": "2026-08-03"
+    },
+    {
+      "risk_id": "R1052",
+      "title": "A rift between SAF and allied groups in Khartoum leads to worsening humanitarian conditions and protection concerns",
+      "country": "Sudan",
+      "p_materialise": 0.2,
+      "priority_score": 0.56,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.4,
+        "impact": 1,
+        "review_age": 1
+      },
+      "risk_level": "Medium",
+      "acaps_probability": "Low",
+      "last_reviewed": "2026-08-03"
+    },
+    {
+      "risk_id": "R1046",
+      "title": "El Niño drives drought conditions, increasing food insecurity and heightening humanitarian needs in Madagascar in 2027",
+      "country": "Madagascar",
+      "p_materialise": 0.5,
+      "priority_score": 0.53,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 1,
+        "impact": 0.8,
+        "review_age": 0.36
+      },
+      "risk_level": "Medium",
+      "acaps_probability": "Medium",
+      "last_reviewed": "2026-10-05"
+    },
+    {
+      "risk_id": "R1047",
+      "title": "El Niño-induced dry conditions in southern and central Mozambique and floods in the northern provinces increase humanitarian needs in 2026 and early 2027",
+      "country": "Mozambique",
+      "p_materialise": 0.5,
+      "priority_score": 0.53,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 1,
+        "impact": 0.8,
+        "review_age": 0.36
+      },
+      "risk_level": "Medium",
+      "acaps_probability": "Medium",
+      "last_reviewed": "2026-10-05"
+    },
+    {
+      "risk_id": "R1074",
+      "title": "Post-mutiny divisions in Niger's army enable JNIM and ISSP expansion across Tillabéri, Tahoua, and Dosso, driving displacement and restricting humanitarian access",
+      "country": "Niger",
+      "p_materialise": 0.5,
+      "priority_score": 0.53,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 1,
+        "impact": 0.8,
+        "review_age": 0.33
+      },
+      "risk_level": "Medium",
+      "acaps_probability": "Medium",
+      "last_reviewed": "2026-10-07"
+    },
+    {
+      "risk_id": "R1053",
+      "title": "Long-range RSF drones targeting the eastern supply corridor and Port Sudan disrupt trade and aid delivery in Red Sea state",
+      "country": "Sudan",
+      "p_materialise": 0.5,
+      "priority_score": 0.52,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 1,
+        "impact": 0.6,
+        "review_age": 0.6
+      },
+      "risk_level": "Medium",
+      "acaps_probability": "Medium",
+      "last_reviewed": "2026-09-13"
+    },
+    {
+      "risk_id": "R1066",
+      "title": "Escalating insecurity across the Lake Chad Basin increases displacement, protection risks, and humanitarian access constraints",
+      "country": "Chad, Niger, Cameroon, Nigeria",
+      "p_materialise": 0.95,
+      "priority_score": 0.5,
+      "score_breakdown": {
+        "signal_strength": 0.55,
+        "uncertainty": 0.1,
+        "impact": 0.8,
+        "review_age": 0.41
+      },
+      "risk_level": "High",
+      "acaps_probability": "Very High",
+      "last_reviewed": "2026-09-30"
+    },
+    {
+      "risk_id": "R1054",
+      "title": "RSF drone attacks damage the Merowe Dam and power grid in Northern state, disrupting health, food security, and public services",
+      "country": "Sudan",
+      "p_materialise": 0.2,
+      "priority_score": 0.5,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.4,
+        "impact": 1,
+        "review_age": 0.6
+      },
+      "risk_level": "Medium",
+      "acaps_probability": "Low",
+      "last_reviewed": "2026-09-13"
+    },
+    {
+      "risk_id": "R1059",
+      "title": "Peace talk end and military offensive against armed groups in Colombia escalate conflict and increase civilian casualties and displacement",
+      "country": "Colombia",
+      "p_materialise": 0.78,
+      "priority_score": 0.48,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.8,
+        "review_age": 0.72
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-09-02"
+    },
+    {
+      "risk_id": "R1061",
+      "title": "Permanent military exclusion zone east of the Yellow Line before the Israeli elections increases displacement and humanitarian access constraints",
+      "country": "Palestine",
+      "p_materialise": 0.78,
+      "priority_score": 0.47,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.8,
+        "review_age": 0.7
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-09-04"
+    },
+    {
+      "risk_id": "R1048",
+      "title": "RSF expansion in Blue Nile state triggers displacement and protection risks",
+      "country": "Sudan",
+      "p_materialise": 0.78,
+      "priority_score": 0.46,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.8,
+        "review_age": 0.6
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-09-13"
+    },
+    {
+      "risk_id": "R1045",
+      "title": "Forecast below-average Kiremt rains in Ethiopia threaten food production and livelihoods",
+      "country": "Ethiopia",
+      "p_materialise": 0.78,
+      "priority_score": 0.43,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.8,
+        "review_age": 0.42
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-09-29"
+    },
+    {
+      "risk_id": "R1071",
+      "title": "Intensifying forest and peatland fires across Indonesia cause prolonged hazardous haze, health impacts, and education, transport, and livelihood disruptions",
+      "country": "Indonesia",
+      "p_materialise": 0.78,
+      "priority_score": 0.43,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.8,
+        "review_age": 0.41
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-09-30"
+    },
+    {
+      "risk_id": "R1042",
+      "title": "Continued coordinated JNIM–FLA attacks and blockades increase protection risks, displacement, and humanitarian access constraints in Mali",
+      "country": "Mali",
+      "p_materialise": 0.78,
+      "priority_score": 0.43,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.8,
+        "review_age": 0.41
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-09-30"
+    },
+    {
+      "risk_id": "R1072",
+      "title": "Sustained military pressure in Cabo Delgado drives Islamic State Mozambique attacks on less-exposed communities in Niassa and northern Nampula, causing localised displacement, abductions, and livelihood loss",
+      "country": "Mozambique",
+      "p_materialise": 0.78,
+      "priority_score": 0.43,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.8,
+        "review_age": 0.39
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-10-02"
+    },
+    {
+      "risk_id": "R1038",
+      "title": "Escalation of inter-group conflict between Jama’at Nusrat al-Islam wal-Muslimin and Islamic State Sahel Province in western Niger leads to increased violence against civilians and displacement",
+      "country": "Niger",
+      "p_materialise": 0.78,
+      "priority_score": 0.43,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.8,
+        "review_age": 0.41
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-09-30"
+    },
+    {
+      "risk_id": "R1073",
+      "title": "Accelerated implementation of the E1 settlement plan results in demolitions, displacement of Bedouin communities, and access constraints",
+      "country": "Palestine",
+      "p_materialise": 0.78,
+      "priority_score": 0.43,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.8,
+        "review_age": 0.39
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-10-02"
+    },
+    {
+      "risk_id": "R1037",
+      "title": "Escalating violence between the Sudan People's Liberation Movement and the Sudan People's Liberation Movement-in-Opposition reignites civil war, driving mass displacement and service collapse",
+      "country": "South Sudan",
+      "p_materialise": 0.78,
+      "priority_score": 0.43,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.8,
+        "review_age": 0.42
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-09-29"
+    },
+    {
+      "risk_id": "R1067",
+      "title": "Escalating clashes between Interim Taliban Authority forces and armed opposition groups in Badakhshan deteriorates food security and increases protection risks",
+      "country": "Afghanistan",
+      "p_materialise": 0.78,
+      "priority_score": 0.42,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.8,
+        "review_age": 0.34
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-10-06"
+    },
+    {
+      "risk_id": "R1068",
+      "title": "Renewed violence in As Sweida or settler outpost establishment drives Israeli expansion in southern Syria, displacing civilians and restricting access",
+      "country": "Syria",
+      "p_materialise": 0.2,
+      "priority_score": 0.41,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.4,
+        "impact": 0.8,
+        "review_age": 0.36
+      },
+      "risk_level": "Medium",
+      "acaps_probability": "Low",
+      "last_reviewed": "2026-10-05"
+    },
+    {
+      "risk_id": "R1058",
+      "title": "El Niño-driven agricultural losses and water shortages in the Philippines increase food security, WASH, and health needs",
+      "country": "Philippines",
+      "p_materialise": 0.78,
+      "priority_score": 0.38,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.6,
+        "review_age": 0.41
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-09-30"
+    },
+    {
+      "risk_id": "R1069",
+      "title": "Military operations to secure the Dawei Special Economic Zone cause further forced displacement and severe protection risks in Dawei district, Tanintharyi region",
+      "country": "Myanmar",
+      "p_materialise": 0.78,
+      "priority_score": 0.37,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.6,
+        "review_age": 0.36
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-10-05"
+    },
+    {
+      "risk_id": "R1062",
+      "title": "Continued attacks between Pakistan and Afghanistan increase protection risks, food security needs, and access constraints in Afghanistan’s border provinces",
+      "country": "Afghanistan",
+      "p_materialise": 0.95,
+      "priority_score": 0.35,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.1,
+        "impact": 0.8,
+        "review_age": 0.33
+      },
+      "risk_level": "High",
+      "acaps_probability": "Very High",
+      "last_reviewed": "2026-10-07"
+    },
+    {
+      "risk_id": "R1044",
+      "title": "Forecast El Niño conditions threaten crop production and worsen food insecurity in Kenya",
+      "country": "Kenya",
+      "p_materialise": 0.78,
+      "priority_score": 0.33,
+      "score_breakdown": {
+        "signal_strength": 0.2,
+        "uncertainty": 0.44,
+        "impact": 0.4,
+        "review_age": 0.42
+      },
+      "risk_level": "High",
+      "acaps_probability": "High",
+      "last_reviewed": "2026-09-29"
+    }
+  ]
+}
