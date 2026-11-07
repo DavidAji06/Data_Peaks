@@ -1,0 +1,35 @@
+subindicator_code,subindicator_name,min_typical_intensity,typical_intensity,max_typical_intensity,rationale
+S1.1,Public statements denying the needs of people in need,1,1,2,Political rhetoric; causes minor accessibility issues at worst unless linked to physical denial.
+S1.2,Discrepancies between humanitarian needs and public statements,1,1,2,Administrative/rhetorical issue. Needs are met with coping strategies.
+S1.3,The denial of the entitlement to assistance to certain groups or areas,2,3,4,Can cause severe shortages (3) or potentially life-threatening conditions (4) depending on the group's vulnerability.
+S2.1,"Physical obstruction to service access (e.g. besieged areas, travel restrictions)",2,3,4,Sieges and physical blockades often cause high suffering (3) and severe food gaps (4).
+S2.2,Bureaucratic and administrative requirements to access assistance (e.g. requirement of specific documents for service access),1,2,2,Delays and administrative hurdles cause some localized shortages (2) but are rarely life-threatening.
+S2.3,The forced displacement of people in need away from services,3,3,4,"Forced displacement inherently causes severe distress, infrastructure loss, and life-threatening risks (3-4)."
+S3.1,"Complex, costly, and time-consuming registration processes",1,1,2,Bureaucratic friction; manageable with coping strategies.
+S3.2,The denial or random assignment of the registration of organisations,1,2,3,"Limits available aid, causing availability/accessibility problems (2-3)."
+S3.3,Constraints on the import of relief items and equipment and staff visas and permits,1,2,3,"Slows down aid delivery causing some shortages (2), potentially moderate gaps (3)."
+S3.4,Aid organisations systematically not being allowed to operate,2,3,4,Systematic denial of aid agencies causes high suffering/significant gaps (3-4).
+S4.1,Country not entirely controlled by the same authority,1,2,2,"Creates coordination friction and localized access issues, but is a baseline context rather than a direct acute shock."
+S4.2,"Administrative impediments (e.g. taxes, fines, quotas) on the passage of goods or people to reach people in need",1,2,2,Bureaucratic interference that reduces aid efficiency (1-2).
+S4.3,Checkpoints towards or in the affected areas,1,2,3,"Checkpoints cause harassment/delays (2), sometimes completely blocking critical access (3)."
+S4.4,The closure of crossings to the affected areas,2,3,4,"Border/crossing closures halt transit flows, leading to significant shortages (3) or severe gaps over time (4)."
+S4.5,Organisations being put on hold despite being ready,1,2,3,"Delays in response (2), rarely life-threatening unless responding to an acute sudden-onset disaster (3)."
+S5.1,Authorities or other groups imposing conditions on aid delivery,1,2,3,"Compromises aid independence, leading to targeted/localized shortages (2)."
+S5.2,Politics and humanitarian issues overlapping in the country,1,2,2,Chronic issue causing localized friction; generally manageable (1-2).
+S5.3,Aid diversion or confiscation,2,3,3,Direct theft of basic services causes shortages and significant gaps for the intended beneficiaries (3).
+S6.1,Aid workers killed,4,4,5,Direct mortality present (4). Excess widespread mortality/massacres push to extreme (5).
+S6.2,Aid workers kidnapped,3,3,4,Severe physical/mental harm and temporary cessation of life-saving services (3-4).
+S6.3,Aid workers injured,3,3,4,Physical harm and targeted violence against personnel (3-4).
+S6.4,Aid workers assaulted,2,3,3,Localized incidents of violence/harassment (2) resulting in potential loss of dignity and physical harm (3).
+S6.5,Aid workers arrested,2,3,3,Administrative/physical detention causing targeted localized violence (2) and disruption of services (3).
+S6.6,Aid-related premises looted,2,3,4,"Loss of assets and basic goods, disrupting service delivery (3), severe if it targets critical medical/food stores (4)."
+S7.1,Violence inhibiting the affected population from moving freely and safely to where humanitarian assistance is available,2,3,4,"General violence causes localized shortages (2), but can trap populations resulting in potentially life-threatening conditions (3-4)."
+S7.2,"Targeting or attack of public services, such as hospitals, schools, and other civilian facilities",3,4,4,Destruction of health/WASH infrastructure directly causes irreversible health damage and life-threatening conditions (4).
+S7.3,Violence leading to the relocation of humanitarian staff and/or the temporary or permanent suspension of humanitarian activities,3,3,4,Suspension of operations causes immediate significant gaps (3) and severe conditions if unassisted for long periods (4).
+S8.1,Confirmed contamination (km2),2,3,4,"Confirmed UXO/IEDs limit movement and agricultural access, causing high suffering (3)."
+S8.2,Suspected contamination (km2),1,2,3,"Psychological barrier/localized constraints, often manageable but stressful (2)."
+S8.3,Casualties,4,4,5,IED/landmine casualties denote heightened mortality/irreversible harm (4-5).
+S9.1,"Rainy season (e.g. snow, monsoon, seasonal impediments)",1,2,3,"Seasonal weather impediments typically create temporary logistical bottlenecks and localized delays (1-2), escalating to 3 when severe flooding/blizzards cut off vulnerable groups."
+S9.2,Severe infrastructure disruption,3,3,4,Lack of potable water/roads causes potentially life-threatening conditions if unassisted (3-4).
+S9.3,"logistical constraints on consumable goods (e.g. fuel scarcity, internet cut-offs)",2,2,3,"Causes some shortages and availability problems, but generally not life-threatening (2)."
+S9.4,"logistical constraints on infrastructure (e.g. remote locations of those in need, travel difficulties)",1,2,2,Chronic logistical hurdles cause some shortages (2) but are usually met with standard coping strategies.
