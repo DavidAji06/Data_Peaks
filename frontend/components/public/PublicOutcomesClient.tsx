@@ -11,7 +11,14 @@ const p = s.public;
 
 export function PublicOutcomesClient({ initialItems }: { initialItems: PublicOutcome[] }) {
   const [items, setItems] = useState(initialItems);
-  const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Initialize timestamp after mount (hydration safety)
+  useEffect(() => {
+    setLastRefresh(new Date());
+    setMounted(true);
+  }, []);
 
   // Auto-refresh every 60 seconds
   useEffect(() => {
@@ -58,7 +65,9 @@ export function PublicOutcomesClient({ initialItems }: { initialItems: PublicOut
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-xs text-ink-500">Last refreshed: {lastRefresh.toLocaleTimeString()}</p>
+      {mounted && lastRefresh && (
+        <p className="mt-3 text-xs text-ink-500">Last refreshed: {lastRefresh.toLocaleTimeString()}</p>
+      )}
     </>
   );
 }
