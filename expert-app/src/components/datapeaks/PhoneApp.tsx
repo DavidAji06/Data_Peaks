@@ -1,15 +1,15 @@
 import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ChevronDown, ChevronLeft, ChevronRight, Check, Lock, EyeOff, UserRound, Newspaper, Link2Off, Clock, CircleCheck,
-  WifiOff, Loader2, House, FileQuestion, Users, Search, List, Globe2, RotateCcw, X, MapPin,
+  WifiOff, Loader2, House, FileQuestion, Users, Search, List, Globe2, RotateCcw, X, MapPin, Pencil,
 } from "lucide-react";
 import { dict, pct } from "./i18n";
 import campImg from "@/assets/camp_sahel.jpg";
 import convoyImg from "@/assets/convoy_chad.jpg";
-import { Badge, Button, Card, LangToggle, SectionLabel, Wordmark, beatsGuessing, type Lang } from "./shared";
+import { Badge, Button, Card, LangToggle, SectionLabel, Wordmark, type Lang } from "./shared";
 import { useExpert, type Expert } from "./useExpert";
 import { useContexts, type ConflictContext } from "./contexts";
-import type { AnonymityLevel, ApiSimilarRisk } from "@/lib/api";
+import { ApiError, type AnonymityLevel, type ApiSimilarRisk } from "@/lib/api";
 
 const Globe = lazy(() => import("./Globe"));
 
@@ -395,7 +395,7 @@ function ContextSheet({ lang, ex, ctx, rankedLabel, assigned, following, onFollo
         <div className="mt-3 rounded border-l-4 border-primary bg-accent p-3 text-sm">
           <p className="font-bold">{L(lang, "What's changed", "Ce qui a changé")}</p>
           <p className="line-clamp-2">{update.report.title}</p>
-          <p className="mt-1 font-condensed text-xs text-muted-foreground">{L(lang, `Related reporting in ${ctx.name.en}`, `Informations liées en ${ctx.name.fr}`)}{update.report.published_at ? ` · ${fmtDate(lang, update.report.published_at)}` : ""}</p>
+          <p className="mt-1 font-condensed text-xs text-muted-foreground">{update.region_match && update.matched_place ? L(lang, `Reporting near ${update.matched_place} (place-name match)`, `Informations près de ${update.matched_place} (correspondance de lieu)`) : L(lang, `Related reporting in ${ctx.name.en}`, `Informations liées en ${ctx.name.fr}`)}{update.report.published_at ? ` · ${fmtDate(lang, update.report.published_at)}` : ""}</p>
         </div>
       )}
       <div className="mt-4 space-y-2">
@@ -513,7 +513,7 @@ function Question(p: { t: T; lang: Lang; ex: Expert; answer: number; setAnswer: 
             <p className="font-medium leading-snug">{update ? update.report.title : t.news}</p>
             <p className="mt-1 font-condensed text-xs text-muted-foreground">
               {update
-                ? [L(lang, `Related reporting in ${d.risk.country}`, `Informations liées : ${d.risk.country}`), update.report.source, fmtDate(lang, update.report.published_at)].filter(Boolean).join(" · ")
+                ? [update.region_match && update.matched_place ? L(lang, `Reporting near ${update.matched_place} (place-name match)`, `Informations près de ${update.matched_place} (correspondance de lieu)`) : L(lang, `Related reporting in ${d.risk.country}`, `Informations liées : ${d.risk.country}`), update.report.source, fmtDate(lang, update.report.published_at)].filter(Boolean).join(" · ")
                 : t.newsMeta}
             </p>
             {update?.report.url && <a href={update.report.url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-primary-strong underline">Source</a>}
@@ -804,6 +804,9 @@ function Profile({ t, lang, ex, prefs, setPrefs, onOpen }: { t: T; lang: Lang; e
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<"idle" | "ok" | "err">("idle");
   const [whoSees, setWhoSees] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nick, setNick] = useState("");
+  const [nickError, setNickError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!s) return;
@@ -839,23 +842,63 @@ function Profile({ t, lang, ex, prefs, setPrefs, onOpen }: { t: T; lang: Lang; e
   const initials = savedPrivacy === "anonymous" ? null : (s?.pseudonym ?? "").split(" ").map((w) => w[0]).join("").slice(0, 2);
   const tr = ex.track;
   const rows = tr?.history ?? [];
-  const avg = tr?.mean_brier ?? null;
-  const label = (x: number) => (beatsGuessing(x) ? t.better : t.notBetter);
   const d = ex.data;
+
+  const startRename = () => {
+    setNick(s?.pseudonym ?? "");
+    setNickError(null);
+    setEditingName(true);
+  };
+  const saveName = async () => {
+    setNickError(null);
+    try {
+      await ex.saveSettings({ pseudonym: nick.trim() });
+      setEditingName(false);
+    } catch (e) {
+      setNickError(e instanceof ApiError && e.status !== 0 ? e.message : L(lang, "Couldn't save. Try again.", "Échec de l'enregistrement. Réessayez."));
+    }
+  };
 
   if (ex.state === "invalid") return <InvalidLink t={t} lang={lang} />;
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-navy font-display text-2xl text-navy-foreground">
-          {initials ? initials : <UserRound className="h-8 w-8" />}
+      <div className="space-y-2">
+        <div className="flex items-center gap-4">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-navy font-display text-2xl text-navy-foreground">
+            {initials ? initials : <UserRound className="h-8 w-8" />}
+          </div>
+          <div className="min-w-0 flex-1">
+            {editingName ? (
+              <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); void saveName(); }}>
+                <input value={nick} onChange={(e) => setNick(e.target.value)} maxLength={30} autoFocus
+                  aria-label={L(lang, "Nickname", "Pseudonyme")} className="h-11 min-w-0 flex-1 rounded-md border bg-card px-3" />
+                <Button variant="navy" className="h-11 px-3">{L(lang, "Save", "Enregistrer")}</Button>
+              </form>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h1 className="font-display text-4xl leading-none text-navy">{name}</h1>
+                {savedPrivacy !== "anonymous" && s && (
+                  <button onClick={startRename} aria-label={L(lang, "Edit nickname", "Modifier le pseudonyme")} className="flex h-11 w-11 items-center justify-center rounded-full text-primary-strong hover:bg-accent">
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            )}
+            <p className="font-condensed text-sm text-muted-foreground">{L(lang, "Expert panel", "Panel d'experts")}{s?.country ? ` · ${s.country}` : ""}</p>
+          </div>
         </div>
-        <div>
-          <h1 className="font-display text-4xl leading-none text-navy">{name}</h1>
-          <p className="font-condensed text-sm text-muted-foreground">{L(lang, "Expert panel", "Panel d'experts")}{s?.country ? ` · ${s.country}` : ""}</p>
-        </div>
+        {editingName && (
+          <div className="space-y-1">
+            {nickError && <p className="text-sm text-risk" role="alert">{nickError}</p>}
+            <p className="text-xs text-muted-foreground">{L(lang, "3–30 characters: letters, numbers, spaces, - and _.", "3 à 30 caractères : lettres, chiffres, espaces, - et _.")}</p>
+            <button onClick={() => setEditingName(false)} className="text-sm font-medium text-primary-strong">{L(lang, "Cancel", "Annuler")}</button>
+          </div>
+        )}
+        {savedPrivacy !== "anonymous" && (
+          <p className="text-xs text-muted-foreground">{L(lang, "Other experts never see your nickname. ACAPS moderators see it unless you choose Fully anonymous.", "Les autres experts ne voient jamais votre pseudonyme. Les modérateurs ACAPS le voient, sauf si vous choisissez Entièrement anonyme.")}</p>
+        )}
       </div>
 
       {/* A. Participation */}
@@ -918,22 +961,19 @@ function Profile({ t, lang, ex, prefs, setPrefs, onOpen }: { t: T; lang: Lang; e
       <section>
         <SectionLabel>{t.track}</SectionLabel>
         <div className="grid grid-cols-2 gap-3">
+          <Card><p className="font-condensed text-sm text-muted-foreground">{t.answered}</p><p className="font-display text-5xl leading-none text-navy">{tr?.answered ?? 0}</p></Card>
           <Card><p className="font-condensed text-sm text-muted-foreground">{L(lang, "Questions resolved", "Questions résolues")}</p><p className="font-display text-5xl leading-none text-navy">{tr?.resolved ?? 0}</p></Card>
-          <Card><p className="font-condensed text-sm text-muted-foreground">{L(lang, "Average score (Brier)", "Score moyen (Brier)")}</p><p className="font-display text-5xl leading-none text-navy">{avg !== null ? avg.toFixed(2) : "—"}</p>{avg !== null && <p className={`font-condensed text-xs font-bold ${beatsGuessing(avg) ? "text-success" : "text-muted-foreground"}`}>{label(avg)}</p>}</Card>
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">{t.scoreHelp}</p>
-        {(tr?.resolved ?? 0) < 3 && <p className="mt-1 text-xs text-muted-foreground">{L(lang, "Your score becomes meaningful after a few resolved questions.", "Votre score devient significatif après quelques questions résolues.")}</p>}
         <div className="mt-3 space-y-2">
           {rows.map((r) => (
             <Card key={r.question_id} className="py-3">
               <div className="flex items-start justify-between gap-2"><p className="text-sm font-medium leading-snug">{r.question_text}</p><Badge tone="muted">{L(lang, "Practice", "Exercice")}</Badge></div>
               <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-condensed text-xs text-muted-foreground">
-                <span>{t.youSaid}: {pct(lang, to100(r.probability))}</span><span>· {r.outcome ? t.itHappened : t.itDidnt}</span>
-                <span className={beatsGuessing(r.brier) ? "font-bold text-success" : ""}>· {t.score} {r.brier.toFixed(2)} — {label(r.brier)}</span>
+                <span>{r.outcome ? t.itHappened : t.itDidnt}</span>
               </div>
             </Card>
           ))}
-          {rows.length > 0 && <p className="text-xs text-muted-foreground">{L(lang, "Practice scores use real ACAPS outcomes with simulated answers.", "Les scores d'exercice utilisent des résultats ACAPS réels et des réponses simulées.")}</p>}
+          {rows.length > 0 && <p className="text-xs text-muted-foreground">{L(lang, "Practice questions use real ACAPS outcomes with simulated answers.", "Les questions d'exercice utilisent des résultats ACAPS réels et des réponses simulées.")}</p>}
         </div>
       </section>
 

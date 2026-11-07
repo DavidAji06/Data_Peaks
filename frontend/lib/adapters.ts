@@ -55,8 +55,19 @@ export const toAlert = (a: ApiAlert): Alert => ({
   strength: a.strength,
   strengthWord: strengthWord(a.strength),
   evidence: a.evidence,
+  country: a.country ?? null,
+  impactScore: a.impact_score ?? null,
+  intensityScore: a.intensity_score ?? null,
+  exposureScore: a.exposure_score ?? null,
+  description: a.description ?? null,
+  regionMatch: a.region_match === true,
+  matchedPlace: a.matched_place ?? null,
   status: a.status,
 });
+
+/** Moderator queue order: highest impact first, then newest. */
+export const byImpactThenDate = (x: Alert, y: Alert) =>
+  (y.impactScore ?? 0) - (x.impactScore ?? 0) || (y.report.publishedAt ?? '').localeCompare(x.report.publishedAt ?? '');
 
 export function toSimilarRisk(s: ApiSimilarRisk): SimilarRisk {
   const outcome = s.outcome.trim().toLowerCase();
@@ -117,22 +128,24 @@ export function toGroupView(g: ApiGroupView): GroupView {
 }
 
 export const toTrackRecord = (t: ApiTrackRecord): TrackRecord => ({
+  answered: t.answered,
   resolved: t.resolved,
-  meanBrier: t.mean_brier,
-  beatsBaseline: t.beats_baseline,
-  baselineBrier: t.baseline_brier,
   history: t.history.map((h) => ({
     questionId: h.question_id,
     questionText: h.question_text,
-    probability: h.probability,
     outcome: h.outcome === 1,
-    brier: h.brier,
   })),
 });
 
 export const toDecisionResult = (d: ApiDecisionOut): DecisionResult =>
   d.status === 'approved'
-    ? { alertId: d.alert_id, status: 'approved', questionId: d.question_id, expertsInvited: d.experts_invited }
+    ? {
+        alertId: d.alert_id,
+        status: 'approved',
+        questionId: d.question_id,
+        expertsInvited: d.experts_invited,
+        expertsNotified: d.experts_notified ?? null,
+      }
     : { alertId: d.alert_id, status: 'rejected' };
 
 export const toQuestionListItem = (q: ApiQuestionListItem): QuestionListItem => ({
@@ -145,6 +158,7 @@ export const toQuestionListItem = (q: ApiQuestionListItem): QuestionListItem => 
   invited: q.invited,
   answered: q.answered,
   median: q.median,
+  weightedMean: q.weighted_mean ?? null,
 });
 
 const toRound = (r: ApiRoundSummary | null): RoundSummary | null =>
@@ -160,6 +174,7 @@ const toModeratorResponse = (r: ApiModeratorResponse): ModeratorResponse => ({
   revisionReason: r.revision_reason,
   revised: r.revised,
   brier: r.brier,
+  weight: r.weight ?? null,
 });
 
 export const toQuestionDetail = (d: ApiQuestionDetail): QuestionDetail => ({
@@ -182,6 +197,15 @@ export const toQuestionDetail = (d: ApiQuestionDetail): QuestionDetail => ({
   firstRound: toRound(d.first_round),
   latest: toRound(d.latest),
   medianShift: d.median_shift,
+  weighted: d.weighted
+    ? {
+        mean: d.weighted.mean,
+        median: d.weighted.median,
+        count: d.weighted.count,
+        label: d.weighted.label,
+        expertsWithHistory: d.weighted.experts_with_history,
+      }
+    : null,
   groupMedianBrier: d.group_median_brier,
   baselineBrier: d.baseline_brier,
   distribution: d.distribution.map((b) => ({ range: b.range, count: b.count })),
@@ -312,7 +336,7 @@ export const toPublicOutcome = (q: ApiPublicQuestion): PublicOutcome => ({
   simulated: q.simulated,
   group:
     q.group_median !== null && canShowAggregate(q.expert_count)
-      ? { expertCount: q.expert_count as number, median: q.group_median, medianBrier: q.group_median_brier }
+      ? { expertCount: q.expert_count as number, median: q.group_median }
       : null,
 });
 

@@ -31,7 +31,6 @@ import type {
   ApiResolveOut,
   ApiRisk,
   ApiRoundSummary,
-  ApiScore,
   ApiSimilarRisk,
   ApiTrackRecord,
   AnonymityLevel,
@@ -203,6 +202,9 @@ function summarise(values: number[]): ApiRoundSummary | null {
   if (values.length === 0) return null;
   return { count: values.length, median: r2(median(values)), min: Math.min(...values), max: Math.max(...values) };
 }
+
+/** One resolved answer with its Brier score (mock-internal; the expert API no longer returns it). */
+interface ApiScore { question_id: string; question_text: string; probability: number; outcome: Outcome; brier: number }
 
 function expertScores(expertId: string): ApiScore[] {
   const latest = new Map<string, ResponseRow>();
@@ -429,7 +431,12 @@ function groupView(token: string): ApiGroupView {
 function trackRecord(token: string): ApiTrackRecord {
   const invite = getInvite(token);
   const scores = expertScores(invite.expert_id);
-  return { ...summariseScores(scores), baseline_brier: BASELINE_BRIER, history: scores };
+  const answered = new Set(db.responses.filter((r) => r.expert_id === invite.expert_id).map((r) => r.question_id)).size;
+  return {
+    answered,
+    resolved: scores.length,
+    history: scores.map((x) => ({ question_id: x.question_id, question_text: x.question_text, outcome: x.outcome })),
+  };
 }
 
 function listAlerts(status: string): ApiAlert[] {
@@ -686,7 +693,6 @@ function publicQuestions(): ApiPublicQuestion[] {
         outcome: q.outcome,
         expert_count: enough ? probabilities.length : null,
         group_median: med,
-        group_median_brier: med !== null && q.outcome !== null ? brier(med, q.outcome) : null,
         simulated: q.id.startsWith('H'),
       };
     });

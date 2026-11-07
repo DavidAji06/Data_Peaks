@@ -9,7 +9,8 @@ from ..db import get_db
 from ..models import Invite, Question, Risk
 from ..services import ml_outputs
 from ..services.geo import COUNTRY_CENTRES
-from ..services.scoring import brier, latest_answers
+from ..services.links import resolve_link
+from ..services.scoring import latest_answers
 
 router = APIRouter(prefix="/public", tags=["public"])
 
@@ -31,7 +32,7 @@ def public_summary(db: Session, question: Question) -> dict:
         "outcome": question.outcome,
         "expert_count": len(probabilities) if enough else None,
         "group_median": median,
-        "group_median_brier": brier(median, question.outcome) if enough else None,
+        # No Brier score here: accuracy scores are shown in the moderator dashboard only
         "simulated": question.id.startswith("H"),  # Seeded past questions
     }
 
@@ -68,14 +69,15 @@ def countries_with_question(db: Session, token: str | None) -> set[str]:
     """ISO3 codes where the expert behind this link has an open question."""
     if not token:
         return set()
-    invite = db.get(Invite, token)
-    if invite is None:
+    try:
+        expert, _ = resolve_link(db, token)
+    except HTTPException:
         return set()
     rows = db.execute(
         select(Risk.iso)
         .join(Question, Question.risk_id == Risk.id)
         .join(Invite, Invite.question_id == Question.id)
-        .where(Invite.expert_id == invite.expert_id, Question.status == "open")
+        .where(Invite.expert_id == expert.id, Question.status == "open")
     ).scalars()
     return {code.strip() for iso in rows for code in iso.split(",") if code.strip()}
 

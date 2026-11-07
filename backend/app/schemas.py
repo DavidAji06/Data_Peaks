@@ -7,7 +7,9 @@ Approving alerts requires a complete question
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+import re
+
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 AnonymityLevel = Literal["known_to_acaps", "pseudonymous", "anonymous"]
 
@@ -50,12 +52,39 @@ class JoinIn(BaseModel):
     max_open_questions: int = Field(default=3, ge=1, le=5)
 
 
+PSEUDONYM_CHARS = re.compile(r"^[A-Za-z0-9 _-]+$")
+RESERVED_PREFIX = "anonymous expert"  # Used for anonymous answers in the moderator view
+
+
+def clean_pseudonym(value: str) -> str:
+    """Trims and checks a nickname chosen by the expert. Raises ValueError with a readable message."""
+    name = " ".join(value.split())  # Trim and collapse inner spaces
+    if not 3 <= len(name) <= 30:
+        raise ValueError("Nickname must be 3 to 30 characters")
+    if "@" in name or re.search(r"(gmail|yahoo|hotmail|outlook)|dot (com|org|net)", name, re.I):
+        raise ValueError("Nickname must not look like an email address")
+    if sum(ch.isdigit() for ch in name) >= 7:
+        raise ValueError("Nickname must not look like a phone number")
+    if not PSEUDONYM_CHARS.match(name):
+        raise ValueError("Use only letters, numbers, spaces, - and _")
+    if name.lower().startswith(RESERVED_PREFIX):
+        raise ValueError("This nickname is reserved")
+    return name
+
+
 class SettingsUpdate(BaseModel):
+    pseudonym: str | None = None
     anonymity_level: AnonymityLevel | None = None
     country: str | None = Field(default=None, min_length=2, max_length=80)
     topics: list[str] | None = Field(default=None, max_length=10)
     language: str | None = Field(default=None, min_length=2, max_length=10)
     max_open_questions: int | None = Field(default=None, ge=1, le=5)
+
+    @field_validator("pseudonym")
+    @classmethod
+    def check_pseudonym(cls, value: str | None) -> str | None:
+        return None if value is None else clean_pseudonym(value)
+
 
 class AlertImport(BaseModel):
     id: str = Field(min_length=1, max_length=50)
@@ -68,6 +97,16 @@ class AlertImport(BaseModel):
     direction: str | None = None
     strength: float | None = Field(default=None, ge=0, le=1)
     evidence: str | None = None
+    # Event scores from the ML pipeline (optional, so older alerts.json files still import)
+    country: str | None = None
+    iso3: str | None = None
+    impact_score: int | None = Field(default=None, ge=1, le=5)
+    intensity_score: int | None = Field(default=None, ge=1, le=5)
+    exposure_score: int | None = Field(default=None, ge=1, le=5)
+    description: str | None = None
+    region_match: bool | None = None
+    matched_place: str | None = None
+
 
 class RiskDecisionIn(BaseModel):
     decision: Literal["keep", "raise", "lower", "update_trigger", "add_trigger"]

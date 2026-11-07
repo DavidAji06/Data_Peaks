@@ -9,16 +9,6 @@ export function median(xs: number[]) {
   return s.length % 2 ? s[m]! : Math.round((s[m - 1]! + s[m]!) / 2);
 }
 
-/** Brier score for a single binary forecast (p in 0–100). Lower is better; 0.25 = always 50%. */
-export function brier(p: number, happened: boolean) {
-  const x = p / 100 - (happened ? 1 : 0);
-  return Math.round(x * x * 1000) / 1000;
-}
-
-export function beatsGuessing(score: number) {
-  return score < 0.25;
-}
-
 /** ACAPS wordmark with pointer motif. */
 export function Wordmark({ tagline = true, size = "md" }: { tagline?: boolean; size?: "sm" | "md" }) {
   return (

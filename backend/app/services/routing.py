@@ -1,8 +1,13 @@
 """
-Picks the experts, those with the fewest open questions go first,
-spreads the load across the panel
-"""
+Sends a question to every expert in the region.
 
+For now "region" means the expert's country: an expert is invited when their country is one
+of the risk's countries, so a risk on "Chad, Niger, Cameroon, Nigeria" reaches all four.
+There is no panel cap.
+
+max_open_questions is a notification preference, not a filter: experts already at their
+limit are still invited (the question is waiting in the app), they just are not pinged now.
+"""
 
 import secrets
 
@@ -10,8 +15,6 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..models import Expert, Invite, Question
-
-MAX_PANEL_SIZE = 10
 
 
 def open_invite_count(db: Session, expert_id: str) -> int:
@@ -28,21 +31,20 @@ def parse_countries(country: str) -> set[str]:
     return {name.strip().lower() for name in country.split(",") if name.strip()}
 
 
+def should_notify(db: Session, expert: Expert) -> bool:
+    """True when the expert is under their max_open_questions (counting the new invite)."""
+    return open_invite_count(db, expert.id) <= expert.max_open_questions
+
+
 def route_question(db: Session, question: Question, country: str) -> list[Invite]:
+    """Invites every expert whose country matches. Returns the new invites."""
     countries = parse_countries(country)
     experts = db.scalars(
-        select(Expert).where(func.lower(Expert.country).in_(countries))
+        select(Expert).where(func.lower(Expert.country).in_(countries)).order_by(Expert.id)
     ).all()
 
-    candidates = []
-    for expert in experts:
-        count = open_invite_count(db, expert.id)
-        if count < expert.max_open_questions:
-            candidates.append((count, expert))
-    candidates.sort(key=lambda pair: pair[0])
-
     invites = []
-    for _, expert in candidates[:MAX_PANEL_SIZE]:
+    for expert in experts:
         invite = Invite(
             token=secrets.token_urlsafe(16),
             question_id=question.id,

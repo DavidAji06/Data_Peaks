@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..models import Question, Response
+from .weighting import expert_weight
 
 BASELINE_BRIER = 0.25  # Score for always answering 50%
 
@@ -22,12 +23,20 @@ def latest_answers(db: Session, question_id: str) -> dict[str, Response]:
     return latest
 
 
-def expert_scores(db: Session, expert_id: str, exclude_anonymous: bool = False) -> list[dict]:
-    rows = db.execute(
+def expert_scores(
+    db: Session,
+    expert_id: str,
+    exclude_anonymous: bool = False,
+    exclude_question: str | None = None,
+) -> list[dict]:
+    query = (
         select(Response, Question)
         .join(Question, Response.question_id == Question.id)
         .where(Response.expert_id == expert_id, Question.status == "resolved")
-    ).all()
+    )
+    if exclude_question:
+        query = query.where(Question.id != exclude_question)
+    rows = db.execute(query).all()
 
     latest = {}
     for response, question in rows:
@@ -58,4 +67,15 @@ def summarise_scores(scores: list[dict]) -> dict:
         "resolved": len(scores),
         "mean_brier": mean,
         "beats_baseline": mean < BASELINE_BRIER,
+    }
+
+
+def expert_weights(db: Session, expert_ids, exclude_question: str | None = None) -> dict[str, float]:
+    """Brier-based weight per expert (moderator only). The question being weighted is left out,
+    so a resolved question's own outcome never feeds its weights."""
+    return {
+        expert_id: expert_weight([
+            score["brier"] for score in expert_scores(db, expert_id, exclude_question=exclude_question)
+        ])
+        for expert_id in expert_ids
     }

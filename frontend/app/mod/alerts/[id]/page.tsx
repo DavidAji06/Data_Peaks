@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { AlertDecisionForm } from '@/components/mod/AlertDecisionForm';
+import { AlertScores, placeLabel } from '@/components/mod/AlertScores';
 import { PageHeader, StatusTag, fmtDate } from '@/components/mod/parts';
 import { TriggerCard } from '@/components/mod/TriggerCard';
 import { Card, Notice, RiskChip } from '@/components/ui/primitives';
@@ -73,8 +74,15 @@ async function AlertDetailView({ params }: { params: PageProps<'/mod/alerts/[id]
             <h2 className="mt-3 text-sm font-medium text-ink-muted">{t.report}</h2>
             <p className="font-medium text-ink">{alert.report.title}</p>
             <p className="mt-1 text-sm text-ink-muted">
-              {[alert.report.source, alert.report.publishedAt && fmtDate(alert.report.publishedAt)].filter(Boolean).join(' · ')}
+              {[placeLabel(alert, risk?.country), alert.report.source, alert.report.publishedAt && fmtDate(alert.report.publishedAt)]
+                .filter(Boolean)
+                .join(' · ')}
             </p>
+            <AlertScores alert={alert} />
+            {alert.impactScore !== null && <p className="mt-1 text-xs text-ink-muted">{mod.alerts.scoresNote}</p>}
+            {alert.description && alert.description !== alert.report.title && (
+              <p className="mt-2 text-sm text-ink">{alert.description}</p>
+            )}
             {alert.report.url && (
               <a
                 href={alert.report.url}
@@ -112,6 +120,8 @@ async function AlertDetailView({ params }: { params: PageProps<'/mod/alerts/[id]
                 <div className="mt-1">
                   {trigger ? (
                     <TriggerCard trigger={trigger} />
+                  ) : alert.triggerId === null ? (
+                    <p className="text-sm text-ink-muted">{t.noTrigger}</p>
                   ) : (
                     <Notice tone="warning">{t.triggerMissing(alert.triggerId ?? '—', risk.id)}</Notice>
                   )}

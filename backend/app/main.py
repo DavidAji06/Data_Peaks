@@ -29,10 +29,12 @@ from .schemas import (
 from .services import ml_outputs
 from .services.alert_import import import_alert_items
 from .services.auth import require_moderator
-from .services.routing import route_question
-from .services.scoring import BASELINE_BRIER, expert_scores, latest_answers, summarise_scores
+from .services.links import require_invite, resolve_link
+from .services.routing import route_question, should_notify
+from .services.scoring import expert_scores, latest_answers
 
-FRONTEND_URL = "http://localhost:3000"
+FRONTEND_URL = "http://localhost:3000"  # Moderator dashboard (and its CORS origin)
+EXPERT_APP_URL = "http://localhost:8080"  # Expert app (Lovable)
 MODERATOR_ONLY = [Depends(require_moderator)]
 MIN_GROUP_SIZE = 5  # Below this, group figures could reveal individual answers
 
@@ -72,6 +74,15 @@ def alert_to_dict(alert: Alert):
         "direction": alert.direction,
         "strength": alert.strength,
         "evidence": alert.evidence,
+        "country": alert.country,
+        "iso3": alert.iso3,
+        "impact_score": alert.impact_score,
+        "intensity_score": alert.intensity_score,
+        "exposure_score": alert.exposure_score,
+        "description": alert.description,
+        # Heuristic place-name match, not proof that a trigger fired
+        "region_match": alert.region_match,
+        "matched_place": alert.matched_place,
         "status": alert.status,
     }
 
@@ -103,10 +114,15 @@ def summarise_question(question_id: str, session_factory=SessionLocal):
 
 
 def get_invite(db: Session, token: str) -> Invite:
-    invite = db.get(Invite, token)
-    if invite is None:
-        raise HTTPException(status_code=404, detail="Link not found")
-    return invite
+    """The invite behind an invite token or a personal link. 404 if there is no open question."""
+    return require_invite(db, token)
+
+
+def nickname_taken(db: Session, name: str, expert_id: str | None = None) -> bool:
+    query = select(Expert).where(func.lower(Expert.pseudonym) == name.lower())
+    if expert_id:
+        query = query.where(Expert.id != expert_id)
+    return db.scalar(query) is not None
 
 
 def get_response(db: Session, question_id: str, expert_id: str, round: int):
@@ -132,7 +148,7 @@ def clean_topics(topics: list[str]) -> str:
 def new_pseudonym(db: Session) -> str:
     while True:
         name = f"Analyst {secrets.token_hex(2).upper()}"
-        if db.scalar(select(Expert).where(Expert.pseudonym == name)) is None:
+        if not nickname_taken(db, name):
             return name
 
 
@@ -143,6 +159,11 @@ def get_open_panel_invite(db: Session, token: str) -> PanelInvite:
     if invite.used:
         raise HTTPException(status_code=409, detail="Invite already used")
     return invite
+
+
+def answer_labels(expert: Expert) -> dict:
+    """Privacy level and nickname at answer time, stored on the response."""
+    return {"anonymity_level": expert.anonymity_level, "pseudonym": expert.pseudonym}
 
 
 def settings_dict(expert: Expert):
@@ -188,8 +209,11 @@ def create_panel_invite(body: PanelInviteIn, db: Session = Depends(get_db)):
 # Moderator: alerts
 
 @app.get("/alerts", dependencies=MODERATOR_ONLY)
-def list_alerts(status: str = "pending", db: Session = Depends(get_db)):
+def list_alerts(status: str = "pending", min_impact: int = 0, db: Session = Depends(get_db)):
+    """Alerts sorted by impact score, then newest first. min_impact=4 keeps only high-impact events."""
     alerts = db.scalars(select(Alert).where(Alert.status == status)).all()
+    alerts = [a for a in alerts if (a.impact_score or 0) >= min_impact]
+    alerts.sort(key=lambda a: (a.impact_score or 0, a.published_at or ""), reverse=True)
     return [alert_to_dict(alert) for alert in alerts]
 
 
@@ -230,15 +254,22 @@ def decide_alert(alert_id: str, body: AlertDecision, db: Session = Depends(get_d
     alert.status = "approved"
     db.commit()
 
-    # Stand-in for real notifications
+    # Stand-in for real notifications. Every invited expert sees the question in the app;
+    # only those under their max_open_questions are pinged now.
+    notified = 0
     for invite in invites:
-        print(f"[notify] {invite.expert_id}: {FRONTEND_URL}/q/{invite.token}")
+        if should_notify(db, db.get(Expert, invite.expert_id)):
+            notified += 1
+            print(f"[notify] {invite.expert_id}: {EXPERT_APP_URL}/?token={invite.token}")
+        else:
+            print(f"[notify] {invite.expert_id}: invited, not pinged (at max_open_questions)")
 
     return {
         "alert_id": alert_id,
         "status": "approved",
         "question_id": question.id,
         "experts_invited": len(invites),
+        "experts_notified": notified,
     }
 
 
@@ -290,11 +321,16 @@ def join_panel(token: str, body: JoinIn, db: Session = Depends(get_db)):
         language=body.language,
         max_open_questions=body.max_open_questions,
         email=invite.email,
+        link_token=secrets.token_urlsafe(16),
     )
     db.add(expert)
     invite.used = True
     db.commit()
-    return {"status": "joined", "pseudonym": expert.pseudonym}
+    return {
+        "status": "joined",
+        "pseudonym": expert.pseudonym,
+        "app_link": f"{EXPERT_APP_URL}/?token={expert.link_token}",  # The expert's personal link
+    }
 
 
 # Expert: secret-link routes
@@ -345,7 +381,7 @@ def submit_answer(
         probability=body.probability,
         reason=body.reason,
         round=1,
-        anonymity_level=db.get(Expert, invite.expert_id).anonymity_level,
+        **answer_labels(db.get(Expert, invite.expert_id)),
     ))
     db.commit()
 
@@ -370,7 +406,7 @@ def submit_revision(token: str, body: AnswerIn, db: Session = Depends(get_db)):
         probability=body.probability,
         reason=body.reason,
         round=2,
-        anonymity_level=db.get(Expert, invite.expert_id).anonymity_level,
+        **answer_labels(db.get(Expert, invite.expert_id)),
     ))
     db.commit()
     return {"status": "revised"}
@@ -417,27 +453,35 @@ def group_view(token: str, db: Session = Depends(get_db)):
 
 @app.get("/q/{token}/track-record")
 def track_record(token: str, db: Session = Depends(get_db)):
-    invite = get_invite(db, token)
-    scores = expert_scores(db, invite.expert_id)
+    """The expert's own record: counts and outcomes only. Brier scores are for moderators."""
+    expert, _ = resolve_link(db, token)
+    answered = db.scalar(
+        select(func.count(func.distinct(Response.question_id))).where(Response.expert_id == expert.id)
+    )
+    scores = expert_scores(db, expert.id)
     return {
-        **summarise_scores(scores),
-        "baseline_brier": BASELINE_BRIER,
-        "history": scores,
+        "answered": answered,
+        "resolved": len(scores),
+        "history": [
+            {"question_id": s["question_id"], "question_text": s["question_text"], "outcome": s["outcome"]}
+            for s in scores
+        ],
     }
 
 
 @app.get("/q/{token}/settings")
 def get_settings(token: str, db: Session = Depends(get_db)):
-    invite = get_invite(db, token)
-    return settings_dict(db.get(Expert, invite.expert_id))
+    expert, _ = resolve_link(db, token)
+    return settings_dict(expert)
 
 
 @app.patch("/q/{token}/settings")
 def update_settings(token: str, body: SettingsUpdate, db: Session = Depends(get_db)):
-    invite = get_invite(db, token)
-    expert = db.get(Expert, invite.expert_id)
+    expert, _ = resolve_link(db, token)
 
     updates = body.model_dump(exclude_unset=True, exclude_none=True)
+    if "pseudonym" in updates and nickname_taken(db, updates["pseudonym"], expert.id):
+        raise HTTPException(status_code=409, detail="That nickname is already taken. Try another one.")
     if "topics" in updates:
         updates["topics"] = clean_topics(updates["topics"])
     for field, value in updates.items():

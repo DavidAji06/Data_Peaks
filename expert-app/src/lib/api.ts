@@ -17,6 +17,14 @@ export interface ApiAlert {
   direction: string | null;
   strength: number | null;
   evidence: string | null;
+  /** LLM scores of the ACAPS access event (1–5); null on older alerts. */
+  impact_score?: number | null;
+  intensity_score?: number | null;
+  exposure_score?: number | null;
+  country?: string | null;
+  /** Heuristic place-name match with the risk text. Never means a trigger fired. */
+  region_match?: boolean | null;
+  matched_place?: string | null;
   status: string;
 }
 
@@ -65,20 +73,17 @@ export interface ApiGroupView {
   themes: ApiThemes;
 }
 
-export interface ApiScore {
+/** A resolved question the expert answered. No scores: those are for ACAPS moderators only. */
+export interface ApiPastQuestion {
   question_id: string;
   question_text: string;
-  probability: number;
   outcome: 0 | 1;
-  brier: number;
 }
 
 export interface ApiTrackRecord {
+  answered: number;
   resolved: number;
-  mean_brier: number | null;
-  beats_baseline: boolean | null;
-  baseline_brier: number;
-  history: ApiScore[];
+  history: ApiPastQuestion[];
 }
 
 export interface ApiSettings {
@@ -150,6 +155,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     try {
       const body = await res.json();
       if (typeof body?.detail === "string") detail = body.detail;
+      // FastAPI validation errors: [{ msg: "Value error, Nickname must be 3 to 30 characters", ... }]
+      else if (Array.isArray(body?.detail) && typeof body.detail[0]?.msg === "string")
+        detail = body.detail[0].msg.replace(/^Value error, /, "");
     } catch {
       /* no JSON body */
     }
@@ -177,6 +185,6 @@ export const api = {
   getGroup: (token: string) => request<ApiGroupView>(`${q(token)}/group`),
   getTrackRecord: (token: string) => request<ApiTrackRecord>(`${q(token)}/track-record`),
   getSettings: (token: string) => request<ApiSettings>(`${q(token)}/settings`),
-  updateSettings: (token: string, body: Partial<Omit<ApiSettings, "pseudonym">>) =>
+  updateSettings: (token: string, body: Partial<ApiSettings>) =>
     request<ApiSettings>(`${q(token)}/settings`, { method: "PATCH", body: JSON.stringify(body) }),
 };

@@ -67,6 +67,9 @@ function List({ items }: { items: QuestionListItem[] }) {
               <span>
                 {q.median !== null && canShowAggregate(q.answered) ? t.median(`${toPercent(q.median)}%`) : t.noMedian}
               </span>
+              {q.weightedMean !== null && canShowAggregate(q.answered) && (
+                <span>{t.weighted(`${toPercent(q.weightedMean)}%`)}</span>
+              )}
               <span>{t.deadline(fmtDate(q.deadline))}</span>
             </p>
           </Link>

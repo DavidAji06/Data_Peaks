@@ -9,7 +9,15 @@
     "published_at": "2026-02-06",
     "direction": "escalating",
     "strength": 1.0,
-    "evidence": "Extreme life-threatening malnutrition, famine may be confirmed, healthcare collapsed; famine/starvation = 5; countrywide population affected = 5."
+    "evidence": "Extreme life-threatening malnutrition, famine may be confirmed, healthcare collapsed; famine/starvation = 5; countrywide population affected = 5.",
+    "country": "Sudan",
+    "iso3": "SDN",
+    "impact_score": 5,
+    "intensity_score": 5,
+    "exposure_score": 5,
+    "description": "The newly identified levels of acute malnutrition represent extreme, life-threatening deprivation, and famine may soon be confirmed by the IPC in these additional areas. For small children, the danger is especially acute: malnutrition gravely weakens their immunity, leaving them far more vulnerable to disease at a time when healthcare and other services have been severely disrupted, if not collapsed entirely.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1049-22929",
@@ -21,7 +29,15 @@
     "published_at": "2026-02-05",
     "direction": "escalating",
     "strength": 1.0,
-    "evidence": "Famine IPC Phase 5 in besieged Kadugli, hunger and blocked food; famine = intensity 5; siege and famine affecting population, exposure 4."
+    "evidence": "Famine IPC Phase 5 in besieged Kadugli, hunger and blocked food; famine = intensity 5; siege and famine affecting population, exposure 4.",
+    "country": "Sudan",
+    "iso3": "SDN",
+    "impact_score": 5,
+    "intensity_score": 5,
+    "exposure_score": 4,
+    "description": "Famine (IPC Phase 5) was already classified in the besieged town of Kadugli in September 2025, with very severe conditions projected in Dilling town (South Kordofan) and the Western Nuba Mountains. In isolated or contested areas, residents face hunger, limited access to healthcare and serious protection risks. Local authorities and armed forces continue to tightly control markets, food supplies and movement preventing communities from benefitting from otherwise favourable agricultural conditions.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1049-24330",
@@ -33,7 +49,15 @@
     "published_at": "2026-05-15",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "RSF besieged El Fasher, blocking supplies, bombarding city. Siege = 4; city population cut off = 4."
+    "evidence": "RSF besieged El Fasher, blocking supplies, bombarding city. Siege = 4; city population cut off = 4.",
+    "country": "Sudan",
+    "iso3": "SDN",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 4,
+    "description": "the Rapid Support Forces besieged El Fasher, the capital of North Darfur, bombarding the city, blocking supplies, and slowly tightening their grip. The Sudanese Armed Forces and their allied paramilitaries, known as the Joint Forces, defended the city from within. El Fasher was the last major city in Darfur not under RSF control.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1046-23048",
@@ -45,7 +69,15 @@
     "published_at": "2026-02-18",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "59 deaths (4+), 423,986 affected stated; exposure band >250,000 = 5."
+    "evidence": "59 deaths (4+), 423,986 affected stated; exposure band >250,000 = 5.",
+    "country": "Madagascar",
+    "iso3": "MDG",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 5,
+    "description": "Moderate to heavy rains are expected in central and southern Madagascar and northern Mozambique between February 18 and 19. Following Cyclone Gezani's passage through Madagascar, the death toll has risen to 59, with 423,986 people affected, 16,428 displaced, 25,044 homes destroyed, and 76,885 homes damaged or flooded.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1046-23032",
@@ -57,7 +89,15 @@
     "published_at": "2026-02-10",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "30+ deaths (4+), 250,406 victims stated; exposure band >250,000 = 5."
+    "evidence": "30+ deaths (4+), 250,406 victims stated; exposure band >250,000 = 5.",
+    "country": "Madagascar",
+    "iso3": "MDG",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 5,
+    "description": "Cyclone Gezani caused widespread devastation in Madagascar. More than 30 people died after Cyclone Gezani struck, causing widespread destruction in Toamasina, the island's second-largest city, according to authorities. At least 36 people were reported seriously injured. More than 2,740 residents were evacuated as a precaution after the cyclone battered coastal communities before moving inland. According to the BNGRC, the cyclone displaced approximately 6,870 people, while a total of 250,406 were classified as victims of the disaster.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1046-23034",
@@ -69,7 +109,15 @@
     "published_at": "2026-01-31",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "12 deaths (4+), 200,000 affected stated; exposure band 100,000-250,000 = 4."
+    "evidence": "12 deaths (4+), 200,000 affected stated; exposure band 100,000-250,000 = 4.",
+    "country": "Madagascar",
+    "iso3": "MDG",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 4,
+    "description": "Tropical Cyclone Fytia made landfall in Madagascar on January 31, causing widespread flooding in northwestern Madagascar. As of February 6, 12 deaths had been reported, more than 31,000 people displaced, and over 200,000 affected in 35 districts across nine regions, with the Bo\u00e9ny region being the hardest hit. Nearly 18,600 houses were flooded, damaged, or destroyed, while 493 classrooms and 20 health facilities sustained damage.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1047-23801",
@@ -81,7 +129,15 @@
     "published_at": "2026-04-28",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "Extensive flooding compounding damage, displacement, needs; life-threatening at scale = 4. Country-wide, exposure 4."
+    "evidence": "Extensive flooding compounding damage, displacement, needs; life-threatening at scale = 4. Country-wide, exposure 4.",
+    "country": "Mozambique",
+    "iso3": "MOZ",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 4,
+    "description": "Mozambique continues to experience significant humanitarian impacts following extensive flooding, with heavy rainfall continuing to affect much of the country since 1 March 2026, particularly across the southern, central and northern provinces. Continued rainfall since the initial flooding has compounded damage, displacement and humanitarian needs, while river overflow, notably along the Licungo River, has further exacerbated impacts in affected areas. ",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1047-23802",
@@ -93,7 +149,15 @@
     "published_at": "2026-04-28",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "Widespread damage to homes, infrastructure, farmland; prolonged displacement, life-threatening conditions = 4. Country-wide, exposure 4."
+    "evidence": "Widespread damage to homes, infrastructure, farmland; prolonged displacement, life-threatening conditions = 4. Country-wide, exposure 4.",
+    "country": "Mozambique",
+    "iso3": "MOZ",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 4,
+    "description": "Ongoing rains continue to cause widespread damage to homes, public infrastructure and agricultural land, limiting safe returns for many families and prolonging humanitarian needs. Additional rainfall is anticipated across the country in the coming days, with the potential to exacerbate flooding and humanitarian needs. While some affected families have been able to return to their areas of origin, many remain displaced due to ongoing rainfall, damaged or unsafe housing, loss of assets, and limited access to essential services. ",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1047-23803",
@@ -105,7 +169,15 @@
     "published_at": "2026-04-28",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "724,000 affected, 100,000 in centres, homes and health facilities destroyed; life-threatening at scale = 4. 724,000 = exposure 5."
+    "evidence": "724,000 affected, 100,000 in centres, homes and health facilities destroyed; life-threatening at scale = 4. 724,000 = exposure 5.",
+    "country": "Mozambique",
+    "iso3": "MOZ",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 5,
+    "description": "In mid-December, severe and prolonged flooding affected large parts of southern and central Mozambique. Rivers burst their banks, displacing communities and damaging or destroying homes, health facilities, water systems and other critical infrastructure. The National Institute for Disaster Management and Risk Reduction reports that more than 724,000 people have been affected by floods. At the peak of the emergency, over 100,000 people were hosted in approximately 100\naccommodation centres.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1065-24560",
@@ -117,7 +189,15 @@
     "published_at": "2026-07-13",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "28 deaths, 100,000+ affected by floods; rule 1 gives 4 for 4+ killed; exposure 4 for 100,000-250,000."
+    "evidence": "28 deaths, 100,000+ affected by floods; rule 1 gives 4 for 4+ killed; exposure 4 for 100,000-250,000.",
+    "country": "Yemen",
+    "iso3": "YEM",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 4,
+    "description": "Between March and April 2026, above-average rainfall triggered flooding in Yemen, negatively affecting over 100,000 people; causing 28 deaths, 84 injuries, and extensive damage to shelter (both tents and houses), cropland, livestock, infrastructure, and WASH systems; displacing landmines, Improvised Explosive Devices (IEDs), and Explosive Remnants of War (ERW); and interrupting market access.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1067-24277",
@@ -129,7 +209,15 @@
     "published_at": "2026-06-10",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "3.7m children + 1.2m women with acute malnutrition, clinics lack life-saving food = intensity 4; 4.9m affected, exposure 5."
+    "evidence": "3.7m children + 1.2m women with acute malnutrition, clinics lack life-saving food = intensity 4; 4.9m affected, exposure 5.",
+    "country": "Afghanistan",
+    "iso3": "AFG",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 5,
+    "description": "Afghanistan is facing a record crisis of acute malnutrition in 2026, affecting 3.7 million children under five\u2014including nearly 1 million with severe acute malnutrition\u2014as well as 1.2 million pregnant and breastfeeding women. Many WFP-supported clinics lack specialized nutritious food, limiting their ability to provide life-saving treatment and leaving most vulnerable people without support.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1067-24287",
@@ -141,7 +229,15 @@
     "published_at": "2026-06-08",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "100,000+ fled, hundreds killed (4+), 17,000 families without aid near famine. Intensity 4; exposure 4 (100,000+)."
+    "evidence": "100,000+ fled, hundreds killed (4+), 17,000 families without aid near famine. Intensity 4; exposure 4 (100,000+).",
+    "country": "Afghanistan",
+    "iso3": "AFG",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 4,
+    "description": "In late February, clashes between Afghanistan and Pakistan flared up again, forcing more than 100,000 people to flee across eastern and southeastern areas and resulting in hundreds of civilian deaths. Families who were already facing severe hardship were pushed into even more critical conditions. In Nuristan Province, nearly 17,000 families in two districts\u2014previously identified by the WFP as being at risk of famine\u2014were left without any aid for nearly two months.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1067-24279",
@@ -153,7 +249,15 @@
     "published_at": "2026-05-14",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "Almost 5m mothers and children malnourished, turned away from treatment = intensity 4; 5m affected, exposure 5."
+    "evidence": "Almost 5m mothers and children malnourished, turned away from treatment = intensity 4; 5m affected, exposure 5.",
+    "country": "Afghanistan",
+    "iso3": "AFG",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 5,
+    "description": "Afghanistan faces near-record malnutrition, with almost five million mothers and children affected. Worsening conditions\u2014including border closures, natural disasters, and funding cuts\u2014are straining aid efforts. WFP\u2019s Carl Skau reported that families are traveling long distances for help, only to be turned away due to a lack of nutritious supplies",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1061-23385",
@@ -165,7 +269,15 @@
     "published_at": "2026-03-18",
     "direction": "escalating",
     "strength": 1.0,
-    "evidence": "72,135 killed and 391 UNRWA colleagues killed over period (rule 1: thousands killed = 5); whole Gaza population affected."
+    "evidence": "72,135 killed and 391 UNRWA colleagues killed over period (rule 1: thousands killed = 5); whole Gaza population affected.",
+    "country": "Palestine",
+    "iso3": "PSE",
+    "impact_score": 5,
+    "intensity_score": 5,
+    "exposure_score": 5,
+    "description": "Between 7 October 2023 and 11 March 2026, according to the Ministry of Health (MoH), as reported by OCHA, 72,135 Palestinians were killed in the Gaza Strip and another 171,830 injured. UNRWA has recorded 391 colleagues killed in Gaza since the start of the war (310 UNRWA personnel, in addition to 81 persons who were supporting UNRWA), up to 17 March 2026.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1061-23480",
@@ -177,7 +289,15 @@
     "published_at": "2026-02-11",
     "direction": "escalating",
     "strength": 1.0,
-    "evidence": "3057 incidents, 746 health workers killed, 435 facilities damaged; mass scale = 5. System-wide health access, exposure 5."
+    "evidence": "3057 incidents, 746 health workers killed, 435 facilities damaged; mass scale = 5. System-wide health access, exposure 5.",
+    "country": "Palestine",
+    "iso3": "PSE",
+    "impact_score": 5,
+    "intensity_score": 5,
+    "exposure_score": 5,
+    "description": "Insecurity Insight identified at least 3057 incidents of violence against or obstruction of access to health care in the occupied Palestinian territory between 07 October 2023 and 30 December 2025. Over 95% of these incidents were attributed to Israeli forces. In Gaza, where 2231 incidents were recorded, health facilities, including children\u2019s hospitals, dental clinics, field hospitals, health clinics, hospitals, medical storage facilities, pharmacies, and rehabilitation\nclinics were struck were damaged 435 times, 746 health workers were killed and 361 arrested.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1061-24191",
@@ -189,7 +309,15 @@
     "published_at": "2026-05-28",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "97 attacks damaging/destroying health facilities in Gaza. Destruction of hospitals = 4; territory-scale, no number, exposure 4."
+    "evidence": "97 attacks damaging/destroying health facilities in Gaza. Destruction of hospitals = 4; territory-scale, no number, exposure 4.",
+    "country": "Palestine",
+    "iso3": "PSE",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 4,
+    "description": "In 2025, health facilities in Gaza \u2013 including children\u2019s hospitals, field hospitals, health clinics, general hospitals, medical storage facilities, and a prosthetics and paralysis center \u2013 were damaged or destroyed at least 97 times by aircraft and drone strikes, artillery shelling, missiles, tank fire, or gunfire.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1037-24453",
@@ -201,7 +329,15 @@
     "published_at": "2026-06-26",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "Access limited, hundreds of thousands deprived of humanitarian assistance. Denial of aid to large population = intensity 4. Hundreds of thousands = exposure 4."
+    "evidence": "Access limited, hundreds of thousands deprived of humanitarian assistance. Denial of aid to large population = intensity 4. Hundreds of thousands = exposure 4.",
+    "country": "South Sudan",
+    "iso3": "SSD",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 4,
+    "description": " Humanitarian partners reported that access to Akobo West (especially the opposition-controlled areas) remained limited due to the volatile security situation, depriving hundreds of thousands of conflict-affected people of humanitarian assistance.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1037-23354",
@@ -213,7 +349,15 @@
     "published_at": "2026-03-18",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "Flooding damaged infrastructure, disrupted services, worsening food insecurity and acute malnutrition. Rule 2: system-scale harm, exposure 4; acute malnutrition intensity 4."
+    "evidence": "Flooding damaged infrastructure, disrupted services, worsening food insecurity and acute malnutrition. Rule 2: system-scale harm, exposure 4; acute malnutrition intensity 4.",
+    "country": "South Sudan",
+    "iso3": "SSD",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 4,
+    "description": "In 2025, flooding damaged infrastructure, blocked roads and air routes, and disrupted essential services. Displaced families crowded into makeshift settlements with limited water, sanitation, healthcare, and education, increasing risks of malaria, cholera, and other waterborne diseases. Livelihoods and food production were severely affected, worsening food insecurity and acute malnutrition. Humanitarian operations in Old Fangak (Jonglei), Panyikang (Upper Nile), and Leer (Unity) faced repeated disruptions, and needs far exceeded pre-positioned supplies.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1037-23257",
@@ -225,7 +369,15 @@
     "published_at": "2026-03-12",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "Four aid workers killed = 4+ killed (rule 1). Nationwide disruption of operations; no number, system-scale = 4."
+    "evidence": "Four aid workers killed = 4+ killed (rule 1). Nationwide disruption of operations; no number, system-scale = 4.",
+    "country": "South Sudan",
+    "iso3": "SSD",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 4,
+    "description": " Violence, intimidation and threats against humanitarian staff, assets and facilities continued to disrupt operations nationwide. Four humanitarian workers were killed in the line of duty while four humanitarian facilities were looted and 10 humanitarian vehicles, equipment and supplies confiscated.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1059-23203",
@@ -237,7 +389,15 @@
     "published_at": "2026-03-06",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "44 fatalities, 580,000 affected, 15,000 evacuated; rule 1: 4+ killed = 4. 580,000 affected = exposure 5."
+    "evidence": "44 fatalities, 580,000 affected, 15,000 evacuated; rule 1: 4+ killed = 4. 580,000 affected = exposure 5.",
+    "country": "Colombia",
+    "iso3": "COL",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 5,
+    "description": "Since January 26, very heavy rainfall across most of Colombia caused floods, flash floods, and landslides across 144 municipalities in 22 departments. As of March 6, the emergency left 44 fatalities, over 580,000 people affected, more than 15,000 evacuated across 87 temporary shelters, and thousands of houses destroyed or damaged.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1059-23214",
@@ -249,7 +409,15 @@
     "published_at": "2026-03-05",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "120,000 victims = exposure 4; sexual violence, torture, attacks on schools, explosive devices = intensity 4."
+    "evidence": "120,000 victims = exposure 4; sexual violence, torture, attacks on schools, explosive devices = intensity 4.",
+    "country": "Colombia",
+    "iso3": "COL",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 4,
+    "description": "At least 120,000 people were victims of attacks against the civilian population in Colombia, reflecting a 10% increase compared to the previous period. Worrying trends included sexual violence, torture, threats, social control, increased violations against children, closures and attacks on schools across several departments, and the expanded use of explosive devices including drones.",
+    "region_match": false,
+    "matched_place": null
   },
   {
     "id": "A-R1066-22957",
@@ -261,6 +429,14 @@
     "published_at": "2026-02-05",
     "direction": "escalating",
     "strength": 0.8,
-    "evidence": "Over 1 million displaced and 2 million children with life-threatening malnutrition; severe at scale \u2192 intensity 4. Stated 1,000,000 displaced \u2192 exposure 5."
+    "evidence": "Over 1 million displaced and 2 million children with life-threatening malnutrition; severe at scale \u2192 intensity 4. Stated 1,000,000 displaced \u2192 exposure 5.",
+    "country": "Nigeria",
+    "iso3": "NGA",
+    "impact_score": 4,
+    "intensity_score": 4,
+    "exposure_score": 5,
+    "description": "The worsening security and violence against civilians in the Northwest and Northcentral has led to a dire humanitarian situation with over 1 million people displaced. The situation also contributes to the severe food and nutrition crisis the country is facing in 2026 with almost 35 million in severe food insecurity in the coming lean season (June-August) and over 2 million children below 5 years expected to suffer from life-threatening malnutrition.",
+    "region_match": false,
+    "matched_place": null
   }
 ]

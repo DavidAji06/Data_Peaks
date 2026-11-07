@@ -28,13 +28,6 @@ export function GroupFigures({ q }: { q: PublicOutcome }) {
           <dt className="text-sm text-ink-muted">{p.median}</dt>
           <dd className="text-3xl font-semibold text-ink">{toPercent(q.group.median)}%</dd>
         </div>
-        {q.group.medianBrier !== null && (
-          <div>
-            <dt className="text-sm text-ink-muted">{p.brier}</dt>
-            <dd className="text-3xl font-semibold text-ink">{q.group.medianBrier.toFixed(4).replace(/0{1,2}$/, '')}</dd>
-            <dd className="mt-1 text-xs text-ink-muted">{p.brierExplain}</dd>
-          </div>
-        )}
       </dl>
     </>
   );

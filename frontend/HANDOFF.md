@@ -44,9 +44,9 @@ Checks: `npm run lint`, `npm run build`, `npm run check:contrast`.
 | URL | Who | What |
 |---|---|---|
 | `/` | Pitch | Demo hub with one link per view |
-| `/q/demo-expert-a` | Expert | Context → blind estimate → group view → revise → receipt |
-| `/q/demo-expert-b` | Expert | Same question, already answered: opens on the group view |
-| `/q/[token]/record` | Expert | Track record (Brier scores) |
+| `/q/demo-expert-a` | Expert | Context → blind estimate → group view → revise → receipt (needs a moderator-created question first; the main expert app is `expert-app/` on port 8080) |
+| `/q/demo-expert-b` | Expert | Same question, already answered after `python -m app.demo_answers Q001` |
+| `/q/[token]/record` | Expert | Track record: answered and resolved counts and outcomes. No Brier scores (moderators only) |
 | `/q/[token]/settings` | Expert | Privacy settings: anonymity level (with who sees what), country, topics, open questions at a time |
 | `/join/[token]` | New expert | Sign-up from a moderator's invite link: the expert chooses their own anonymity level |
 | `/mod` | ACAPS | Alert queue (pending/approved/rejected), approve with an editable question, or reject |
@@ -110,10 +110,11 @@ Still open:
 
 ## Demo path (about 3 minutes)
 
-1. `python -m app.seed` in `backend/`, then open `/`.
-2. **Moderator** `/mod` → alert A002 → edit the draft question, fill "How it resolves" → Approve: "Question Q002 sent to 6 experts" (the backend prints the expert links in its terminal).
-3. **Expert** (phone width) `/q/demo-expert-a` → context and similar past risks → slide to a value, one-line reason → submit → group view (median, range, your mark) → revise or keep.
-4. **Moderator** `/mod/questions/Q001` → 6 answers, first vs latest median, distribution, labelled answers → "Generate AI summary" (empty until Markos's summariser is connected) → resolve → Brier scores.
+1. `python -m app.seed` in `backend/` (no open question: only real pending alerts and practice questions H001–H008), then open `/`.
+2. **Moderator** `/mod` → alerts sorted by impact (filter "4+" by default) with impact, intensity, exposure and the LLM reasoning → open R1049's top alert → edit the draft question, fill "How it resolves" → Approve: "Question Q001 sent to 6 experts" (every expert in the risk's countries; the backend prints the expert app links in its terminal).
+3. `python -m app.demo_answers Q001` in `backend/` → 5 synthetic answers (experts B–F).
+4. **Expert** `http://localhost:8080/?token=demo-expert-a` (expert app) or `/q/demo-expert-a` here → context and similar past risks → slide to a value, one-line reason → submit → group view (median, range) → revise or keep.
+5. **Moderator** `/mod/questions/Q001` → 6 answers, plain median next to "Weighted by past accuracy (Brier)" (see `docs/brier-weighting.md`), distribution, labelled answers with weights → resolve → Brier scores.
 5. **Public** `/outcomes` → resolved questions with group figures only (Q001 appears once resolved in step 4).
 6. **Expert** `/q/demo-expert-a/record` → track record. `/mod/leaderboard` → calibration.
 7. `/mod/risks/R1043` → triggers (completion rates unchanged since June despite the escalation) → record "update T0618 40% → 70%".

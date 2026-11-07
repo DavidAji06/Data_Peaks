@@ -44,6 +44,9 @@ class Expert(Base):
     language: Mapped[str] = mapped_column(default="en")
     max_open_questions: Mapped[int] = mapped_column(default=3)
     email: Mapped[str | None]  # Synthetic only; never returned by the API
+    # Personal link that opens the expert app even before any question is routed to them.
+    # The seed gives synthetic experts fixed ones (demo-expert-a ...); joined experts get a random one.
+    link_token: Mapped[str | None] = mapped_column(String, unique=True)
 
 
 class PanelInvite(Base):
@@ -69,6 +72,16 @@ class Alert(Base):
     direction: Mapped[str | None]
     strength: Mapped[float | None]
     evidence: Mapped[str | None] = mapped_column(Text)
+    # Why the alert is in the queue: the LLM scores of the ACAPS access event
+    country: Mapped[str | None]
+    iso3: Mapped[str | None]
+    impact_score: Mapped[int | None]  # 1-5, from intensity x exposure
+    intensity_score: Mapped[int | None]
+    exposure_score: Mapped[int | None]
+    description: Mapped[str | None] = mapped_column(Text)  # Full event text
+    # Heuristic place-name match between the event text and the risk/trigger text
+    region_match: Mapped[bool | None]
+    matched_place: Mapped[str | None]
     status: Mapped[str] = mapped_column(default="pending")
 
 
@@ -107,6 +120,7 @@ class Response(Base):
     reason: Mapped[str] = mapped_column(Text)
     round: Mapped[int]  # 1 = blind answer, 2 = revision
     anonymity_level: Mapped[str | None]  # The expert's level when they answered
+    pseudonym: Mapped[str | None]  # The expert's nickname when they answered, so a rename never relabels past answers
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
 

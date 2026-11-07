@@ -24,9 +24,11 @@ from ..services.scoring import (
     BASELINE_BRIER,
     brier,
     expert_scores,
+    expert_weights,
     latest_answers,
     summarise_scores,
 )
+from ..services import weighting
 
 router = APIRouter(
     prefix="/moderator",
@@ -68,6 +70,18 @@ def answers_by_expert(db: Session, question_id: str) -> dict[str, dict[int, Resp
     return by_expert
 
 
+def weighted_group(db: Session, question_id: str, by_expert: dict[str, dict[int, Response]]):
+    """Brier-weighted estimate of the latest answers, plus each expert's weight (moderators only)."""
+    weights = expert_weights(db, list(by_expert), exclude_question=question_id)
+    estimate = weighting.weighted_estimate([
+        (rounds[max(rounds)].probability, weights[expert_id]) for expert_id, rounds in by_expert.items()
+    ])
+    if estimate is not None:
+        estimate["label"] = weighting.LABEL
+        estimate["experts_with_history"] = sum(1 for w in weights.values() if w != weighting.NEUTRAL_WEIGHT)
+    return estimate, weights
+
+
 def invited_count(db: Session, question_id: str) -> int:
     return db.scalar(
         select(func.count()).select_from(Invite).where(Invite.question_id == question_id)
@@ -82,6 +96,7 @@ def list_questions(db: Session = Depends(get_db)):
         by_expert = answers_by_expert(db, question.id)
         latest = [rounds[max(rounds)].probability for rounds in by_expert.values()]
         summary = summarise(latest)
+        weighted, _ = weighted_group(db, question.id, by_expert)
         result.append({
             "id": question.id,
             "risk_id": question.risk_id,
@@ -92,6 +107,7 @@ def list_questions(db: Session = Depends(get_db)):
             "invited": invited_count(db, question.id),
             "answered": len(by_expert),
             "median": summary["median"] if summary else None,
+            "weighted_mean": weighted["mean"] if weighted else None,
         })
     return result
 
@@ -118,6 +134,8 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
     # Sort by latest probability so the order doesn't reveal who answered when
     ordered = sorted(by_expert.items(), key=lambda item: item[1][max(item[1])].probability)
 
+    weighted, weights = weighted_group(db, question_id, by_expert)
+
     responses = []
     anonymous_number = 0
     for expert_id, rounds in ordered:
@@ -136,14 +154,20 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
         if level == "anonymous":
             anonymous_number += 1
 
+        # The nickname stored with the answer, so renaming later never relabels past answers
+        pseudonym = (first_answer or revision).pseudonym or expert.pseudonym
         responses.append({
-            **moderator_label(expert, anonymous_number, level),
+            **moderator_label(expert, anonymous_number, level, pseudonym),
             "first_probability": first_answer.probability if first_answer else None,
             "first_reason": first_answer.reason if first_answer else None,
             "latest_probability": latest_answer.probability,
             "revision_reason": revision.reason if revision else None,
             "revised": revision is not None,
-            "brier": brier(latest_answer.probability, question.outcome) if resolved else None,})
+            "brier": brier(latest_answer.probability, question.outcome) if resolved else None,
+            # An anonymous expert's weight is used privately but never shown next to their answer
+            "weight": None if level == "anonymous" else weights[expert_id],
+        })
+
 
 
         
@@ -182,6 +206,7 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
         "first_round": first_summary,
         "latest": latest_summary,
         "median_shift": median_shift,
+        "weighted": weighted,
         "group_median_brier": group_brier,
         "baseline_brier": BASELINE_BRIER,
         "distribution": bands(latest),

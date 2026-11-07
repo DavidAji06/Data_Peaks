@@ -67,7 +67,22 @@ export function useExpert() {
   const refresh = useCallback(async () => {
     if (!token) return;
     try {
-      const q = await api.getQuestion(token);
+      let q: ApiExpertQuestion;
+      try {
+        q = await api.getQuestion(token);
+      } catch (e) {
+        if (!(e instanceof ApiError && e.status === 404)) throw e;
+        // A personal link with no question yet: the expert exists, so show "You're up to date".
+        // If the settings call also 404s, the link itself is unknown ("invalid").
+        const [s, t] = await Promise.all([api.getSettings(token), api.getTrackRecord(token).catch(() => null)]);
+        setData(null);
+        setSettings(s);
+        setTrack(t);
+        setGroup(null);
+        setGroupLocked(true);
+        setState("ready");
+        return;
+      }
       setData(q);
       setOwn(readOwn(q.question.id));
       const [s, t] = await Promise.all([

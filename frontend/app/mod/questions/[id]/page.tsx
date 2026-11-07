@@ -95,6 +95,27 @@ async function QuestionView({ params }: { params: PageProps<'/mod/questions/[id]
             )}
           </Card>
 
+          {showFigures && d.latest && d.weighted && (
+            <Card>
+              <h2 className="text-base font-semibold text-ink">{d.weighted.label}</h2>
+              <dl className="mt-3 grid grid-cols-3 gap-3">
+                <div>
+                  <dt className="text-sm text-ink-muted">{t.plainMedian}</dt>
+                  <dd className="text-2xl font-semibold text-ink">{toPercent(d.latest.median)}%</dd>
+                </div>
+                <div>
+                  <dt className="text-sm text-ink-muted">{t.weightedMean}</dt>
+                  <dd className="text-2xl font-semibold text-ink">{toPercent(d.weighted.mean)}%</dd>
+                </div>
+                <div>
+                  <dt className="text-sm text-ink-muted">{t.weightedMedian}</dt>
+                  <dd className="text-2xl font-semibold text-ink">{toPercent(d.weighted.median)}%</dd>
+                </div>
+              </dl>
+              <p className="mt-2 text-sm text-ink-muted">{t.weightedHelp(d.weighted.expertsWithHistory, d.weighted.count)}</p>
+            </Card>
+          )}
+
           {showFigures && <Distribution d={d} />}
 
           <Responses d={d} />
@@ -153,6 +174,7 @@ function Responses({ d }: { d: QuestionDetail }) {
                 <LevelTag level={r.anonymityLevel} />
                 {r.revised && <StatusTag tone="accent">{t.revisedTag}</StatusTag>}
                 {r.brier !== null && <span className="text-sm text-ink-muted">{t.brier(fmtBrier(r.brier))}</span>}
+                {r.weight !== null && <span className="text-sm text-ink-muted">{t.weight(r.weight)}</span>}
               </div>
               <p className="mt-1 text-sm text-ink">
                 {r.revised && r.firstProbability !== null ? (

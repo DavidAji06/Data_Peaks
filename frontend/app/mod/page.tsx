@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { AlertScores, placeLabel } from '@/components/mod/AlertScores';
 import { PageHeader, StatusTag, fmtDate } from '@/components/mod/parts';
+import { byImpactThenDate } from '@/lib/adapters';
 import { getAlerts } from '@/lib/api';
 import { mod } from '@/lib/i18n/mod';
 import type { AlertStatus } from '@/lib/types';
@@ -11,6 +13,19 @@ export const metadata: Metadata = { title: 'Alerts' };
 
 const STATUSES: readonly AlertStatus[] = ['pending', 'approved', 'rejected'];
 const asStatus = (v: unknown): AlertStatus => (STATUSES.includes(v as AlertStatus) ? (v as AlertStatus) : 'pending');
+const IMPACT_OPTIONS = [0, 3, 4, 5] as const;
+const DEFAULT_MIN_IMPACT = 4; // Same threshold as the export pipeline
+const asMinImpact = (v: unknown): number => {
+  const n = Number(v);
+  return IMPACT_OPTIONS.includes(n as (typeof IMPACT_OPTIONS)[number]) ? n : DEFAULT_MIN_IMPACT;
+};
+const queueHref = (status: AlertStatus, min: number) => {
+  const params = new URLSearchParams();
+  if (status !== 'pending') params.set('status', status);
+  if (min !== DEFAULT_MIN_IMPACT) params.set('min', String(min));
+  const q = params.toString();
+  return q ? `/mod?${q}` : '/mod';
+};
 
 export default function AlertQueuePage({ searchParams }: PageProps<'/mod'>) {
   return (
@@ -21,8 +36,13 @@ export default function AlertQueuePage({ searchParams }: PageProps<'/mod'>) {
 }
 
 async function AlertQueue({ searchParams }: { searchParams: PageProps<'/mod'>['searchParams'] }) {
-  const status = asStatus((await searchParams).status);
-  const { data: alerts, source } = await getAlerts(status);
+  const params = await searchParams;
+  const status = asStatus(params.status);
+  const minImpact = asMinImpact(params.min);
+  const { data: all, source } = await getAlerts(status);
+  // Alerts without scores (older imports) stay visible: the filter only hides scored, lower-impact ones
+  const alerts = all.filter((a) => a.impactScore === null || a.impactScore >= minImpact).sort(byImpactThenDate);
+  const hidden = all.length - alerts.length;
 
   return (
     <>
@@ -32,7 +52,7 @@ async function AlertQueue({ searchParams }: { searchParams: PageProps<'/mod'>['s
         {STATUSES.map((s) => (
           <Link
             key={s}
-            href={s === 'pending' ? '/mod' : `/mod?status=${s}`}
+            href={queueHref(s, minImpact)}
             aria-current={s === status ? 'page' : undefined}
             className={`-mb-px inline-flex min-h-11 items-center border-b-2 px-3 text-sm font-medium ${
               s === status ? 'border-accent text-accent' : 'border-transparent text-ink-muted hover:text-ink'
@@ -42,6 +62,24 @@ async function AlertQueue({ searchParams }: { searchParams: PageProps<'/mod'>['s
           </Link>
         ))}
       </nav>
+
+      <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-ink-muted">{mod.alerts.minImpact}:</span>
+        {IMPACT_OPTIONS.map((n) => (
+          <Link
+            key={n}
+            href={queueHref(status, n)}
+            aria-current={n === minImpact ? 'true' : undefined}
+            className={`inline-flex min-h-11 items-center rounded-full border px-3 ${
+              n === minImpact ? 'border-accent text-accent' : 'border-line text-ink-muted hover:text-ink'
+            }`}
+          >
+            {n === 0 ? mod.alerts.anyImpact : `${n}+`}
+          </Link>
+        ))}
+        <span className="text-ink-muted">{mod.alerts.sortNote}</span>
+        {hidden > 0 && <span className="text-ink-muted">{mod.alerts.hidden(hidden)}</span>}
+      </div>
 
       {alerts.length === 0 ? (
         <p className="rounded-xl border border-line bg-surface p-5 text-ink-muted">{mod.alerts.empty[status]}</p>
@@ -68,10 +106,16 @@ async function AlertQueue({ searchParams }: { searchParams: PageProps<'/mod'>['s
                 </div>
                 <p className="mt-2 font-medium text-ink">{a.report.title}</p>
                 <p className="mt-1 text-sm text-ink-muted">
-                  {[a.report.source, a.report.publishedAt ? fmtDate(a.report.publishedAt) : mod.alerts.noDate]
+                  {[placeLabel(a), a.report.source, a.report.publishedAt ? fmtDate(a.report.publishedAt) : mod.alerts.noDate]
                     .filter(Boolean)
                     .join(' · ')}
                 </p>
+                <AlertScores alert={a} />
+                {a.evidence && (
+                  <p className="mt-1 text-sm text-ink-muted">
+                    <span className="font-medium">{mod.alerts.reasoning}:</span> {a.evidence}
+                  </p>
+                )}
                 {status === 'pending' && (
                   <span className="mt-2 inline-block text-sm font-medium text-accent underline underline-offset-4">
                     {mod.alerts.open}

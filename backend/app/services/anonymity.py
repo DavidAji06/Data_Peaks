@@ -15,19 +15,22 @@ def stricter(*levels: str | None) -> str:
     return max(known, key=PRIVACY_ORDER.index) if known else "anonymous"
 
 
-def moderator_label(expert: Expert, anonymous_number: int, level: str | None = None) -> dict:
+def moderator_label(
+    expert: Expert, anonymous_number: int, level: str | None = None, pseudonym: str | None = None
+) -> dict:
     level = level or expert.anonymity_level
+    pseudonym = pseudonym or expert.pseudonym
 
     if level == "known_to_acaps":
         # A real system would show the expert's real name here
         return {
-            "label": expert.pseudonym,
+            "label": pseudonym,
             "anonymity_level": "known_to_acaps",
             "identity_known": True,
         }
     if level == "pseudonymous":
         return {
-            "label": expert.pseudonym,
+            "label": pseudonym,
             "anonymity_level": "pseudonymous",
             "identity_known": False,
         }

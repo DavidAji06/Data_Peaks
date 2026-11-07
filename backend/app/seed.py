@@ -1,7 +1,13 @@
 """
-Loads the real risks from the CSV and the real ML alerts, adds 6 fake experts and
-opens 1 question on the top-ranked risk (R1049, Sudan).
-5 experts have already answered, so expert-a can show the blind-answer lock (for the demo).
+Loads the real risks from the CSV and the real ML alerts (all pending), adds 6 fake experts
+in Sudan and the practice questions H001-H008.
+
+No open question is created here: the moderator writes it in the dashboard (/mod/alerts/[id])
+when approving an alert. Then `python -m app.demo_answers Q001` adds 5 synthetic answers,
+so expert A can demo the blind-answer lock.
+
+Each synthetic expert has a fixed personal link, demo-expert-a ... demo-expert-f, which opens
+the expert app before and after the moderator creates a question.
 """
 import random
 import secrets
@@ -24,20 +30,7 @@ LEVEL_ORDER = ["pseudonymous", "anonymous", "known_to_acaps"]
 LEVELS = {letter: LEVEL_ORDER[i % 3] for i, letter in enumerate("abcdef")}
 
 
-# The demo question uses the top-ranked risk in data/processed/ranked_risks.json
-DEMO_RISK = "R1049"  # RSF restoration of siege on Al Obeid, North Kordofan
-DEMO_TRIGGER = "T0634"  # RSF encirclement of Al Obeid
-DEMO_COUNTRY = "Sudan"
-DEMO_DEADLINE = date(2027, 5, 7)  # About six months after the hackathon
-
-
-def find_trigger(df: pd.DataFrame, risk_id: str, trigger_id: str) -> dict:
-    """Reads one trigger's title and description from the Risk Radar Triggers column."""
-    text = df.loc[df["Risk ID"] == risk_id, "Triggers"].iloc[0]
-    block = text.split(f"Trigger ID: {risk_id} - {trigger_id}", 1)[1].split("Trigger ID:", 1)[0]
-    title = block.split("Title:", 1)[1].splitlines()[0].strip()
-    description = block.split("Description:", 1)[1].split("Sources:", 1)[0].strip()
-    return {"title": title, "description": " ".join(description.split())}
+DEMO_COUNTRY = "Sudan"  # The top-ranked risk, R1049 (Al Obeid), is in Sudan
 
 
 def clean(value):
@@ -77,6 +70,7 @@ def seed():
             anonymity_level=LEVELS[letter],
             country=DEMO_COUNTRY,
             topics="conflict,displacement",
+            link_token=f"demo-expert-{letter}",  # Fixed personal link for the demo only
         ))
     db.flush()  # Risks must exist before alerts are checked against them
 
@@ -84,53 +78,6 @@ def seed():
     alerts, skipped = import_alert_items(db, ml_outputs.alerts_from_file())
     if skipped:
         print(f"Skipped {len(skipped)} alerts: {skipped}")
-
-    # The open demo question is built on the top-ranked risk and its strongest alert.
-    # Alerts are matched to risks by country only, so this report is related reporting
-    # from Sudan, not evidence that trigger T0634 fired.
-    risk_alerts = [a for a in alerts if a.risk_id == DEMO_RISK]
-    linked = max(risk_alerts, key=lambda a: (a.strength or 0, a.published_at or ""), default=None)
-    if linked is not None:
-        linked.status = "approved"
-
-    trigger = find_trigger(df, DEMO_RISK, DEMO_TRIGGER)
-    db.add(Question(
-        id="Q001",
-        risk_id=DEMO_RISK,
-        alert_id=linked.id if linked else None,
-        # Only ACAPS wording: the trigger title and description from the Risk Radar CSV.
-        # In the real flow a moderator writes the question when approving an alert.
-        text=f"Will ACAPS trigger {DEMO_TRIGGER}, \"{trigger['title']}\", be met by {DEMO_DEADLINE.day} {DEMO_DEADLINE:%B %Y}?",
-        resolution_criteria=f"ACAPS trigger description ({DEMO_RISK} - {DEMO_TRIGGER}): {trigger['description']}",
-        deadline=DEMO_DEADLINE,
-    ))
-
-    # Fixed links for the seeded demo only; real links are random
-    for letter in "abcdef":
-        db.add(Invite(
-            token=f"demo-expert-{letter}",
-            question_id="Q001",
-            expert_id=f"expert-{letter}",
-        ))
-
-    # Five experts have already answered, so expert-a can demo the blind-answer lock.
-    # Synthetic reasons written for the demo; they are not real expert views.
-    demo_answers = [
-        ("b", 0.70, "RSF units have held positions on the roads west of Al Obeid before; a new push from Bara or the west seems likely before the rains."),
-        ("c", 0.55, "SAF retook Bara in March, which widens the buffer north of Al Obeid. A full encirclement is harder now, but road attacks are still plausible."),
-        ("d", 0.80, "Drone strikes and attacks on the El Obeid-Kosti road suggest the RSF is testing supply routes again. Interdiction of one route would count."),
-        ("e", 0.45, "Fighting has shifted to South Kordofan and Darfur. The RSF may lack the forces to besiege Al Obeid again within six months."),
-        ("f", 0.65, "Traders report fuel and market shortages in Al Obeid, an early sign that access routes are being squeezed."),
-    ]
-    for letter, probability, reason in demo_answers:
-        db.add(Response(
-            question_id="Q001",
-            expert_id=f"expert-{letter}",
-            probability=probability,
-            reason=reason,
-            round=1,
-            anonymity_level=LEVELS[letter],
-        ))
 
     # Past questions: REAL resolved ACAPS outcomes, SIMULATED expert forecasts
     resolved = (
@@ -169,11 +116,13 @@ def seed():
                 reason="Simulated forecast for testing scores.",
                 round=1,
                 anonymity_level=LEVELS[letter],
+                pseudonym=f"Analyst {letter.upper()}",
             ))
 
     db.commit()
     db.close()
-    print(f"Seeded {len(df)} risks, 6 experts, {len(alerts)} real alerts, open question Q001 on {DEMO_RISK} and {len(resolved)} past questions")
+    print(f"Seeded {len(df)} risks, 6 experts, {len(alerts)} real pending alerts and {len(resolved)} practice questions. "
+          "No open question yet: approve an alert at http://localhost:3000/mod")
 
 
 if __name__ == "__main__":

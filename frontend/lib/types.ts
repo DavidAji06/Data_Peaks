@@ -34,6 +34,15 @@ export interface ApiAlert {
   direction: string | null; // "escalating" in the seed
   strength: number | null; // 0–1
   evidence: string | null;
+  // Why the alert is in the queue: LLM scores of the ACAPS access event (null on older alerts)
+  country?: string | null;
+  iso3?: string | null;
+  impact_score?: number | null; // 1–5
+  intensity_score?: number | null; // 1–5
+  exposure_score?: number | null; // 1–5
+  description?: string | null;
+  region_match?: boolean | null; // heuristic place-name match, never proof a trigger fired
+  matched_place?: string | null;
   status: AlertStatus;
 }
 
@@ -89,21 +98,17 @@ export interface ApiGroupView {
   themes: ApiThemes;
 }
 
-export interface ApiScore {
+export interface ApiPastQuestion {
   question_id: string;
   question_text: string;
-  probability: number;
   outcome: Outcome;
-  brier: number;
 }
 
-/** GET /q/{token}/track-record */
+/** GET /q/{token}/track-record. Counts and outcomes only: Brier scores are for moderators. */
 export interface ApiTrackRecord {
+  answered: number;
   resolved: number;
-  mean_brier: number | null;
-  beats_baseline: boolean | null;
-  baseline_brier: number;
-  history: ApiScore[];
+  history: ApiPastQuestion[];
 }
 
 /** Body of POST /alerts/{id}/decision. Approving needs all three question fields and a future deadline. */
@@ -116,7 +121,7 @@ export interface ApiDecisionIn {
 
 export type ApiDecisionOut =
   | { alert_id: string; status: 'rejected' }
-  | { alert_id: string; status: 'approved'; question_id: string; experts_invited: number };
+  | { alert_id: string; status: 'approved'; question_id: string; experts_invited: number; experts_notified?: number };
 
 /** One item of GET /moderator/questions */
 export interface ApiQuestionListItem {
@@ -129,6 +134,7 @@ export interface ApiQuestionListItem {
   invited: number;
   answered: number;
   median: number | null;
+  weighted_mean?: number | null; // Brier-weighted, moderators only
 }
 
 export interface ApiRoundSummary {
@@ -148,6 +154,16 @@ export interface ApiModeratorResponse {
   revision_reason: string | null;
   revised: boolean;
   brier: number | null; // once resolved
+  weight?: number | null; // Brier-based weight; null for anonymous answers
+}
+
+/** Brier-weighted group estimate (moderators only). */
+export interface ApiWeighted {
+  mean: number;
+  median: number;
+  count: number;
+  label: string;
+  experts_with_history: number;
 }
 
 /** GET /moderator/questions/{id} */
@@ -165,6 +181,7 @@ export interface ApiQuestionDetail {
   first_round: ApiRoundSummary | null;
   latest: ApiRoundSummary | null;
   median_shift: number | null;
+  weighted?: ApiWeighted | null;
   group_median_brier: number | null;
   baseline_brier: number;
   distribution: { range: string; count: number }[]; // 5 bands of 20%
@@ -198,10 +215,11 @@ export interface ApiJoinIn {
 export interface ApiJoinOut {
   status: 'joined';
   pseudonym: string;
+  app_link?: string; // the expert's personal link to the expert app
 }
 
 /** PATCH /q/{token}/settings: only the fields sent change. Returns the full settings. */
-export type ApiSettingsUpdate = Partial<Pick<ApiExpertSettings, 'anonymity_level' | 'country' | 'topics' | 'max_open_questions'>>;
+export type ApiSettingsUpdate = Partial<Pick<ApiExpertSettings, 'pseudonym' | 'anonymity_level' | 'country' | 'topics' | 'max_open_questions'>>;
 
 /** GET /public/questions (no key): resolved questions only. Figures are null below 5 answers. */
 export interface ApiPublicQuestion {
@@ -213,7 +231,6 @@ export interface ApiPublicQuestion {
   outcome: Outcome | null;
   expert_count: number | null;
   group_median: number | null;
-  group_median_brier: number | null;
   simulated: boolean;
 }
 
@@ -313,6 +330,13 @@ export interface Alert {
   strength: number | null; // 0–1
   strengthWord: StrengthWord | null;
   evidence: string | null;
+  country: string | null;
+  impactScore: number | null;
+  intensityScore: number | null;
+  exposureScore: number | null;
+  description: string | null;
+  regionMatch: boolean;
+  matchedPlace: string | null;
   status: AlertStatus;
 }
 
@@ -349,16 +373,14 @@ export type GroupView =
   | { questionId: string; responseCount: number; suppressed: false; median: number; min: number; max: number; themes: Themes };
 
 export interface TrackRecord {
+  answered: number;
   resolved: number;
-  meanBrier: number | null;
-  beatsBaseline: boolean | null;
-  baselineBrier: number;
-  history: { questionId: string; questionText: string; probability: number; outcome: boolean; brier: number }[];
+  history: { questionId: string; questionText: string; outcome: boolean }[];
 }
 
 export type DecisionResult =
   | { alertId: string; status: 'rejected' }
-  | { alertId: string; status: 'approved'; questionId: string; expertsInvited: number };
+  | { alertId: string; status: 'approved'; questionId: string; expertsInvited: number; expertsNotified: number | null };
 
 export interface QuestionListItem {
   id: string;
@@ -370,6 +392,7 @@ export interface QuestionListItem {
   invited: number;
   answered: number;
   median: number | null;
+  weightedMean: number | null;
 }
 
 export interface RoundSummary {
@@ -389,6 +412,7 @@ export interface ModeratorResponse {
   revisionReason: string | null;
   revised: boolean;
   brier: number | null;
+  weight: number | null;
 }
 
 export interface QuestionDetail {
@@ -405,6 +429,7 @@ export interface QuestionDetail {
   firstRound: RoundSummary | null;
   latest: RoundSummary | null;
   medianShift: number | null;
+  weighted: { mean: number; median: number; count: number; label: string; expertsWithHistory: number } | null;
   groupMedianBrier: number | null;
   baselineBrier: number;
   distribution: { range: string; count: number }[];
@@ -494,7 +519,7 @@ export interface PublicOutcome {
   outcome: boolean | null;
   simulated: boolean; // practice question with simulated answers
   /** null = fewer than 5 answers: nothing is published */
-  group: { expertCount: number; median: number; medianBrier: number | null } | null;
+  group: { expertCount: number; median: number } | null;
 }
 
 /** Moderator's risk decision. No backend endpoint yet: kept in client state only. */

@@ -19,6 +19,8 @@ from app.services.auth import MODERATOR_KEY
 from app.models import Alert
 from app.services import ml_outputs
 from app.services.routing import parse_countries
+from app.services.weighting import NEUTRAL_WEIGHT, expert_weight, weighted_estimate
+from app.demo_answers import DemoError, add_demo_answers
 
 MOD = {"X-Moderator-Key": MODERATOR_KEY}
 ANSWER = {"probability": 0.6, "reason": "Test reason"}
@@ -182,6 +184,9 @@ def test_multi_country_risk_reaches_experts(client):
     db = next(override())
     db.add(Risk(id="R2", title="Lake Chad risk", country="Chad, Niger, Nigeria", iso="TCD, NER, NGA"))
     db.add(Alert(id="A9", risk_id="R2", report_title="Test report"))
+    for country in ("Niger", "Nigeria", "Mali"):
+        db.add(Expert(id=f"expert-{country}", pseudonym=f"Analyst {country}", anonymity_level="pseudonymous",
+                      country=country, topics="conflict"))
     db.commit()
     db.close()
 
@@ -192,7 +197,7 @@ def test_multi_country_risk_reaches_experts(client):
         "deadline": "2030-01-01",
     }
     result = client.post("/alerts/A9/decision", json=body, headers=MOD).json()
-    assert result["experts_invited"] == 3  # All three test experts are in Chad
+    assert result["experts_invited"] == 5  # 3 in Chad, 1 in Niger, 1 in Nigeria; not the one in Mali
 
 def test_anonymous_answers_stay_anonymous(client):
     # Answer anonymously, then switch to the least private level
@@ -282,3 +287,219 @@ def test_public_contexts(client, monkeypatch):
     mine = client.get("/public/contexts", params={"token": "tok-a"}).json()
     assert mine["contexts"][0]["has_question"] is True
     assert client.get("/public/contexts", params={"token": "nope"}).json()["contexts"][0]["has_question"] is False
+
+
+# ---------------------------------------------------------------- routing: every expert in the region
+
+def approve(client, alert_id: str, text: str = "Test routed question?"):
+    body = {
+        "status": "approved",
+        "question_text": text,
+        "resolution_criteria": "Test criteria",
+        "deadline": "2030-01-01",
+    }
+    return client.post(f"/alerts/{alert_id}/decision", json=body, headers=MOD).json()
+
+
+def test_experts_over_their_limit_are_still_invited(client):
+    db = app.state.session_factory()
+    db.get(Expert, "expert-a").max_open_questions = 1  # Already has Q001 open
+    db.add(Alert(id="A10", risk_id="R1", report_title="Test report"))
+    db.commit()
+    db.close()
+
+    result = approve(client, "A10")
+    assert result["experts_invited"] == 3
+    assert result["experts_notified"] == 2  # expert-a is invited but not pinged
+
+
+def test_no_panel_cap(client):
+    db = app.state.session_factory()
+    for n in range(12):
+        db.add(Expert(id=f"expert-x{n}", pseudonym=f"Analyst X{n}", anonymity_level="pseudonymous",
+                      country="Chad", topics="conflict"))
+    db.add(Alert(id="A11", risk_id="R1", report_title="Test report"))
+    db.commit()
+    db.close()
+    assert approve(client, "A11")["experts_invited"] == 15
+
+
+# ---------------------------------------------------------------- personal links
+
+def test_personal_link_without_question_is_up_to_date(client):
+    db = app.state.session_factory()
+    db.add(Expert(id="expert-z", pseudonym="Analyst Z", anonymity_level="pseudonymous",
+                  country="Sudan", topics="conflict", link_token="demo-expert-z"))
+    db.commit()
+    db.close()
+
+    assert client.get("/q/demo-expert-z").status_code == 404  # No question yet
+    assert client.get("/q/demo-expert-z/settings").json()["pseudonym"] == "Analyst Z"
+    assert client.get("/q/demo-expert-z/track-record").json()["resolved"] == 0
+    assert client.get("/q/unknown-link/settings").status_code == 404
+
+
+def test_personal_link_follows_newest_open_question(client):
+    db = app.state.session_factory()
+    db.get(Expert, "expert-a").link_token = "demo-expert-a"
+    db.commit()
+    db.close()
+
+    assert client.get("/q/demo-expert-a").json()["question"]["id"] == "Q001"
+    assert client.post("/q/demo-expert-a/responses", json=ANSWER).status_code == 200
+    assert client.get("/q/tok-a").json()["answered"] is True  # Same invite behind both links
+
+
+# ---------------------------------------------------------------- no Brier for experts
+
+def test_expert_endpoints_never_return_brier_or_weights(client):
+    client.post("/q/tok-a/responses", json=ANSWER)
+    client.post("/moderator/questions/Q001/resolve", json={"outcome": 1}, headers=MOD)
+
+    record = client.get("/q/tok-a/track-record")
+    assert record.json()["resolved"] == 1
+    assert record.json()["history"][0]["outcome"] == 1
+    for text in (record.text, client.get("/q/tok-a/settings").text, client.get("/public/questions").text):
+        assert "brier" not in text.lower()
+        assert "weight" not in text.lower()
+        assert "baseline" not in text.lower()
+
+
+# ---------------------------------------------------------------- nickname
+
+def test_nickname_can_be_changed(client):
+    response = client.patch("/q/tok-a/settings", json={"pseudonym": "  Kordofan   Watcher "})
+    assert response.status_code == 200
+    assert response.json()["pseudonym"] == "Kordofan Watcher"
+
+
+@pytest.mark.parametrize("bad", [
+    "ab",                       # Too short
+    "x" * 31,                   # Too long
+    "me@example.org",           # Email
+    "+249 912 345 678",         # Phone number
+    "0912345678",               # Phone number
+    "Hello!",                   # Not allowed character
+    "Anonymous expert 1",       # Reserved label
+])
+def test_nickname_validation(client, bad):
+    assert client.patch("/q/tok-a/settings", json={"pseudonym": bad}).status_code == 422
+
+
+def test_nickname_must_be_unique(client):
+    response = client.patch("/q/tok-a/settings", json={"pseudonym": "analyst c"})  # Case-insensitive
+    assert response.status_code == 409
+    assert "already taken" in response.json()["detail"]
+    # Keeping your own name is fine
+    assert client.patch("/q/tok-c/settings", json={"pseudonym": "Analyst C"}).status_code == 200
+
+
+def test_rename_keeps_past_answer_labels(client):
+    client.post("/q/tok-a/responses", json=ANSWER)  # Answered as "Analyst A"
+    client.patch("/q/tok-a/settings", json={"pseudonym": "New Name"})
+
+    labels = [r["label"] for r in client.get("/moderator/questions/Q001", headers=MOD).json()["responses"]]
+    assert "Analyst A" in labels
+    assert "New Name" not in labels
+
+
+def test_leaderboard_uses_new_nickname_and_skips_anonymous(client):
+    resolved_history(client)
+    client.patch("/q/tok-c/settings", json={"pseudonym": "Kordofan Watcher"})
+    board = client.get("/moderator/leaderboard", headers=MOD).json()
+    labels = [row["label"] for row in board["experts"]]
+    assert "Kordofan Watcher" in labels
+    assert all(row["anonymity_level"] != "anonymous" for row in board["experts"])
+
+
+# ---------------------------------------------------------------- Brier weighting
+
+def test_expert_weight_formula():
+    assert expert_weight([]) == NEUTRAL_WEIGHT
+    assert expert_weight([0.0, 0.0]) == NEUTRAL_WEIGHT  # Fewer than 3 resolved: neutral
+    assert expert_weight([0.0, 0.0, 0.0]) == pytest.approx(1.2)  # Perfect: 0.2 + 1
+    assert expert_weight([0.25, 0.25, 0.25]) == pytest.approx(0.2)  # Always 50%: floor
+    assert expert_weight([0.81, 0.64, 0.49]) == pytest.approx(0.2)  # Worse than 50%: still the floor
+    assert expert_weight([0.125, 0.125, 0.125]) == pytest.approx(0.7)
+
+
+def test_weighted_estimate():
+    assert weighted_estimate([]) is None
+    equal = weighted_estimate([(0.2, 1), (0.4, 1), (0.9, 1)])
+    assert equal["mean"] == pytest.approx(0.5) and equal["median"] == pytest.approx(0.4)
+    skewed = weighted_estimate([(0.2, 0.2), (0.4, 0.2), (0.9, 1.2)])
+    assert skewed["mean"] == pytest.approx(0.75) and skewed["median"] == pytest.approx(0.9)
+
+
+def resolved_history(client):
+    """Three resolved questions: expert-c (known) is always right, expert-b (anonymous) always 50%."""
+    db = app.state.session_factory()
+    for n in range(3):
+        qid = f"H00{n + 1}"
+        db.add(Question(id=qid, risk_id="R1", text="Past?", resolution_criteria="x",
+                        deadline=date(2025, 1, 1), status="resolved", outcome=1))
+        db.add(Response(question_id=qid, expert_id="expert-c", probability=1.0, reason="r", round=1,
+                        anonymity_level="known_to_acaps"))
+        db.add(Response(question_id=qid, expert_id="expert-b", probability=0.5, reason="r", round=1,
+                        anonymity_level="anonymous"))
+    db.commit()
+    db.close()
+
+
+def test_moderator_sees_weighted_estimate(client):
+    resolved_history(client)
+    detail = client.get("/moderator/questions/Q001", headers=MOD).json()
+
+    # Q001: expert-b 0.8 (weight 0.2), expert-c 0.4 (weight 1.2)
+    weighted = detail["weighted"]
+    assert weighted["label"] == "Weighted by past accuracy (Brier)"
+    assert weighted["mean"] == pytest.approx(round((0.8 * 0.2 + 0.4 * 1.2) / 1.4, 2))
+    assert weighted["median"] == pytest.approx(0.4)
+    assert detail["latest"]["median"] == pytest.approx(0.6)  # Plain median still there
+
+    by_label = {r["label"]: r for r in detail["responses"]}
+    assert by_label["Analyst C"]["weight"] == pytest.approx(1.2)
+    assert by_label["Anonymous expert 1"]["weight"] is None  # Never next to an identity
+
+    listed = {q["id"]: q for q in client.get("/moderator/questions", headers=MOD).json()}
+    assert listed["Q001"]["weighted_mean"] == weighted["mean"]
+
+
+# ---------------------------------------------------------------- alerts: impact filter and sort
+
+def test_alerts_sorted_and_filtered_by_impact(client):
+    db = app.state.session_factory()
+    db.add(Alert(id="A-low", risk_id="R1", report_title="Low", impact_score=3, published_at="2026-05-01"))
+    db.add(Alert(id="A-old", risk_id="R1", report_title="Old", impact_score=5, published_at="2026-01-01"))
+    db.add(Alert(id="A-new", risk_id="R1", report_title="New", impact_score=5, published_at="2026-03-01",
+                 intensity_score=5, exposure_score=4, country="Chad", region_match=False))
+    db.commit()
+    db.close()
+
+    ids = [a["id"] for a in client.get("/alerts", params={"min_impact": 4}, headers=MOD).json()]
+    assert ids == ["A-new", "A-old"]
+    everything = client.get("/alerts", headers=MOD).json()
+    assert [a["id"] for a in everything] == ["A-new", "A-old", "A-low"]
+    assert everything[0]["intensity_score"] == 5 and everything[0]["region_match"] is False
+
+
+def test_alert_import_keeps_scores(client):
+    from app.services.alert_import import import_alert_items
+
+    db = app.state.session_factory()
+    added, skipped = import_alert_items(db, [{
+        "id": "A-imp", "risk_id": "R1", "report_title": "Report", "impact_score": 4,
+        "intensity_score": 4, "exposure_score": 5, "region_match": True, "matched_place": "Bara (North Kordofan)",
+    }, {"id": "A-bad", "risk_id": "R1", "report_title": "Report", "impact_score": 9}])
+    assert [a.id for a in added] == ["A-imp"] and skipped[0]["id"] == "A-bad"
+    assert added[0].matched_place == "Bara (North Kordofan)"
+    db.close()
+
+
+# ---------------------------------------------------------------- demo helper
+
+def test_demo_answers_refuses_missing_question(client):
+    db = app.state.session_factory()
+    with pytest.raises(DemoError):
+        add_demo_answers(db, "Q999")
+    db.close()
