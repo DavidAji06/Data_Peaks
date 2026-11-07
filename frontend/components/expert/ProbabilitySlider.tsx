@@ -23,10 +23,10 @@ export function ProbabilitySlider({
   const shown = unset ? s.estimate.sliderNotSet : s.estimate.sliderValue(value, bandLabel(fromPercent(value)));
   return (
     <div>
-      <label htmlFor={id} className="block font-medium text-ink">
+      <label htmlFor={id} className="text-label block">
         {s.estimate.sliderLabel}
       </label>
-      <p className={`mt-1 text-2xl font-semibold ${unset ? 'text-ink-muted text-base font-normal' : 'text-ink'}`} aria-hidden="true">
+      <p className={`mt-2 ${unset ? 'text-muted text-sm' : 'text-big'}`} aria-hidden="true">
         {shown}
       </p>
       <input
@@ -45,12 +45,11 @@ export function ProbabilitySlider({
             onChange(Math.round(Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width)) * 100));
           }
         }}
-        className={`probability-range mt-2 w-full ${unset ? 'is-unset' : ''}`}
+        className={`probability-range mt-4 w-full ${unset ? 'is-unset' : ''}`}
         style={{ '--fill': `${value ?? 0}%` } as React.CSSProperties}
       />
-      <div className="mt-1 flex justify-between text-xs text-ink-muted" aria-hidden="true">
+      <div className="mt-2 flex justify-between text-xs text-muted" aria-hidden="true">
         <span>0%</span>
-        <span>50%</span>
         <span>100%</span>
       </div>
     </div>

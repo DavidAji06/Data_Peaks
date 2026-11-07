@@ -1,0 +1,44 @@
+- generic [active] [ref=f48e1]:
+  - main [ref=f48e2]:
+    - generic [ref=f48e3]:
+      - generic [ref=f48e4]:
+        - generic [ref=f48e5]: Ground Truth
+        - generic [ref=f48e6]: Demo data (offline)
+      - paragraph [ref=f48e7]: Step 2 of 4 · Your estimate
+      - generic [ref=f48e8]:
+        - paragraph [ref=f48e9]: Chad · R1043
+        - heading "Escalating cross-border insecurity linked to the Sudan conflict increases protection risks and humanitarian needs in eastern Chad" [level=1] [ref=f48e10]
+        - generic [ref=f48e11]: "ACAPS risk level: High"
+        - heading "The question" [level=2] [ref=f48e13]
+        - paragraph [ref=f48e14]: "Sample: Will a defined cross-border event occur in eastern Chad by 6 May 2027?"
+        - paragraph [ref=f48e15]: Resolves by 6 May 2027
+        - group [ref=f48e16]:
+          - generic "How this resolves" [ref=f48e17] [cursor=pointer]
+      - generic [ref=f48e61]:
+        - paragraph [ref=f48e62]: Answer on your own first. You'll see the group's view after you submit.
+        - generic [ref=f48e63]:
+          - generic [ref=f48e64]: Your probability
+          - paragraph [aria-hidden] [ref=f48e65]: "Not set yet: tap or drag the slider"
+          - slider "Your probability" [ref=f48e66] [cursor=pointer]: "50"
+          - generic [aria-hidden] [ref=f48e67]:
+            - generic [ref=f48e68]: 0%
+            - generic [ref=f48e69]: 50%
+            - generic [ref=f48e70]: 100%
+        - generic [ref=f48e71]:
+          - generic [ref=f48e72]: Your reason
+          - paragraph [ref=f48e73]: One or two lines is enough.
+          - textbox "Your reason" [ref=f48e74]:
+            - /placeholder: What are you seeing that others might miss?
+          - paragraph [ref=f48e75]: 0 / 280
+        - generic [ref=f48e76]:
+          - paragraph [ref=f48e77]: Who sees this answer
+          - paragraph [ref=f48e78]: "Your anonymity level: Fully anonymous"
+          - list [ref=f48e79]:
+            - listitem [ref=f48e80]: ACAPS sees only "Anonymous expert", and you are never ranked.
+            - listitem [ref=f48e81]: "Other experts: group figures only"
+            - listitem [ref=f48e82]: "Public: never individually"
+          - link "Change my anonymity level" [ref=f48e83] [cursor=pointer]:
+            - /url: /q/demo-expert-a/settings
+        - button "Submit my estimate" [ref=f48e85]
+  - button "Open Next.js Dev Tools" [ref=f48e91] [cursor=pointer]
+  - alert [ref=f48e95]

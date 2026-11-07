@@ -1,0 +1,25 @@
+- generic [active] [ref=f43e1]:
+  - generic [ref=f43e2]:
+    - banner [ref=f43e3]:
+      - generic [ref=f43e4]:
+        - generic [ref=f43e5]:
+          - link "Ground Truth · ACAPS moderator" [ref=f43e6] [cursor=pointer]:
+            - /url: /
+            - text: Ground Truth
+            - generic [ref=f43e7]: · ACAPS moderator
+          - paragraph [ref=f43e8]: "Demo: no sign-in yet. A real deployment needs moderator accounts."
+        - navigation "Moderator sections" [ref=f43e10]:
+          - link "Alerts" [ref=f43e11] [cursor=pointer]:
+            - /url: /mod
+          - link "Questions" [ref=f43e12] [cursor=pointer]:
+            - /url: /mod/questions
+          - link "Risks" [ref=f43e13] [cursor=pointer]:
+            - /url: /mod/risks
+          - link "Calibration" [ref=f43e14] [cursor=pointer]:
+            - /url: /mod/leaderboard
+          - link "Panel" [ref=f43e15] [cursor=pointer]:
+            - /url: /mod/panel
+    - main [ref=f43e16]:
+      - generic "Loading" [ref=f43e17]
+  - button "Open Next.js Dev Tools" [ref=f43e29] [cursor=pointer]
+  - alert [ref=f43e33]

@@ -235,7 +235,7 @@ export const mod = {
     noQuestions: 'No expert questions on this risk yet.',
     decisionTitle: 'Decision',
     decisionHelp: 'Record what ACAPS decides after reading the experts.',
-    notSaved: 'Not saved to server yet: kept on this page only until the backend has a decision endpoint.',
+    notSaved: 'Saving to server…',
     kind: 'Decision',
     trigger: 'Trigger',
     newCompletion: 'New completion (%)',

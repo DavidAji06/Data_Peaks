@@ -896,7 +896,7 @@
     {
       "id": "A001",
       "risk_id": "R1043",
-      "trigger_id": "T0001",
+      "trigger_id": "T0618",
       "report_title": "Sample report on clashes near the Chad-Sudan border",
       "report_source": "Sample source",
       "report_url": "https://example.org/sample-report",
@@ -909,7 +909,7 @@
     {
       "id": "A002",
       "risk_id": "R1043",
-      "trigger_id": "T0001",
+      "trigger_id": "T0620",
       "report_title": "Sample report on new refugee arrivals in eastern Chad",
       "report_source": "Sample source",
       "report_url": "https://example.org/sample-report-2",

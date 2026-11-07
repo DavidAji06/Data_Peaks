@@ -231,6 +231,7 @@ export const en = {
     alreadySubmitted: 'Already submitted. Showing where you left off.',
     network: "Couldn't reach the server. Your answer is still here.",
     networkSettings: "Couldn't reach the server. Your choices are still here: try again.",
+    slowNetwork: 'The server is taking a moment to respond. Still loading…',
     notFound: 'Page not found.',
     toHome: 'Go to the start page',
   },
@@ -252,8 +253,8 @@ export const en = {
   },
   decisions: {
     keep: 'Keep the current rating',
-    raise_probability: 'Raise the probability',
-    lower_probability: 'Lower the probability',
+    raise: 'Raise the probability',
+    lower: 'Lower the probability',
     update_trigger: 'Update a trigger',
     add_trigger: 'Add a trigger',
   } satisfies Record<DecisionKind, string>,

@@ -24,16 +24,16 @@ export function PageHeader({
   return (
     <div className="mb-5">
       {back && (
-        <Link href={back.href} className="mb-1 inline-flex min-h-11 items-center text-sm font-medium text-accent underline underline-offset-4">
+        <Link href={back.href} className="mb-1 inline-flex min-h-11 items-center text-sm font-medium text-primary-600 underline underline-offset-4 hover:text-primary-700">
           ← {mod.backTo(back.label)}
         </Link>
       )}
       <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-xl font-semibold text-ink sm:text-2xl">{title}</h1>
+        <h1 className="text-xl font-semibold text-ink-900 sm:text-2xl">{title}</h1>
         {source === 'demo' && <DemoBadge>{mod.demoOffline}</DemoBadge>}
         {demoUntilMl && <DemoBadge>{mod.demoUntilMl}</DemoBadge>}
       </div>
-      {intro && <p className="mt-1 max-w-2xl text-ink-muted">{intro}</p>}
+      {intro && <p className="mt-1 max-w-2xl text-ink-500">{intro}</p>}
     </div>
   );
 }
@@ -41,7 +41,7 @@ export function PageHeader({
 /** Anonymity level as a quiet tag; the label itself always comes from the API. */
 export function LevelTag({ level }: { level: AnonymityLevel }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-line px-2 py-0.5 text-xs text-ink-muted">
+    <span className="inline-flex items-center rounded-full border border-border-default px-2 py-0.5 text-xs text-ink-500" style={{ borderRadius: '7px' }}>
       {en.anonymity.levels[level].label}
     </span>
   );
@@ -50,9 +50,10 @@ export function LevelTag({ level }: { level: AnonymityLevel }) {
 export function StatusTag({ children, tone = 'muted' }: { children: ReactNode; tone?: 'muted' | 'accent' }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-        tone === 'accent' ? 'bg-accent-soft text-accent' : 'bg-surface-muted text-ink-muted'
+      className={`inline-flex items-center px-2.5 py-0.5 text-xs font-bold ${
+        tone === 'accent' ? 'bg-primary-50 text-primary-600' : 'bg-surface-card text-ink-500'
       }`}
+      style={{ borderRadius: '7px' }}
     >
       {children}
     </span>
@@ -64,11 +65,11 @@ export function MiniBar({ label, value }: { label: string; value: number | null 
   const pct = value === null ? 0 : Math.round(Math.min(Math.max(value, 0), 1) * 100);
   return (
     <div className="grid grid-cols-[5.5rem_1fr_2.25rem] items-center gap-2 text-xs">
-      <span className="text-ink-muted">{label}</span>
-      <span className="h-1.5 rounded-full bg-surface-muted" aria-hidden="true">
-        <span className="block h-1.5 rounded-full bg-accent" style={{ width: `${pct}%` }} />
+      <span className="text-ink-500">{label}</span>
+      <span className="h-1.5 rounded-full bg-border-subtle" aria-hidden="true">
+        <span className="block h-1.5 rounded-full bg-primary-500" style={{ width: `${pct}%` }} />
       </span>
-      <span className="text-right tabular-nums text-ink">{value === null ? '—' : value.toFixed(2)}</span>
+            <span className="text-right tabular-nums text-ink-900">{value === null ? '—' : value.toFixed(2)}</span>
     </div>
   );
 }

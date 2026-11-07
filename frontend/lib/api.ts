@@ -124,7 +124,13 @@ export function getExpertQuestion(token: string): Promise<Loaded<ExpertQuestion>
   return load(async (call) => {
     const raw = await call<ApiExpertQuestion>('GET', `/q/${enc(token)}`);
     const similar = isPlaceholderSimilar(raw.similar_risks)
-      ? { items: curated.similar_risks[raw.risk.id] ?? [], areDemo: true }
+      ? (() => {
+          const curatedItems = curated.similar_risks[raw.risk.id] ?? [];
+          if (curatedItems.length === 0) {
+            console.warn(`[Ground Truth] No curated similar risks found for risk ${raw.risk.id}`);
+          }
+          return { items: curatedItems, areDemo: true };
+        })()
       : { items: raw.similar_risks, areDemo: false };
     // Only the anonymity level is used from the settings; the pseudonym and topics stay on the server.
     let level: ExpertQuestion['anonymityLevel'] = null;
@@ -264,7 +270,12 @@ export function getRankedRisks(): Promise<Loaded<RankedRisks>> {
   return load(async (call) => {
     const raw = await call<ApiRankedRisk[]>('GET', '/risks/ranked');
     return isPlaceholderRanked(raw)
-      ? { items: curated.ranked_risks.map(toRankedRisk), areDemo: true }
+      ? (() => {
+          if (curated.ranked_risks.length === 0) {
+            console.warn('[Ground Truth] No curated ranked risks found; showing empty list');
+          }
+          return { items: curated.ranked_risks.map(toRankedRisk), areDemo: true };
+        })()
       : { items: raw.map(toRankedRisk), areDemo: false };
   }, 'moderator');
 }
