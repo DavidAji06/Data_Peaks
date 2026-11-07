@@ -1,4 +1,4 @@
-# Prompt for the next session: moderator-made questions, impact filtering, no Brier for experts, editable nickname
+# Prompt for the next session: moderator-made questions, impact filtering, region-wide routing with Brier weighting, no Brier for experts, editable nickname
 
 Project: `C:\Projects\Data_Peaks`, the repo for the ACAPS "Ground Truth" hackathon challenge. Work on branch `test` (pushed to origin). Read `CLAUDE.md` first. Use only synthetic experts and never real personal data. `.env` at the repo root holds ACAPS_TOKEN, GREENPT_KEY, GREENPT_MODEL and GREENPT_BUDGET_USD. Never print those values or ask for them.
 
@@ -59,7 +59,20 @@ Project: `C:\Projects\Data_Peaks`, the repo for the ACAPS "Ground Truth" hackath
 - Decide whether a renamed expert's past pseudonymous answers show the new name or the old one. Today the label is read live from `experts.pseudonym`, so a rename relabels past answers. Recommended: store the label on each response at answer time, just like `anonymity_level`. Write a test.
 - The leaderboard must keep excluding anonymous experts.
 
-### 5. Do not change
+### 5. Send each question to every expert in the region, and give more weight to experts with better Brier scores
+- **Routing.** For now, region means the expert's country. In `backend/app/services/routing.py`, `route_question` currently invites at most `MAX_PANEL_SIZE = 10` experts and skips anyone already at `max_open_questions`. Change it to invite **every** expert whose country is one of the risk's countries; a multi-country risk such as "Chad, Niger, Cameroon, Nigeria" reaches all four. Remove the panel cap. Keep `max_open_questions` as a preference that controls how often an expert is notified, not whether they are invited, and say this in the code and the README. Update `test_multi_country_risk_reaches_experts` and add a test showing that experts over their limit are still invited.
+- **Weighting.** Add a Brier-weighted group estimate next to the plain median. Weights come from each expert's mean Brier on resolved questions (`services/scoring.py`, `expert_scores`):
+  - skill = max(0, 1 − mean_brier / 0.25), so 0.25 (always 50%) gives 0 and a perfect score gives 1
+  - weight = 0.2 + skill, so nobody is ignored completely
+  - experts with fewer than 3 resolved questions get a neutral weight of 1
+  - aggregate = weighted mean of the latest answers (also report the weighted median)
+
+  Put this in one small, tested function and document the formula in `docs/` (in plain words).
+- **Who sees it.** The weighted estimate and each expert's weight appear **only** in the moderator dashboard: `/moderator/questions` and `/moderator/questions/{id}`, and the matching `frontend/` pages, next to the plain median. Label it "Weighted by past accuracy (Brier)". The expert app keeps showing the plain median and range, so experts never see Brier scores or weights (this matches task 3). Anonymous experts' scores may be used privately for weighting, but they stay off the leaderboard and their weight is never shown next to an identity.
+- Decide whether the Elo rating in `ml/ranking/` should replace Brier as the weight later, and note it as a follow-up. Keep Brier for now.
+- Add tests: weights, the neutral weight for new experts, the formula's edge cases, and that the expert endpoints never return weights or Brier values.
+
+### 6. Do not change
 - The app's colours, fonts, layout or Questions screen design.
 - The honest labels already in place: "Related reporting in Sudan", "ACAPS humanitarian access events (scored by LLM)", "AI summary of expert reasons", "Ranked by Data Peaks pipeline · {date}".
 - The practice questions H001–H008. They use real ACAPS outcomes with simulated forecasts.
@@ -70,7 +83,7 @@ Project: `C:\Projects\Data_Peaks`, the repo for the ACAPS "Ground Truth" hackath
 3. Run the demo-answers helper. Expert A then sees the question, the globe halo on Sudan, the real past cases with "How it evolved", and the blind-answer lock.
 4. Submit 75% with a reason. The Group tab shows the median, the range and the AI summary.
 5. Profile: rename to a new nickname, check that a duplicate is rejected, switch privacy levels, and confirm that no Brier score appears anywhere.
-6. Moderator leaderboard: Brier is still there, anonymous experts are excluded, and the new nickname appears.
+6. Moderator leaderboard: Brier is still there, anonymous experts are excluded, and the new nickname appears. Moderator question page: every Sudan expert was invited, and the Brier-weighted estimate appears next to the plain median.
 7. Run `cd backend && ../venv/Scripts/python.exe -m pytest tests -q` and `venv/Scripts/python.exe -m pytest ml/tests -q`, then `npx tsc --noEmit -p expert-app`.
 8. Reseed so the demo starts clean. Commit to `test` and push.
 
