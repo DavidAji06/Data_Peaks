@@ -9,7 +9,7 @@ PROCESSED = ROOT / "data" / "processed"
 EVENTS = PROCESSED / "access_events_scored_v7.csv"
 RISKS = ROOT / "data" / "risk-radar-export.csv"
 
-RECENT_DAYS = 180          # How far back counts as "recent"
+RECENT_DAYS = 180         # Many countries report quarterly, so 90 days misses them
 MIN_ALERT_IMPACT = 4      # Only high-impact events become alerts
 MAX_ALERTS_PER_RISK = 3
 SCALE = 5                 # Impact scores run from 1 to 5
@@ -46,7 +46,7 @@ def main():
     rates = observed_rates(risks)
     active = risks[risks["Status"] == "Active"]
 
-    alerts, ranked = [], []
+    candidates, ranked = [], []
     for _, risk in active.iterrows():
         matches = recent[recent["iso3"].isin(isos(risk["ISO"]))]
         # One report can appear once per access indicator, so count each report once
@@ -78,7 +78,7 @@ def main():
         )
         for _, event in strong.iterrows():
             description = str(event["description"])
-            alerts.append({
+            candidates.append((priority, event["event_id"], {
                 "id": f"A-{risk['Risk ID']}-{event['event_id']}",
                 "risk_id": risk["Risk ID"],
                 "trigger_id": None,  # Trigger matching not built yet
@@ -89,7 +89,15 @@ def main():
                 "direction": "escalating",
                 "strength": round(min(float(event["impact_score"]) / SCALE, 1.0), 2),
                 "evidence": None if pd.isna(event["brief_reasoning"]) else str(event["brief_reasoning"]),
-            })
+            }))
+
+    # Each report appears once, under the highest-priority risk it matches
+    candidates.sort(key=lambda candidate: candidate[0], reverse=True)
+    seen_events, alerts = set(), []
+    for _, event_id, alert in candidates:
+        if event_id not in seen_events:
+            seen_events.add(event_id)
+            alerts.append(alert)
 
     ranked.sort(key=lambda row: row["priority_score"], reverse=True)
 
