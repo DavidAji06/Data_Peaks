@@ -251,7 +251,7 @@ function Home({ t, lang, ex, active, prefs, onQuestions, onGroup }: { t: T; lang
     return () => ro.disconnect();
   }, []);
 
-  const { contexts, rankedAt } = useContexts(ex.token);
+  const { contexts, rankedAt, failed: contextsFailed } = useContexts(ex.token);
   const liveCountry = ex.data?.question.status === "open" ? ex.data.risk.country : null;
   const assignedIds = contexts.filter((c) => c.hasQuestion || c.name.en === liveCountry).map((c) => c.id);
   const rankedLabel = L(lang, "Ranked by Data Peaks pipeline", "Classé par le pipeline Data Peaks") + (rankedAt ? ` · ${fmtDate(lang, rankedAt)}` : "");
@@ -312,6 +312,7 @@ function Home({ t, lang, ex, active, prefs, onQuestions, onGroup }: { t: T; lang
           </Card>
         )}
 
+        {contextsFailed && <p className="text-sm text-risk">{L(lang, "Couldn't load the map data. Check that the backend is running the latest version.", "Impossible de charger les données de la carte. Vérifiez que le backend est à jour.")}</p>}
         <div ref={boxRef} className="w-full">
           {listView ? (
             <div className="space-y-2">
@@ -464,7 +465,7 @@ function Question(p: { t: T; lang: Lang; ex: Expert; answer: number; setAnswer: 
   const level = d.risk.risk_level ? `${d.risk.risk_level} risk` : "";
   const update = d.trigger_update;
   const cases = d.similar_risks.length
-    ? d.similar_risks.map((s) => ({ place: s.country, code: s.risk_id, status: s.outcome, text: s.what_happened || s.title }))
+    ? d.similar_risks.map((s) => ({ place: s.country, code: s.risk_id, status: s.outcome, text: s.what_happened || s.title, full: s.what_happened_full || "", title: s.title, sources: s.sources ?? [] }))
     : t.cases;
 
   const submit = async () => {
@@ -530,11 +531,12 @@ function Question(p: { t: T; lang: Lang; ex: Expert; answer: number; setAnswer: 
   );
 }
 
-type Case = { place: string; code: string; status: string; text: string };
+type Case = { place: string; code: string; status: string; text: string; full?: string; title?: string; sources?: string[] };
 
 function CasesCarousel({ t, cases }: { t: T; cases: Case[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const [idx, setIdx] = useState(0);
+  const [expanded, setExpanded] = useState<number | null>(null);
   const go = (i: number) => {
     const el = ref.current;
     if (!el) return;
@@ -548,9 +550,21 @@ function CasesCarousel({ t, cases }: { t: T; cases: Case[] }) {
         {cases.map((c, i) => (
           <div key={c.code + i} className="w-full shrink-0 snap-center px-1 py-1" aria-label={`${i + 1} / ${cases.length}`}>
             <Card className="h-full">
-              <p className="text-2xl font-medium text-navy">{c.place}</p>
-              <p className="font-condensed text-xs text-muted-foreground">{c.code} · {c.status}</p>
-              <p className="mt-3 text-base leading-relaxed">{c.text}</p>
+              <button onClick={() => setExpanded(expanded === i ? null : i)} aria-expanded={expanded === i} className="w-full text-left">
+                <p className="text-2xl font-medium text-navy">{c.place}</p>
+                <p className="font-condensed text-xs text-muted-foreground">{c.code} · {c.status}</p>
+                {expanded === i && c.title && <p className="mt-3 font-bold leading-snug">{c.title}</p>}
+                <p className="mt-3 text-base leading-relaxed">{expanded === i && c.full ? c.full : c.text}</p>
+                {(c.full || c.title) && <span className="mt-2 flex items-center gap-1 text-sm font-medium text-primary-strong">{expanded === i ? "Show less" : "Read the full case"}<ChevronDown className={`h-4 w-4 transition-transform ${expanded === i ? "rotate-180" : ""}`} /></span>}
+              </button>
+              {expanded === i && !!c.sources?.length && (
+                <div className="mt-3 space-y-1 border-t pt-2">
+                  <p className="font-condensed text-xs text-muted-foreground">Sources</p>
+                  {c.sources.map((url) => (
+                    <a key={url} href={url} target="_blank" rel="noreferrer" className="block break-all text-xs text-primary-strong underline">{new URL(url).hostname.replace(/^www\./, "")}</a>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
         ))}

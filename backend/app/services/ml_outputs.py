@@ -1,5 +1,7 @@
 import json
+import re
 import sys
+from functools import lru_cache
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -25,11 +27,40 @@ def ranked_risks() -> list:
     return data if isinstance(data, list) else sample("ranked_risk")
 
 
+RISK_RADAR_CSV = ROOT / "data" / "risk-radar-export.csv"
+URL = re.compile(r"https?://[^\s)\]]+")
+
+
+@lru_cache(maxsize=1)
+def past_case_details() -> dict:
+    """Full 'what happened' text and source links per risk, from the Risk Radar CSV."""
+    import pandas as pd
+
+    try:
+        df = pd.read_csv(RISK_RADAR_CSV)
+    except FileNotFoundError:
+        return {}
+
+    def text(value):
+        return "" if pd.isna(value) else str(value).strip()
+
+    details = {}
+    for _, row in df.iterrows():
+        full = text(row.get("Impact materialisation description")) or text(row.get("Hazard materialisation"))
+        urls = list(dict.fromkeys(URL.findall(text(row.get("Materialisation sources")))))
+        details[str(row["Risk ID"])] = {"what_happened_full": full, "sources": urls}
+    return details
+
+
 def similar_risks(risk_id: str) -> list:
     data = read_json(PROCESSED / "similar_risks.json")
-    if isinstance(data, dict):
-        return data.get(risk_id, [])[:3]
-    return sample("similar_risk")
+    if not isinstance(data, dict):
+        return sample("similar_risk")
+    details = past_case_details()
+    return [
+        {**match, **details.get(str(match.get("risk_id")), {"what_happened_full": "", "sources": []})}
+        for match in data.get(risk_id, [])[:3]
+    ]
 
 
 def alerts_from_file() -> list:

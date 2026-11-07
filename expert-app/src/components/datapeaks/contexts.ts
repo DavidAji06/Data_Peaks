@@ -56,6 +56,7 @@ function toContext(c: ApiContext): ConflictContext {
 export function useContexts(token: string | null) {
   const [contexts, setContexts] = useState<ConflictContext[]>([]);
   const [rankedAt, setRankedAt] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -65,16 +66,17 @@ export function useContexts(token: string | null) {
         if (cancelled) return;
         setContexts(res.contexts.map(toContext));
         setRankedAt(res.ranked_at);
+        setFailed(false);
       })
       .catch(() => {
-        /* Backend offline: the globe shows no dots; the rest of Home shows its offline card. */
+        if (!cancelled) setFailed(true);
       });
     return () => {
       cancelled = true;
     };
   }, [token]);
 
-  return { contexts, rankedAt };
+  return { contexts, rankedAt, failed };
 }
 
 export const START_VIEW = { lat: 10, lng: 22, altitude: 1.45 };

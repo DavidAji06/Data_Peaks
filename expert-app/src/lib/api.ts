@@ -27,6 +27,10 @@ export interface ApiSimilarRisk {
   similarity?: number;
   outcome: string;
   what_happened: string;
+  /** Full ACAPS text, untruncated. */
+  what_happened_full?: string;
+  /** Source links recorded by ACAPS for what happened. */
+  sources?: string[];
 }
 
 export interface ApiExpertQuestion {
