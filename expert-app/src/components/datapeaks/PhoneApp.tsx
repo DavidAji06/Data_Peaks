@@ -87,7 +87,8 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
     ["group", L(lang, "Group", "Groupe"), Users],
   ];
   const needsData = screen === "questions" || screen === "group";
-  const blocked = ex.state !== "ready" && needsData;
+  // Questions and Group need a question: with none yet (personal link, nothing routed) show "You're up to date"
+  const blocked = needsData && (ex.state !== "ready" || !ex.data);
 
   return (
     <div className="mx-auto flex min-h-[760px] w-full max-w-[420px] flex-col overflow-hidden bg-background sm:rounded-2xl sm:border-8 sm:border-foreground sm:shadow-xl">
@@ -138,7 +139,14 @@ function LoadNotice({ t, lang, ex }: { t: T; lang: Lang; ex: Expert }) {
   if (ex.state === "loading")
     return <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" />{L(lang, "Loading…", "Chargement…")}</div>;
   if (ex.state === "invalid") return <InvalidLink t={t} lang={lang} />;
+  if (ex.state === "ready") return <UpToDate lang={lang} />;
   return <OfflineCard lang={lang} ex={ex} />;
+}
+
+function UpToDate({ lang }: { lang: Lang }) {
+  return (
+    <Card><p className="font-bold">{L(lang, "You're up to date.", "Vous êtes à jour.")}</p><p className="text-sm text-muted-foreground">{L(lang, "We'll let you know when your perspective is needed.", "Nous vous préviendrons quand votre avis sera utile.")}</p></Card>
+  );
 }
 
 function InvalidLink({ t, lang }: { t: T; lang: Lang }) {
@@ -415,9 +423,7 @@ function NextContribution({ lang, t, ex, onQuestions, onGroup }: { lang: Lang; t
   if (ex.state === "invalid") return <InvalidLink t={t} lang={lang} />;
   if (ex.state === "offline") return <OfflineCard lang={lang} ex={ex} />;
   const d = ex.data;
-  if (!d) return (
-    <Card><p className="font-bold">{L(lang, "You're up to date.", "Vous êtes à jour.")}</p><p className="text-sm text-muted-foreground">{L(lang, "We'll let you know when your perspective is needed.", "Nous vous préviendrons quand votre avis sera utile.")}</p></Card>
-  );
+  if (!d) return <UpToDate lang={lang} />;
   const closed = d.question.status !== "open";
   const status = closed ? L(lang, "Closed", "Close") : d.revised ? L(lang, "Revised", "Révisée") : d.answered ? L(lang, "Answered", "Répondue") : L(lang, "Open", "Ouverte");
   return (
