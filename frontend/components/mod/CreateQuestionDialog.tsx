@@ -40,7 +40,7 @@ export function CreateQuestionDialog({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`${buttonClass.secondary} text-sm`}
+        className={`${buttonClass.secondary} text-xs sm:text-sm font-semibold transition-all duration-150 hover:shadow-md`}
         aria-label={`Create question from alert ${alertId}`}
       >
         Create question
@@ -48,19 +48,22 @@ export function CreateQuestionDialog({
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm"
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);
           }}
           role="presentation"
         >
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-surface p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-ink">Create question from alert {alertId}</h2>
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl border border-line">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-ink">Create question</h2>
+                <p className="text-xs sm:text-sm text-ink-muted mt-1">From alert <span className="font-mono font-semibold">{alertId}</span></p>
+              </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="text-ink-muted hover:text-ink"
+                className="text-ink-muted hover:text-ink transition-colors p-1 hover:bg-surface-muted rounded-lg"
                 aria-label="Close dialog"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

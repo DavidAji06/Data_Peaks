@@ -29,17 +29,17 @@ export function AlertCard({ alert: a, status, source, today, minDeadline, trigge
 
   return (
     <li key={a.id}>
-      <div className="rounded-xl border border-line bg-surface p-4 hover:border-line-strong">
+      <div className="group rounded-xl border border-line bg-surface p-4 transition-all duration-200 hover:border-accent hover:shadow-md hover:shadow-accent/10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <Link
             href={`/mod/alerts/${encodeURIComponent(a.id)}`}
             className="flex-1 block"
           >
-            <div className="flex flex-wrap items-center gap-2 text-sm text-ink-muted">
-              <span className="font-medium text-ink">{a.id}</span>
-              <span>·</span>
-              <span>{a.riskId}</span>
-              <span>·</span>
+            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-ink-muted">
+              <span className="font-semibold text-ink">{a.id}</span>
+              <span className="text-line">·</span>
+              <span className="font-medium">{a.riskId}</span>
+              <span className="text-line">·</span>
               <span>{mod.alerts.trigger(a.triggerId)}</span>
               {a.strengthWord && a.strength !== null && (
                 <StatusTag tone={a.strengthWord === 'strong' ? 'accent' : 'muted'}>
@@ -48,21 +48,21 @@ export function AlertCard({ alert: a, status, source, today, minDeadline, trigge
               )}
               {a.direction && <StatusTag>{mod.direction[a.direction] ?? a.direction}</StatusTag>}
             </div>
-            <p className="mt-2 font-medium text-ink">{a.report.title}</p>
-            <p className="mt-1 text-sm text-ink-muted">
+            <p className="mt-2.5 font-semibold text-ink text-base group-hover:text-accent transition-colors">{a.report.title}</p>
+            <p className="mt-1.5 text-xs sm:text-sm text-ink-muted">
               {[a.report.source, a.report.publishedAt ? fmtDate(a.report.publishedAt) : mod.alerts.noDate]
                 .filter(Boolean)
                 .join(' · ')}
             </p>
             {status === 'pending' && (
-              <span className="mt-2 inline-block text-sm font-medium text-accent underline underline-offset-4">
-                {mod.alerts.open}
+              <span className="mt-2 inline-block text-xs sm:text-sm font-semibold text-accent">
+                → {mod.alerts.open}
               </span>
             )}
           </Link>
 
           {status === 'pending' && (
-            <div className="flex gap-2 sm:flex-col">
+            <div className="flex gap-2 sm:flex-col sm:flex-shrink-0">
               <CreateQuestionDialog
                 alertId={a.id}
                 status={a.status}
@@ -74,7 +74,7 @@ export function AlertCard({ alert: a, status, source, today, minDeadline, trigge
               />
               <Link
                 href={`/mod/alerts/${encodeURIComponent(a.id)}`}
-                className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg border border-line-strong text-ink hover:bg-surface-muted"
+                className="inline-flex items-center px-3 py-2 text-xs sm:text-sm font-medium rounded-lg border border-line-strong text-ink hover:border-accent hover:bg-accent hover:text-ink transition-colors duration-150"
               >
                 Review
               </Link>
