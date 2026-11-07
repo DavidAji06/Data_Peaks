@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { Suspense } from 'react';
 import { PublicHeader } from '@/components/public/PublicOutcomeView';
-import { Chip } from '@/components/ui/primitives';
 import { getPublicOutcomes } from '@/lib/api';
-import { toPercent } from '@/lib/probability';
 import { strings as s } from '@/lib/strings';
 import { QuestionSkeleton } from '@/app/q/[token]/loading';
 import { PublicOutcomesClient } from '@/components/public/PublicOutcomesClient';

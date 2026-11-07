@@ -12,21 +12,14 @@ const p = s.public;
 export function PublicOutcomesClient({ initialItems }: { initialItems: PublicOutcome[] }) {
   const [items, setItems] = useState(initialItems);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
-  const [mounted, setMounted] = useState(false);
 
-  // Initialize timestamp after mount (hydration safety)
+  // Auto-refresh every 60 seconds (also runs once on mount to initialize lastRefresh)
   useEffect(() => {
-    setLastRefresh(new Date());
-    setMounted(true);
-  }, []);
-
-  // Auto-refresh every 60 seconds
-  useEffect(() => {
-    const interval = setInterval(async () => {
+    const refresh = async () => {
       try {
         const res = await fetch('/api/demo/public/questions');
         if (!res.ok) return;
-        const data = (await res.json()) as any[];
+        const data = (await res.json()) as PublicOutcome[];
         const refreshed = data.sort((a, b) => Number(a.simulated) - Number(b.simulated));
         setItems(refreshed);
         setLastRefresh(new Date());
@@ -34,10 +27,16 @@ export function PublicOutcomesClient({ initialItems }: { initialItems: PublicOut
         // Silent fail on refresh — page still shows previous data
         console.debug('Public outcomes auto-refresh failed', e);
       }
-    }, 60000); // 60 seconds
+    };
 
+    // Refresh immediately on mount
+    refresh();
+
+    // Then refresh every 60 seconds
+    const interval = setInterval(refresh, 60000);
     return () => clearInterval(interval);
   }, []);
+
 
   if (items.length === 0) {
     return <p className="mt-4 rounded-xl border border-border-default bg-surface-card p-5 text-ink-muted">{p.empty}</p>;
@@ -65,7 +64,7 @@ export function PublicOutcomesClient({ initialItems }: { initialItems: PublicOut
           </li>
         ))}
       </ul>
-      {mounted && lastRefresh && (
+      {lastRefresh && (
         <p className="mt-3 text-xs text-ink-500">Last refreshed: {lastRefresh.toLocaleTimeString()}</p>
       )}
     </>
