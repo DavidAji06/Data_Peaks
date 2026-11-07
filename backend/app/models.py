@@ -5,13 +5,16 @@ Each expert can submit one answer per round of Q's
 """
 
 from datetime import date, datetime, timezone
+
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .db import Base
 
+
 def utc_now():
     return datetime.now(timezone.utc)
+
 
 class Risk(Base):
     __tablename__ = "risks"
@@ -80,7 +83,7 @@ class Question(Base):
     deadline: Mapped[date]
     status: Mapped[str] = mapped_column(default="open")
     outcome: Mapped[int | None]  # 1 = happened, 0 = didn't, None = unresolved
-    themes: Mapped[str | None] = mapped_column(Text)  # AI summary as JSON, used in Part 2
+    themes: Mapped[str | None] = mapped_column(Text)  # AI summary as JSON
 
 
 class Invite(Base):
@@ -103,4 +106,17 @@ class Response(Base):
     probability: Mapped[float] = mapped_column(Float)
     reason: Mapped[str] = mapped_column(Text)
     round: Mapped[int]  # 1 = blind answer, 2 = revision
+    anonymity_level: Mapped[str | None]  # The expert's level when they answered
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+
+
+class RiskDecision(Base):
+    __tablename__ = "risk_decisions"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    risk_id: Mapped[str] = mapped_column(ForeignKey("risks.id"))
+    question_id: Mapped[str | None] = mapped_column(ForeignKey("questions.id"))
+    decision: Mapped[str]  # keep, raise, lower, update_trigger, add_trigger
+    trigger_id: Mapped[str | None]
+    note: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)

@@ -68,3 +68,17 @@ class AlertImport(BaseModel):
     direction: str | None = None
     strength: float | None = Field(default=None, ge=0, le=1)
     evidence: str | None = None
+
+class RiskDecisionIn(BaseModel):
+    decision: Literal["keep", "raise", "lower", "update_trigger", "add_trigger"]
+    question_id: str | None = None
+    trigger_id: str | None = None
+    note: str | None = Field(default=None, max_length=1000)
+
+    @model_validator(mode="after")
+    def check_details(self):
+        if self.decision == "update_trigger" and not self.trigger_id:
+            raise ValueError("update_trigger needs a trigger_id")
+        if self.decision in ("update_trigger", "add_trigger") and not self.note:
+            raise ValueError("Trigger changes need a note")
+        return self

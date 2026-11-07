@@ -22,7 +22,7 @@ def latest_answers(db: Session, question_id: str) -> dict[str, Response]:
     return latest
 
 
-def expert_scores(db: Session, expert_id: str) -> list[dict]:
+def expert_scores(db: Session, expert_id: str, exclude_anonymous: bool = False) -> list[dict]:
     rows = db.execute(
         select(Response, Question)
         .join(Question, Response.question_id == Question.id)
@@ -35,16 +35,19 @@ def expert_scores(db: Session, expert_id: str) -> list[dict]:
         if current is None or response.round > current[0].round:
             latest[question.id] = (response, question)
 
-    return [
-        {
+    scores = []
+    for response, question in sorted(latest.values(), key=lambda pair: pair[1].id):
+        # Answers given anonymously must never count towards a public identity
+        if exclude_anonymous and response.anonymity_level == "anonymous":
+            continue
+        scores.append({
             "question_id": question.id,
             "question_text": question.text,
             "probability": response.probability,
             "outcome": question.outcome,
             "brier": brier(response.probability, question.outcome),
-        }
-        for response, question in sorted(latest.values(), key=lambda pair: pair[1].id)
-    ]
+        })
+    return scores
 
 
 def summarise_scores(scores: list[dict]) -> dict:

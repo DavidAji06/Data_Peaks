@@ -189,3 +189,34 @@ def test_multi_country_risk_reaches_experts(client):
     }
     result = client.post("/alerts/A9/decision", json=body, headers=MOD).json()
     assert result["experts_invited"] == 3  # All three test experts are in Chad
+
+def test_anonymous_answers_stay_anonymous(client):
+    # Answer anonymously, then switch to the least private level
+    client.patch("/q/tok-a/settings", json={"anonymity_level": "anonymous"})
+    client.post("/q/tok-a/responses", json=ANSWER)
+    client.patch("/q/tok-a/settings", json={"anonymity_level": "known_to_acaps"})
+
+    labels = [r["label"] for r in client.get("/moderator/questions/Q001", headers=MOD).json()["responses"]]
+    assert "Analyst A" not in labels
+
+
+def test_alert_detail(client):
+    assert client.get("/alerts/missing", headers=MOD).status_code == 404
+
+
+def test_risk_decision_saved(client):
+    body = {"decision": "raise", "question_id": "Q001", "note": "Experts expect escalation"}
+    assert client.post("/risks/R1/decide", json=body, headers=MOD).status_code == 200
+
+    history = client.get("/risks/R1/decisions", headers=MOD).json()
+    assert history[0]["decision"] == "raise"
+
+    # Trigger changes need a note
+    bad = client.post("/risks/R1/decide", json={"decision": "add_trigger"}, headers=MOD)
+    assert bad.status_code == 422
+
+
+def test_public_question_detail(client):
+    assert client.get("/public/questions/Q001").status_code == 404  # Still open
+    client.post("/moderator/questions/Q001/resolve", json={"outcome": 1}, headers=MOD)
+    assert client.get("/public/questions/Q001").status_code == 200

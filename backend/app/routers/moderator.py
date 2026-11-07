@@ -19,7 +19,7 @@ from ..services.auth import require_moderator
 from ..db import get_db
 from ..models import Expert, Invite, Question, Response, Risk
 from ..schemas import ResolveIn
-from ..services.anonymity import moderator_label
+from ..services.anonymity import moderator_label, stricter
 from ..services.scoring import (
     BASELINE_BRIER,
     brier,
@@ -122,22 +122,31 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
     anonymous_number = 0
     for expert_id, rounds in ordered:
         expert = experts[expert_id]
-        if expert.anonymity_level == "anonymous":
-            anonymous_number += 1
-
         first_answer = rounds.get(1)
         revision = rounds.get(2)
         latest_answer = revision or first_answer
 
+        # Use the most private level the expert has had for this question, so
+        # changing settings later can never reveal who gave an anonymous answer
+        level = stricter(
+            expert.anonymity_level,
+            first_answer.anonymity_level if first_answer else None,
+            revision.anonymity_level if revision else None,
+        )
+        if level == "anonymous":
+            anonymous_number += 1
+
         responses.append({
-            **moderator_label(expert, anonymous_number),
+            **moderator_label(expert, anonymous_number, level),
             "first_probability": first_answer.probability if first_answer else None,
             "first_reason": first_answer.reason if first_answer else None,
             "latest_probability": latest_answer.probability,
             "revision_reason": revision.reason if revision else None,
             "revised": revision is not None,
-            "brier": brier(latest_answer.probability, question.outcome) if resolved else None,
-        })
+            "brier": brier(latest_answer.probability, question.outcome) if resolved else None,})
+
+
+        
 
     first_summary = summarise(first)
     latest_summary = summarise(latest)
@@ -217,7 +226,7 @@ def leaderboard(db: Session = Depends(get_db)):
         # Ranking anonymous experts would link their answers across questions
         if expert.anonymity_level == "anonymous":
             continue
-        summary = summarise_scores(expert_scores(db, expert.id))
+        summary = summarise_scores(expert_scores(db, expert.id, exclude_anonymous=True))
         if summary["resolved"] < MIN_RESOLVED_FOR_RANKING:
             continue
         rows.append({

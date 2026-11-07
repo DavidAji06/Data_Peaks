@@ -14,7 +14,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .db import Base, engine, get_db
-from .models import Alert, Expert, Invite, PanelInvite, Question, Response, Risk
+from .models import Alert, Expert, Invite, PanelInvite, Question, Response, Risk, RiskDecision
 from .routers.moderator import router as moderator_router
 from .routers.public import router as public_router
 from .schemas import (
@@ -23,6 +23,7 @@ from .schemas import (
     AnswerIn,
     JoinIn,
     PanelInviteIn,
+    RiskDecisionIn,
     SettingsUpdate,
 )
 from .services import ml_outputs
@@ -333,6 +334,7 @@ def submit_answer(token: str, body: AnswerIn, db: Session = Depends(get_db)):
         probability=body.probability,
         reason=body.reason,
         round=1,
+        anonymity_level=db.get(Expert, invite.expert_id).anonymity_level,
     ))
     db.commit()
     return {"status": "received"}
@@ -353,6 +355,7 @@ def submit_revision(token: str, body: AnswerIn, db: Session = Depends(get_db)):
         probability=body.probability,
         reason=body.reason,
         round=2,
+        anonymity_level=db.get(Expert, invite.expert_id).anonymity_level,
     ))
     db.commit()
     return {"status": "revised"}
@@ -427,3 +430,38 @@ def update_settings(token: str, body: SettingsUpdate, db: Session = Depends(get_
 
     db.commit()
     return settings_dict(expert)
+
+# Moderator: single alert and risk decisions
+
+@app.get("/alerts/{alert_id}", dependencies=MODERATOR_ONLY)
+def get_alert(alert_id: str, db: Session = Depends(get_db)):
+    alert = db.get(Alert, alert_id)
+    if alert is None:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    return alert_to_dict(alert)
+
+
+@app.post("/risks/{risk_id}/decide", dependencies=MODERATOR_ONLY)
+def decide_risk(risk_id: str, body: RiskDecisionIn, db: Session = Depends(get_db)):
+    if db.get(Risk, risk_id) is None:
+        raise HTTPException(status_code=404, detail="Risk not found")
+    if body.question_id:
+        question = db.get(Question, body.question_id)
+        if question is None or question.risk_id != risk_id:
+            raise HTTPException(status_code=400, detail="Question doesn't belong to this risk")
+
+    decision = RiskDecision(risk_id=risk_id, **body.model_dump())
+    db.add(decision)
+    db.commit()
+    db.refresh(decision)
+    return to_dict(decision)
+
+
+@app.get("/risks/{risk_id}/decisions", dependencies=MODERATOR_ONLY)
+def list_risk_decisions(risk_id: str, db: Session = Depends(get_db)):
+    decisions = db.scalars(
+        select(RiskDecision)
+        .where(RiskDecision.risk_id == risk_id)
+        .order_by(RiskDecision.created_at.desc())
+    ).all()
+    return [to_dict(decision) for decision in decisions]
