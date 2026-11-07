@@ -17,6 +17,7 @@ from app.main import app
 from app.models import Expert, Invite, PanelInvite, Question, Response, Risk
 from app.services.auth import MODERATOR_KEY
 from app.models import Alert
+from app.services import ml_outputs
 from app.services.routing import parse_countries
 
 MOD = {"X-Moderator-Key": MODERATOR_KEY}
@@ -68,7 +69,10 @@ def client():
             session.close()
 
     app.dependency_overrides[get_db] = override_get_db
+    real_factory = app.state.session_factory
+    app.state.session_factory = TestSession  # Background jobs use the test db too
     yield TestClient(app)
+    app.state.session_factory = real_factory
     app.dependency_overrides.clear()
 
 
@@ -220,3 +224,61 @@ def test_public_question_detail(client):
     assert client.get("/public/questions/Q001").status_code == 404  # Still open
     client.post("/moderator/questions/Q001/resolve", json={"outcome": 1}, headers=MOD)
     assert client.get("/public/questions/Q001").status_code == 200
+
+def add_answers(letters: str):
+    """Adds experts who already answered Q001, so the group reaches the minimum size."""
+    db = app.state.session_factory()
+    for letter in letters:
+        db.add(Expert(id=f"expert-{letter}", pseudonym=f"Analyst {letter.upper()}",
+                      anonymity_level="pseudonymous", country="Chad", topics="conflict"))
+        db.add(Response(question_id="Q001", expert_id=f"expert-{letter}",
+                        probability=0.5, reason=f"{letter.upper()} reason", round=1))
+    db.commit()
+    db.close()
+
+
+def test_themes_summarised_once_group_is_big_enough(client, monkeypatch):
+    calls = []
+
+    def fake_summary(reasons):
+        calls.append(reasons)
+        return {"agreement": ["Most expect fighting to continue"], "disagreement": [], "new_information": []}
+
+    monkeypatch.setattr(ml_outputs, "summarise_reasons", fake_summary)
+    add_answers("de")
+    client.post("/q/tok-a/responses", json=ANSWER)  # 5th answer
+
+    assert len(calls) == 1 and len(calls[0]) == 5
+    themes = client.get("/q/tok-a/group").json()["themes"]
+    assert themes["agreement"] == ["Most expect fighting to continue"]
+
+
+def test_no_themes_stored_when_summary_fails(client, monkeypatch):
+    monkeypatch.setattr(ml_outputs, "summarise_reasons", lambda reasons: ml_outputs.empty_themes())
+    add_answers("de")
+    client.post("/q/tok-a/responses", json=ANSWER)
+    assert client.get("/q/tok-a/group").json()["themes"] == ml_outputs.empty_themes()
+
+
+def test_no_summary_for_small_groups(client, monkeypatch):
+    calls = []
+    monkeypatch.setattr(ml_outputs, "summarise_reasons", lambda reasons: calls.append(reasons) or {})
+    client.post("/q/tok-a/responses", json=ANSWER)  # Only 3 answers
+    assert calls == []
+
+
+def test_public_contexts(client, monkeypatch):
+    monkeypatch.setattr(ml_outputs, "ranked_risks", lambda: [
+        {"risk_id": "R1", "priority_score": 0.7, "p_materialise": 0.4},
+        {"risk_id": "R-missing", "priority_score": 0.9},
+    ])
+    anonymous = client.get("/public/contexts").json()
+    chad = anonymous["contexts"][0]
+    assert len(anonymous["contexts"]) == 1
+    assert chad["iso3"] == "TCD" and chad["has_question"] is False
+    assert chad["risks"] == [{"id": "R1", "title": "Test risk", "risk_level": None, "priority_score": 0.7}]
+    assert "p_materialise" not in str(anonymous)
+
+    mine = client.get("/public/contexts", params={"token": "tok-a"}).json()
+    assert mine["contexts"][0]["has_question"] is True
+    assert client.get("/public/contexts", params={"token": "nope"}).json()["contexts"][0]["has_question"] is False

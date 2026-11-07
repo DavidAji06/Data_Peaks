@@ -8,7 +8,7 @@ import campImg from "@/assets/camp_sahel.jpg";
 import convoyImg from "@/assets/convoy_chad.jpg";
 import { Badge, Button, Card, LangToggle, SectionLabel, Wordmark, beatsGuessing, type Lang } from "./shared";
 import { useExpert, type Expert } from "./useExpert";
-import { CONTEXTS, type ConflictContext } from "./contexts";
+import { useContexts, type ConflictContext } from "./contexts";
 import type { AnonymityLevel } from "@/lib/api";
 
 const Globe = lazy(() => import("./Globe"));
@@ -226,7 +226,7 @@ function hasWebGL() {
 
 function Home({ t, lang, ex, active, prefs, onQuestions, onGroup }: { t: T; lang: Lang; ex: Expert; active: boolean; prefs: Prefs; onQuestions: () => void; onGroup: () => void }) {
   const [filter, setFilter] = useState<0 | 1 | 2>(0); // all, following, my questions
-  const [following, setFollowing] = useState<string[]>(["chad", "sudan"]);
+  const [following, setFollowing] = useState<string[]>(["sdn", "tcd"]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [resetSignal, setResetSignal] = useState(0);
   const [zoomSignal, setZoomSignal] = useState<{ n: number; dir: 1 | -1 }>({ n: 0, dir: 1 });
@@ -251,12 +251,14 @@ function Home({ t, lang, ex, active, prefs, onQuestions, onGroup }: { t: T; lang
     return () => ro.disconnect();
   }, []);
 
-  const liveRisk = ex.data?.risk.id;
-  const assignedIds = CONTEXTS.filter((c) => c.liveRiskId && c.liveRiskId === liveRisk).map((c) => c.id);
-  const shown = CONTEXTS.filter((c) => (filter === 1 ? following.includes(c.id) : filter === 2 ? assignedIds.includes(c.id) : true));
-  const results = CONTEXTS.filter((c) => (c.name.en + " " + c.name.fr).toLowerCase().includes(query.trim().toLowerCase()));
+  const { contexts, rankedAt } = useContexts(ex.token);
+  const liveCountry = ex.data?.question.status === "open" ? ex.data.risk.country : null;
+  const assignedIds = contexts.filter((c) => c.hasQuestion || c.name.en === liveCountry).map((c) => c.id);
+  const rankedLabel = L(lang, "Ranked by Data Peaks pipeline", "Classé par le pipeline Data Peaks") + (rankedAt ? ` · ${fmtDate(lang, rankedAt)}` : "");
+  const shown = contexts.filter((c) => (filter === 1 ? following.includes(c.id) : filter === 2 ? assignedIds.includes(c.id) : true));
+  const results = contexts.filter((c) => (c.name.en + " " + c.name.fr).toLowerCase().includes(query.trim().toLowerCase()));
   const listView = listChoice || prefs.listView || !webgl;
-  const selected = CONTEXTS.find((c) => c.id === selectedId) ?? null;
+  const selected = contexts.find((c) => c.id === selectedId) ?? null;
 
   const select = (id: string) => {
     setSelectedId(id);
@@ -344,12 +346,12 @@ function Home({ t, lang, ex, active, prefs, onQuestions, onGroup }: { t: T; lang
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-condensed text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--globe-marker)" }} />{L(lang, "Monitored context", "Contexte suivi")}</span>
           <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full border-2" style={{ borderColor: "var(--globe-marker)" }} />{L(lang, "Your question", "Votre question")}</span>
-          <Badge tone="muted">{L(lang, "Demo snapshot", "Données de démo")}</Badge>
+          <Badge tone="muted">{rankedLabel}</Badge>
           {!listView && <button onClick={() => { setSelectedId(null); setResetSignal((n) => n + 1); }} className="ml-auto flex min-h-11 items-center gap-1 font-medium text-primary-strong"><RotateCcw className="h-3.5 w-3.5" />{L(lang, "Reset view", "Réinitialiser")}</button>}
         </div>
 
         {selected && (
-          <ContextSheet lang={lang} ex={ex} ctx={selected} assigned={assignedIds.includes(selected.id)}
+          <ContextSheet lang={lang} ex={ex} ctx={selected} rankedLabel={rankedLabel} assigned={assignedIds.includes(selected.id)}
             following={following.includes(selected.id)}
             onFollow={() => setFollowing((f) => (f.includes(selected.id) ? f.filter((x) => x !== selected.id) : [...f, selected.id]))}
             onClose={() => setSelectedId(null)} onQuestions={onQuestions} onGroup={onGroup} />
@@ -361,8 +363,8 @@ function Home({ t, lang, ex, active, prefs, onQuestions, onGroup }: { t: T; lang
   );
 }
 
-function ContextSheet({ lang, ex, ctx, assigned, following, onFollow, onClose, onQuestions, onGroup }: {
-  lang: Lang; ex: Expert; ctx: ConflictContext; assigned: boolean; following: boolean; onFollow: () => void; onClose: () => void; onQuestions: () => void; onGroup: () => void;
+function ContextSheet({ lang, ex, ctx, rankedLabel, assigned, following, onFollow, onClose, onQuestions, onGroup }: {
+  lang: Lang; ex: Expert; ctx: ConflictContext; rankedLabel: string; assigned: boolean; following: boolean; onFollow: () => void; onClose: () => void; onQuestions: () => void; onGroup: () => void;
 }) {
   const d = assigned ? ex.data : null;
   const update = d?.trigger_update;
@@ -380,12 +382,19 @@ function ContextSheet({ lang, ex, ctx, assigned, following, onFollow, onClose, o
       <p className="mt-2 text-sm leading-snug">{d?.risk.title ?? ctx.riskTitle}</p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <Badge tone="risk">{L(lang, "ACAPS risk level", "Niveau de risque ACAPS")}: {d?.risk.risk_level ?? ctx.riskLevel}</Badge>
-        {!assigned && <Badge tone="muted">{L(lang, "Demo snapshot", "Données de démo")}</Badge>}
+        <Badge tone="muted">{rankedLabel}</Badge>
       </div>
+      {ctx.risks.filter((r) => r.id !== (d?.risk.id ?? ctx.risks[0]?.id)).map((r) => (
+        <div key={r.id} className="mt-3 border-t pt-2">
+          <p className="text-sm leading-snug">{r.title}</p>
+          <Badge tone="risk">{L(lang, "ACAPS risk level", "Niveau de risque ACAPS")}: {r.riskLevel}</Badge>
+        </div>
+      ))}
       {update && (
         <div className="mt-3 rounded border-l-4 border-primary bg-accent p-3 text-sm">
           <p className="font-bold">{L(lang, "What's changed", "Ce qui a changé")}</p>
-          <p className="line-clamp-2">{update.evidence || update.report.title}</p>
+          <p className="line-clamp-2">{update.report.title}</p>
+          <p className="mt-1 font-condensed text-xs text-muted-foreground">{L(lang, `Related reporting in ${ctx.name.en}`, `Informations liées en ${ctx.name.fr}`)}{update.report.published_at ? ` · ${fmtDate(lang, update.report.published_at)}` : ""}</p>
         </div>
       )}
       <div className="mt-4 space-y-2">
@@ -500,9 +509,11 @@ function Question(p: { t: T; lang: Lang; ex: Expert; answer: number; setAnswer: 
         <Card className="overflow-hidden p-0">
           <img src={convoyImg} alt="" loading="lazy" width={800} height={500} className="h-32 w-full object-cover" />
           <div className="flex gap-3 p-4"><Newspaper className="h-5 w-5 shrink-0 text-primary" /><div>
-            <p className="font-medium leading-snug">{update ? update.evidence || update.report.title : t.news}</p>
+            <p className="font-medium leading-snug">{update ? update.report.title : t.news}</p>
             <p className="mt-1 font-condensed text-xs text-muted-foreground">
-              {update ? [update.report.title, update.report.source, update.report.published_at].filter(Boolean).join(" · ") : t.newsMeta}
+              {update
+                ? [L(lang, `Related reporting in ${d.risk.country}`, `Informations liées : ${d.risk.country}`), update.report.source, fmtDate(lang, update.report.published_at)].filter(Boolean).join(" · ")
+                : t.newsMeta}
             </p>
             {update?.report.url && <a href={update.report.url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-primary-strong underline">Source</a>}
           </div></div>
@@ -614,6 +625,7 @@ function Group({ t, lang, ex, view, setView, onQuestion, onHome, onProfile }: {
             <SectionLabel>{t.range}</SectionLabel>
             <CompareAxis lang={lang} min={to100(g.min!)} max={to100(g.max!)} median={to100(g.median!)} first={first} latest={revisedValue ? latest : null} />
           </section>
+          {hasThemes && <p className="font-condensed text-xs font-bold uppercase tracking-widest text-muted-foreground">{L(lang, "AI summary of expert reasons", "Synthèse IA des raisons des experts")}</p>}
           {hasThemes ? lists.filter(([, items]) => items.length).map(([title, items]) => (
             <section key={title}><SectionLabel>{title}</SectionLabel>
               <ul className="space-y-1.5">{items.map((i) => <li key={i} className="rounded border bg-card px-3 py-2 text-sm">{i}</li>)}</ul>

@@ -4,22 +4,22 @@ Group view returns 403 until the expert has submitted an answer
 Never includes expert IDs
 """
 
+import json
 import secrets
 import statistics
+import threading
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import ValidationError
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from .db import Base, engine, get_db
+from .db import Base, SessionLocal, engine, get_db
 from .models import Alert, Expert, Invite, PanelInvite, Question, Response, Risk, RiskDecision
 from .routers.moderator import router as moderator_router
 from .routers.public import router as public_router
 from .schemas import (
     AlertDecision,
-    AlertImport,
     AnswerIn,
     JoinIn,
     PanelInviteIn,
@@ -27,9 +27,10 @@ from .schemas import (
     SettingsUpdate,
 )
 from .services import ml_outputs
+from .services.alert_import import import_alert_items
 from .services.auth import require_moderator
 from .services.routing import route_question
-from .services.scoring import BASELINE_BRIER, expert_scores, summarise_scores
+from .services.scoring import BASELINE_BRIER, expert_scores, latest_answers, summarise_scores
 
 FRONTEND_URL = "http://localhost:3000"
 MODERATOR_ONLY = [Depends(require_moderator)]
@@ -38,6 +39,7 @@ MIN_GROUP_SIZE = 5  # Below this, group figures could reveal individual answers
 Base.metadata.create_all(engine)
 
 app = FastAPI(title="Data Peaks API")
+app.state.session_factory = SessionLocal  # Background jobs open their own session; tests swap this
 
 app.add_middleware(
     CORSMiddleware,
@@ -72,6 +74,32 @@ def alert_to_dict(alert: Alert):
         "evidence": alert.evidence,
         "status": alert.status,
     }
+
+
+_summarising: set[str] = set()  # Questions with a theme summary in progress
+_summary_lock = threading.Lock()
+
+
+def summarise_question(question_id: str, session_factory=SessionLocal):
+    """Background job: ask the LLM once for themes in the experts' reasons and store them."""
+    with _summary_lock:
+        if question_id in _summarising:
+            return
+        _summarising.add(question_id)
+    db = session_factory()
+    try:
+        question = db.get(Question, question_id)
+        if question is None or question.themes:
+            return
+        reasons = [r.reason for r in latest_answers(db, question_id).values()]
+        themes = ml_outputs.summarise_reasons(reasons)
+        if any(themes.values()):  # On failure nothing is stored, so the app keeps its fallback text
+            question.themes = json.dumps(themes)
+            db.commit()
+    finally:
+        db.close()
+        with _summary_lock:
+            _summarising.discard(question_id)
 
 
 def get_invite(db: Session, token: str) -> Invite:
@@ -167,31 +195,9 @@ def list_alerts(status: str = "pending", db: Session = Depends(get_db)):
 
 @app.post("/alerts/import", dependencies=MODERATOR_ONLY)
 def import_alerts(db: Session = Depends(get_db)):
-    imported = 0
-    skipped = []
-    seen = set()
-
-    for item in ml_outputs.alerts_from_file():
-        try:
-            alert = AlertImport.model_validate(item)
-        except ValidationError:
-            item_id = item.get("id") if isinstance(item, dict) else None
-            skipped.append({"id": item_id, "reason": "Invalid or missing fields"})
-            continue
-
-        if alert.id in seen or db.get(Alert, alert.id):
-            skipped.append({"id": alert.id, "reason": "Already exists"})
-            continue
-        if db.get(Risk, alert.risk_id) is None:
-            skipped.append({"id": alert.id, "reason": "Unknown risk"})
-            continue
-
-        db.add(Alert(**alert.model_dump(), status="pending"))
-        seen.add(alert.id)
-        imported += 1
-
+    added, skipped = import_alert_items(db, ml_outputs.alerts_from_file())
     db.commit()
-    return {"imported": imported, "skipped": skipped}
+    return {"imported": len(added), "skipped": skipped}
 
 
 @app.post("/alerts/{alert_id}/decision", dependencies=MODERATOR_ONLY)
@@ -322,7 +328,12 @@ def expert_question(token: str, db: Session = Depends(get_db)):
 
 
 @app.post("/q/{token}/responses")
-def submit_answer(token: str, body: AnswerIn, db: Session = Depends(get_db)):
+def submit_answer(
+    token: str,
+    body: AnswerIn,
+    background: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     invite = get_invite(db, token)
     require_open(db.get(Question, invite.question_id))
     if get_response(db, invite.question_id, invite.expert_id, 1):
@@ -337,6 +348,10 @@ def submit_answer(token: str, body: AnswerIn, db: Session = Depends(get_db)):
         anonymity_level=db.get(Expert, invite.expert_id).anonymity_level,
     ))
     db.commit()
+
+    question = db.get(Question, invite.question_id)
+    if not question.themes and len(latest_answers(db, question.id)) >= MIN_GROUP_SIZE:
+        background.add_task(summarise_question, question.id, app.state.session_factory)
     return {"status": "received"}
 
 

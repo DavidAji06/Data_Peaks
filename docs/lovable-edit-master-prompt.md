@@ -155,11 +155,14 @@ Build exactly the globe described in the earlier build prompt (sections 06–09 
 - "Reset view" returns to the Africa/Chad starting view and clears the selection.
 
 05.4 Data (what the dots mean)
-- Store the context list in a data/config module (for example src/components/datapeaks/contexts.ts), not inside the globe component. Each entry: id, country name (EN + FR), ISO code, lat, lng (south = negative), monitored: true, risk id(s) and title, published ACAPS risk level label, isDemo flag, and a reference to the assigned question id when this expert has one.
-- Demo snapshot locations: Chad (15.45, 18.73), Sudan (12.86, 30.22), South Sudan (6.88, 31.31), DR Congo (-4.04, 21.76), Somalia (5.15, 46.20), Yemen (15.55, 48.52), Myanmar (21.92, 95.96), Ukraine (48.38, 31.17). These are illustrative context centres, not attack or expert locations.
-- The Chad context links to the real assigned question that the data hook loads (risk R1043 / the question from GET /q/{token}). Its "Your question" ring and its sheet CTA must reflect the real answered / not answered / closed state.
+- The context list comes from the backend: GET /public/contexts?token={expert token} (public, read-only). It is built from data/processed/ranked_risks.json (the Data Peaks pipeline ranking: priority = 0.4 x signal + 0.3 x uncertainty + 0.3 x impact) joined with the ACAPS Risk Radar risks. Per country it returns iso3, country, centre lat/lng (static lookup in backend/app/services/geo.py), up to three top risks (id, title, ACAPS risk level, priority_score) and has_question for this expert. No moderator-only data (p_materialise, score breakdown, alerts) is exposed.
+- src/components/datapeaks/contexts.ts only maps that response (plus French country names) via useContexts(); there is no hard-coded country list any more.
+- Dots are approximate country centres, not attack or expert locations.
+- The context where this expert has an open question (Sudan, risk R1049, in the seeded demo) gets the "Your question" halo. Its ring and sheet CTA reflect the real answered / not answered / closed state from GET /q/{token}.
+- The legend badge reads "Ranked by Data Peaks pipeline · {date of ranked_risks.json}".
 - A country without a dot means "No monitored context in this dataset", not "no conflict". Say this once in the list view footer.
 - Red colour and size never encode severity. Severity, if shown, is the published ACAPS risk level text in the sheet.
+- "What's changed" shows the linked ML alert (ACAPS humanitarian access events scored by the LLM), labelled "Related reporting in {country}" with its real date. Alerts are matched to risks by country only, so never present it as proof that a trigger fired. These events have no URL; show no link.
 
 05.5 Context sheet
 - Use the existing sheet/drawer primitive (src/components/ui/sheet.tsx or drawer.tsx) as a bottom sheet with rounded top corners, white card surface, a thin top border, a drag handle and a visible close button (lucide X, 44 px target).
@@ -295,7 +298,7 @@ The app is connected to the team's FastAPI backend through src/lib/api.ts and th
 - HTTP status handling: 403 on group = locked state; 409 on submit/revision = refetch; 404 on token = invalid link state; 400 "closed" = closed state; network error = retry state.
 - The expert link token is a credential: never print it in the UI, titles, logs or analytics.
 - The API base URL comes from VITE_API_URL (empty = same origin, proxied to the backend in development). Do not hard-code localhost URLs in components.
-- The globe context list (section 05.4) is demo configuration and must be labelled as a demo snapshot; only the Chad entry is linked to live API data.
+- The globe context list (section 05.4) is live data from GET /public/contexts (pipeline ranking + Risk Radar); only the expert's own question context is linked to GET /q/{token}.
 - If Lovable's preview cannot reach the backend, show the network-failure state from section 08.4; do not silently replace live data with fixtures.
 
 =====================================================================

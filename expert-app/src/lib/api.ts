@@ -78,6 +78,20 @@ export interface ApiSettings {
   max_open_questions: number;
 }
 
+export interface ApiContext {
+  iso3: string;
+  country: string;
+  lat: number;
+  lng: number;
+  risks: { id: string; title: string; risk_level: string | null; priority_score: number | null }[];
+  has_question: boolean;
+}
+
+export interface ApiContexts {
+  ranked_at: string | null;
+  contexts: ApiContext[];
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -135,6 +149,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 const q = (token: string) => `/q/${encodeURIComponent(token)}`;
 
 export const api = {
+  getContexts: (token: string | null) =>
+    request<ApiContexts>(`/public/contexts${token ? `?token=${encodeURIComponent(token)}` : ""}`),
   getQuestion: (token: string) => request<ApiExpertQuestion>(q(token)),
   submitAnswer: (token: string, probability: number, reason: string) =>
     request<{ status: string }>(`${q(token)}/responses`, {

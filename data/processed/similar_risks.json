@@ -1,0 +1,730 @@
+{
+  "R1062": [
+    {
+      "risk_id": "R0990",
+      "title": "Unsafe return of Afghan nationals from Pakistan causes food, shelter and livelihood shortage upon their arrival at Afghanistan along with risk of persecution. ",
+      "country": "Afghanistan",
+      "similarity": 0.662,
+      "outcome": "Materialised",
+      "what_happened": "In late May 2025, the forced repatriation of Afghan nationals from Pakistan intensified, triggering a growing humanitarian crisis in Afghanistan. Since Pakistan’s crackdown on undocumented foreigners in September 2023, over 850,000 Afghans have been ..."
+    },
+    {
+      "risk_id": "R0353",
+      "title": "Taliban attacks on provincial capitals lead to civil war violence levels, resulting in humanitarian needs for the affected population.",
+      "country": "Afghanistan",
+      "similarity": 0.635,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R1030",
+      "title": "Direct US–Iran military confrontation causes mass civilian casualties in Iran and regional conflict spillover, leading to displacement and service collapse",
+      "country": "Iran",
+      "similarity": 0.496,
+      "outcome": "Materialised",
+      "what_happened": "The anticipated escalation scenario has largely materialised in Iran following the outbreak of hostilities on 28 February 2026. Initial US–Israeli airstrikes on strategic military and nuclear sites quickly triggered Iranian retaliation through missil..."
+    }
+  ],
+  "R1067": [
+    {
+      "risk_id": "R0353",
+      "title": "Taliban attacks on provincial capitals lead to civil war violence levels, resulting in humanitarian needs for the affected population.",
+      "country": "Afghanistan",
+      "similarity": 0.649,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R1012",
+      "title": "Escalating armed conflict during the December 2025 election in Myanmar heightens protection risks",
+      "country": "Myanmar",
+      "similarity": 0.61,
+      "outcome": "Materialised",
+      "what_happened": "Airstrikes in contested areas increased after the election date was announced, with attacks intended to regain control of areas where voting was scheduled. On election day in December 2025, junta forces continued air and artillery attacks even as pol..."
+    },
+    {
+      "risk_id": "R0134",
+      "title": "Increased violence around upcoming elections in early 2022 leads to civil war and countrywide conflict after the elections",
+      "country": "Myanmar",
+      "similarity": 0.576,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    }
+  ],
+  "R1043": [
+    {
+      "risk_id": "R0018",
+      "title": "Economic crisis leads to increased food insecurity, socio-political instability, and protection concerns amid protest",
+      "country": "Sudan",
+      "similarity": 0.628,
+      "outcome": "Materialised",
+      "what_happened": "The country faced severe shortages of hard currency and basic commodities like fuel, flour, and medicines, leading to skyrocketing prices. Households across Sudan, including most IDPs, struggled to meet their basic needs as staple food prices for whe..."
+    },
+    {
+      "risk_id": "R0200",
+      "title": "Tensions between the military and political components in Sudan’s transitional government result in social unrest and increased access constraints for humanitarian organisations",
+      "country": "Sudan",
+      "similarity": 0.611,
+      "outcome": "Materialised",
+      "what_happened": "Protests by non-Arab tribes in eastern Sudan, which started in mid-September 2021, have intensified after the coup attempt as fears about the military taking over the Government increased. The Beja tribes shut down ports, blocked roads, and closed th..."
+    },
+    {
+      "risk_id": "R1056",
+      "title": "Resource-related clashes and political tensions in Tindouf camps restrict humanitarian access and increase protection risks for Sahrawi refugees",
+      "country": "Algeria",
+      "similarity": 0.597,
+      "outcome": "Materialised",
+      "what_happened": "The risk's hazard materialised, but the anticipated impact did not. The hazard was evident in August, with an armed clash within the Polisario Front on 7 August and two peaceful protests on 15 August over detainee treatment and perceived unequal acce..."
+    }
+  ],
+  "R1066": [
+    {
+      "risk_id": "R0094",
+      "title": "Increase of violent attacks on civilians and IDP camps in the Far North region",
+      "country": "Cameroon",
+      "similarity": 0.69,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R0978",
+      "title": "Lakurawa armed group resurgence in North West Nigeria and southern Niger heightens insecurity and leads to more displacement",
+      "country": "Nigeria, Niger",
+      "similarity": 0.641,
+      "outcome": "Materialised",
+      "what_happened": "The resurgence of the Lakurawa armed group has led to renewed insecurity and displacement across parts of northwest Nigeria and southern Niger. Armed raids, extortion, and community intimidation have disrupted livelihoods and triggered population mov..."
+    },
+    {
+      "risk_id": "R0345",
+      "title": "The expansion of armed groups from central Sahel to coastal countries (Benin, Côte d’Ivoire, Ghana, and Togo) leads to displacement and increased food insecurity.",
+      "country": "Ivory Coast, Benin, Togo, Ghana",
+      "similarity": 0.617,
+      "outcome": "Materialised",
+      "what_happened": "The increase in violence has caused internal displacement in the affected countries. In Benin, at least 1,200 internally displaced people (IDPs) have been reported in the Atacora Department. In Togo, over 2,200 IDPs have been recorded in the Savanes ..."
+    }
+  ],
+  "R1059": [
+    {
+      "risk_id": "R1013",
+      "title": "Intensified territorial disputes among armed groups over illegal mining corridors in southern Bolívar lead to mass displacement and confinement",
+      "country": "Colombia",
+      "similarity": 0.751,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R0369",
+      "title": "An increase in paramilitary and National Liberation Army violence in areas previously held by the Revolutionary Armed Forces of Colombia lead to displacement and access constraints.",
+      "country": "Colombia",
+      "similarity": 0.738,
+      "outcome": "Materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R1011",
+      "title": "US military build-up in the Caribbean triggers internal destabilisation in Venezuela and heightens humanitarian needs",
+      "country": "Venezuela",
+      "similarity": 0.663,
+      "outcome": "Materialised",
+      "what_happened": "The US military operation against Venezuela — designated Operation Absolute Resolve — was carried out on 3 January 2026 by elements of the Delta Force, US Air Force, and US Navy. The operation culminated in the capture of Nicolás Maduro and his wife ..."
+    }
+  ],
+  "R1045": [
+    {
+      "risk_id": "R1040",
+      "title": "El Niño-driven above-average temperatures and below-average precipitation cause widespread drought in the Central American Dry Corridor (El Salvador, Guatemala, and Honduras), increasing food and health needs",
+      "country": "Honduras, Guatemala, El Salvador",
+      "similarity": 0.638,
+      "outcome": "Materialised",
+      "what_happened": "El Niño-associated drought is increasing humanitarian needs across Central America’s Dry Corridor, particularly in food security, livelihoods, and WASH. In Honduras, WASH accounts for 708,000 people in need in red-alert municipalities, followed by fo..."
+    },
+    {
+      "risk_id": "R0512",
+      "title": "El Niño in Zimbabwe increases the needs of those already affected by drought, cyclones, disease outbreaks, and protracted economic instability",
+      "country": "Zimbabwe",
+      "similarity": 0.627,
+      "outcome": "Materialised",
+      "what_happened": "The impact of the El Niño-induced drought in Zimbabwe materialised, resulting in widespread crop failure and a sharp increase in food insecurity across the country. Millions of people, many already vulnerable due to previous shocks such as Cyclone Fr..."
+    },
+    {
+      "risk_id": "R0982",
+      "title": "Flooding and landslides in Tanzania kill people, destroy infrastructure, damage crops, and increase waterborne diseases, aggravating socioeconomic and environmental vulnerabilities",
+      "country": "Tanzania",
+      "similarity": 0.612,
+      "outcome": "Materialised",
+      "what_happened": "The direct consequences of the materialised hazard were significant and widespread across the affected regions. In Ulanga district, Morogoro, the continuous heavy rainfall and strong winds led to the collapse of 433 houses and the displacement of 2,1..."
+    }
+  ],
+  "R1071": [
+    {
+      "risk_id": "R0982",
+      "title": "Flooding and landslides in Tanzania kill people, destroy infrastructure, damage crops, and increase waterborne diseases, aggravating socioeconomic and environmental vulnerabilities",
+      "country": "Tanzania",
+      "similarity": 0.479,
+      "outcome": "Materialised",
+      "what_happened": "The direct consequences of the materialised hazard were significant and widespread across the affected regions. In Ulanga district, Morogoro, the continuous heavy rainfall and strong winds led to the collapse of 433 houses and the displacement of 2,1..."
+    },
+    {
+      "risk_id": "R1016",
+      "title": "La Niña-driven above-normal rainfall and enhanced cyclonic activity in the Philippines cause widespread flooding, agricultural damage, and displacement",
+      "country": "Philippines",
+      "similarity": 0.45,
+      "outcome": "Materialised",
+      "what_happened": "Typhoon Tino made multiple landfalls across the Visayas between 2–6 November 2025. An estimated 2.4 million people across eight regions were affected, with over 377,000 displaced to either one of the 2,936 evacuation centres or staying with host fami..."
+    },
+    {
+      "risk_id": "R0371",
+      "title": "Heavy rains in late August 2022 cause floods that affect previously affected areas, especially in the northeast, and new areas, especially in the southeast, aggravating the humanitarian situation.",
+      "country": "Bangladesh",
+      "similarity": 0.449,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    }
+  ],
+  "R1044": [
+    {
+      "risk_id": "R0512",
+      "title": "El Niño in Zimbabwe increases the needs of those already affected by drought, cyclones, disease outbreaks, and protracted economic instability",
+      "country": "Zimbabwe",
+      "similarity": 0.646,
+      "outcome": "Materialised",
+      "what_happened": "The impact of the El Niño-induced drought in Zimbabwe materialised, resulting in widespread crop failure and a sharp increase in food insecurity across the country. Millions of people, many already vulnerable due to previous shocks such as Cyclone Fr..."
+    },
+    {
+      "risk_id": "R1040",
+      "title": "El Niño-driven above-average temperatures and below-average precipitation cause widespread drought in the Central American Dry Corridor (El Salvador, Guatemala, and Honduras), increasing food and health needs",
+      "country": "Honduras, Guatemala, El Salvador",
+      "similarity": 0.615,
+      "outcome": "Materialised",
+      "what_happened": "El Niño-associated drought is increasing humanitarian needs across Central America’s Dry Corridor, particularly in food security, livelihoods, and WASH. In Honduras, WASH accounts for 708,000 people in need in red-alert municipalities, followed by fo..."
+    },
+    {
+      "risk_id": "R0982",
+      "title": "Flooding and landslides in Tanzania kill people, destroy infrastructure, damage crops, and increase waterborne diseases, aggravating socioeconomic and environmental vulnerabilities",
+      "country": "Tanzania",
+      "similarity": 0.607,
+      "outcome": "Materialised",
+      "what_happened": "The direct consequences of the materialised hazard were significant and widespread across the affected regions. In Ulanga district, Morogoro, the continuous heavy rainfall and strong winds led to the collapse of 433 houses and the displacement of 2,1..."
+    }
+  ],
+  "R1046": [
+    {
+      "risk_id": "R1040",
+      "title": "El Niño-driven above-average temperatures and below-average precipitation cause widespread drought in the Central American Dry Corridor (El Salvador, Guatemala, and Honduras), increasing food and health needs",
+      "country": "Honduras, Guatemala, El Salvador",
+      "similarity": 0.762,
+      "outcome": "Materialised",
+      "what_happened": "El Niño-associated drought is increasing humanitarian needs across Central America’s Dry Corridor, particularly in food security, livelihoods, and WASH. In Honduras, WASH accounts for 708,000 people in need in red-alert municipalities, followed by fo..."
+    },
+    {
+      "risk_id": "R0512",
+      "title": "El Niño in Zimbabwe increases the needs of those already affected by drought, cyclones, disease outbreaks, and protracted economic instability",
+      "country": "Zimbabwe",
+      "similarity": 0.743,
+      "outcome": "Materialised",
+      "what_happened": "The impact of the El Niño-induced drought in Zimbabwe materialised, resulting in widespread crop failure and a sharp increase in food insecurity across the country. Millions of people, many already vulnerable due to previous shocks such as Cyclone Fr..."
+    },
+    {
+      "risk_id": "R1018",
+      "title": "La Niña-driven above-normal rainfall and tropical cyclone intensification cause widespread flooding, an increase in water-borne diseases and malnutrition",
+      "country": "Haiti",
+      "similarity": 0.742,
+      "outcome": "Materialised",
+      "what_happened": "The risk has materialised as heavy rainfall and flooding between 29–30 April 2026 affected an estimated 15,000 people, inundated more than 3,660 houses, damaged agricultural land, killed livestock, and disrupted road networks, restricting access to m..."
+    }
+  ],
+  "R1042": [
+    {
+      "risk_id": "R1014",
+      "title": "Failure of essential services owing to the blockade in Mali leads to civil unrest and destabilisation and aggravates needs",
+      "country": "Mali",
+      "similarity": 0.708,
+      "outcome": "Materialised",
+      "what_happened": "The blockade caused recurrent fuel shortages, electricity cuts, transport disruptions, school closures, increased prices, and constraints on humanitarian operations. Access to healthcare, markets, and essential services deteriorated in several region..."
+    },
+    {
+      "risk_id": "R0242",
+      "title": "An increase in security incidents lead to displacement in Niono circle.",
+      "country": "Mali",
+      "similarity": 0.605,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R0089",
+      "title": "Deterioration of humanitarian situation in Mali",
+      "country": "Mali",
+      "similarity": 0.599,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    }
+  ],
+  "R1047": [
+    {
+      "risk_id": "R1017",
+      "title": "La Niña-induced heavy rainfall and enhanced cyclonic activity from October–March in central and northern Mozambique increase flooding and displacement",
+      "country": "Mozambique",
+      "similarity": 0.856,
+      "outcome": "Materialised",
+      "what_happened": "The impacts have also materialised. Persistent flooding since December 2025 has triggered expanded inundation across Manica, Nampula, Sofala, Tete, and Zambezia, leading to continued evacuation (with at least 112,800 displaced), localised infrastruct..."
+    },
+    {
+      "risk_id": "R0512",
+      "title": "El Niño in Zimbabwe increases the needs of those already affected by drought, cyclones, disease outbreaks, and protracted economic instability",
+      "country": "Zimbabwe",
+      "similarity": 0.726,
+      "outcome": "Materialised",
+      "what_happened": "The impact of the El Niño-induced drought in Zimbabwe materialised, resulting in widespread crop failure and a sharp increase in food insecurity across the country. Millions of people, many already vulnerable due to previous shocks such as Cyclone Fr..."
+    },
+    {
+      "risk_id": "R1040",
+      "title": "El Niño-driven above-average temperatures and below-average precipitation cause widespread drought in the Central American Dry Corridor (El Salvador, Guatemala, and Honduras), increasing food and health needs",
+      "country": "Honduras, Guatemala, El Salvador",
+      "similarity": 0.689,
+      "outcome": "Materialised",
+      "what_happened": "El Niño-associated drought is increasing humanitarian needs across Central America’s Dry Corridor, particularly in food security, livelihoods, and WASH. In Honduras, WASH accounts for 708,000 people in need in red-alert municipalities, followed by fo..."
+    }
+  ],
+  "R1072": [
+    {
+      "risk_id": "R0107",
+      "title": "Spreading of the violent insurgency of Cabo Delgado into the Tanzanian territory.",
+      "country": "Tanzania",
+      "similarity": 0.633,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R0463",
+      "title": "The deployment of the regional military force leads to more displacement and increased humanitarian needs in eastern Democratic Republic of Congo.",
+      "country": "Democratic Republic of the Congo",
+      "similarity": 0.571,
+      "outcome": "Materialised",
+      "what_happened": "Since January 2025, about 450,000 people have been displaced due to renewed violence, especially after the M23 captured key cities, such as Goma and Bukavu. These military operations and the resulting instability have exacerbated the humanitarian cri..."
+    },
+    {
+      "risk_id": "R0242",
+      "title": "An increase in security incidents lead to displacement in Niono circle.",
+      "country": "Mali",
+      "similarity": 0.567,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    }
+  ],
+  "R1069": [
+    {
+      "risk_id": "R0242",
+      "title": "An increase in security incidents lead to displacement in Niono circle.",
+      "country": "Mali",
+      "similarity": 0.568,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R1012",
+      "title": "Escalating armed conflict during the December 2025 election in Myanmar heightens protection risks",
+      "country": "Myanmar",
+      "similarity": 0.546,
+      "outcome": "Materialised",
+      "what_happened": "Airstrikes in contested areas increased after the election date was announced, with attacks intended to regain control of areas where voting was scheduled. On election day in December 2025, junta forces continued air and artillery attacks even as pol..."
+    },
+    {
+      "risk_id": "R1001",
+      "title": "Further Israeli expansion in southern Syria triggers armed group resistance, displacement, and heightened food insecurity",
+      "country": "Syria",
+      "similarity": 0.503,
+      "outcome": "Materialised",
+      "what_happened": "The expected humanitarian impacts partially materialised. Continued Israeli incursions displaced additional households, damaged homes, roads, water infrastructure, and agricultural land, and restricted civilian access to farmland and essential servic..."
+    }
+  ],
+  "R1038": [
+    {
+      "risk_id": "R1014",
+      "title": "Failure of essential services owing to the blockade in Mali leads to civil unrest and destabilisation and aggravates needs",
+      "country": "Mali",
+      "similarity": 0.657,
+      "outcome": "Materialised",
+      "what_happened": "The blockade caused recurrent fuel shortages, electricity cuts, transport disruptions, school closures, increased prices, and constraints on humanitarian operations. Access to healthcare, markets, and essential services deteriorated in several region..."
+    },
+    {
+      "risk_id": "R0242",
+      "title": "An increase in security incidents lead to displacement in Niono circle.",
+      "country": "Mali",
+      "similarity": 0.646,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R0978",
+      "title": "Lakurawa armed group resurgence in North West Nigeria and southern Niger heightens insecurity and leads to more displacement",
+      "country": "Nigeria, Niger",
+      "similarity": 0.631,
+      "outcome": "Materialised",
+      "what_happened": "The resurgence of the Lakurawa armed group has led to renewed insecurity and displacement across parts of northwest Nigeria and southern Niger. Armed raids, extortion, and community intimidation have disrupted livelihoods and triggered population mov..."
+    }
+  ],
+  "R1074": [
+    {
+      "risk_id": "R0242",
+      "title": "An increase in security incidents lead to displacement in Niono circle.",
+      "country": "Mali",
+      "similarity": 0.614,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R0978",
+      "title": "Lakurawa armed group resurgence in North West Nigeria and southern Niger heightens insecurity and leads to more displacement",
+      "country": "Nigeria, Niger",
+      "similarity": 0.585,
+      "outcome": "Materialised",
+      "what_happened": "The resurgence of the Lakurawa armed group has led to renewed insecurity and displacement across parts of northwest Nigeria and southern Niger. Armed raids, extortion, and community intimidation have disrupted livelihoods and triggered population mov..."
+    },
+    {
+      "risk_id": "R0094",
+      "title": "Increase of violent attacks on civilians and IDP camps in the Far North region",
+      "country": "Cameroon",
+      "similarity": 0.571,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    }
+  ],
+  "R1061": [
+    {
+      "risk_id": "R1021",
+      "title": "A return to large‑scale conflict in Gaza stokes a further deterioration of food security and humanitarian conditions",
+      "country": "Palestine",
+      "similarity": 0.769,
+      "outcome": "Materialised",
+      "what_happened": "The humanitarian impacts anticipated in the risk materialised. The sharp reduction in aid led to severe food shortages, with flour prices tripling and bread production declining by 50% because of shortages of flour and fuel. Humanitarian operations w..."
+    },
+    {
+      "risk_id": "R1001",
+      "title": "Further Israeli expansion in southern Syria triggers armed group resistance, displacement, and heightened food insecurity",
+      "country": "Syria",
+      "similarity": 0.646,
+      "outcome": "Materialised",
+      "what_happened": "The expected humanitarian impacts partially materialised. Continued Israeli incursions displaced additional households, damaged homes, roads, water infrastructure, and agricultural land, and restricted civilian access to farmland and essential servic..."
+    },
+    {
+      "risk_id": "R0985",
+      "title": "Attempts to politically marginalise and militarily weaken Hezbollah in Lebanon leads to internal tensions, protests, and displacement",
+      "country": "Lebanon",
+      "similarity": 0.611,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    }
+  ],
+  "R1073": [
+    {
+      "risk_id": "R1041",
+      "title": "Escalation of confrontation between Israel forces and Palestinian armed groups in the West Bank leads to increased displacement and livelihood and healthcare needs.",
+      "country": "Palestine",
+      "similarity": 0.595,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R1021",
+      "title": "A return to large‑scale conflict in Gaza stokes a further deterioration of food security and humanitarian conditions",
+      "country": "Palestine",
+      "similarity": 0.489,
+      "outcome": "Materialised",
+      "what_happened": "The humanitarian impacts anticipated in the risk materialised. The sharp reduction in aid led to severe food shortages, with flour prices tripling and bread production declining by 50% because of shortages of flour and fuel. Humanitarian operations w..."
+    },
+    {
+      "risk_id": "R1001",
+      "title": "Further Israeli expansion in southern Syria triggers armed group resistance, displacement, and heightened food insecurity",
+      "country": "Syria",
+      "similarity": 0.489,
+      "outcome": "Materialised",
+      "what_happened": "The expected humanitarian impacts partially materialised. Continued Israeli incursions displaced additional households, damaged homes, roads, water infrastructure, and agricultural land, and restricted civilian access to farmland and essential servic..."
+    }
+  ],
+  "R1058": [
+    {
+      "risk_id": "R1016",
+      "title": "La Niña-driven above-normal rainfall and enhanced cyclonic activity in the Philippines cause widespread flooding, agricultural damage, and displacement",
+      "country": "Philippines",
+      "similarity": 0.785,
+      "outcome": "Materialised",
+      "what_happened": "Typhoon Tino made multiple landfalls across the Visayas between 2–6 November 2025. An estimated 2.4 million people across eight regions were affected, with over 377,000 displaced to either one of the 2,936 evacuation centres or staying with host fami..."
+    },
+    {
+      "risk_id": "R1040",
+      "title": "El Niño-driven above-average temperatures and below-average precipitation cause widespread drought in the Central American Dry Corridor (El Salvador, Guatemala, and Honduras), increasing food and health needs",
+      "country": "Honduras, Guatemala, El Salvador",
+      "similarity": 0.72,
+      "outcome": "Materialised",
+      "what_happened": "El Niño-associated drought is increasing humanitarian needs across Central America’s Dry Corridor, particularly in food security, livelihoods, and WASH. In Honduras, WASH accounts for 708,000 people in need in red-alert municipalities, followed by fo..."
+    },
+    {
+      "risk_id": "R1019",
+      "title": "La Niña-driven above-normal rainfall and flooding in Colombia cause widespread crop damage, landslides, waterborne diseases, and food insecurity and malnutrition",
+      "country": "Colombia",
+      "similarity": 0.659,
+      "outcome": "Materialised",
+      "what_happened": "From November 2025 to January 2026, heavy rains, floods, and landslides impacted 115,000 families, affected 24 of the country's 32 departments, and forced the closure of major roads in several departments across the country. This resulted in 600 repo..."
+    }
+  ],
+  "R1037": [
+    {
+      "risk_id": "R0200",
+      "title": "Tensions between the military and political components in Sudan’s transitional government result in social unrest and increased access constraints for humanitarian organisations",
+      "country": "Sudan",
+      "similarity": 0.739,
+      "outcome": "Materialised",
+      "what_happened": "Protests by non-Arab tribes in eastern Sudan, which started in mid-September 2021, have intensified after the coup attempt as fears about the military taking over the Government increased. The Beja tribes shut down ports, blocked roads, and closed th..."
+    },
+    {
+      "risk_id": "R0002",
+      "title": "Establishment of military regime leads to increased conflict and spread of violence across Sudan",
+      "country": "Sudan",
+      "similarity": 0.718,
+      "outcome": "Materialised",
+      "what_happened": "After the removal of Omar Al Bashir in April 2019, Sudan's Transitional Military Council (TMC) faced massive protests led by the Forces of Freedom and Change. Protesters demanded a transition to civilian rule, accusing the TMC of perpetuating Al Bash..."
+    },
+    {
+      "risk_id": "R0073",
+      "title": "The declaration of a state of emergency escalates protests that may lead to violence and further displacement in the Darfur region",
+      "country": "Sudan",
+      "similarity": 0.677,
+      "outcome": "Materialised",
+      "what_happened": "The displacement numbers have risen as violence has persisted. Humanitarian access has often been constrained, and IDPs faced dire conditions, including limited access to food, shelter, and healthcare."
+    }
+  ],
+  "R1048": [
+    {
+      "risk_id": "R0200",
+      "title": "Tensions between the military and political components in Sudan’s transitional government result in social unrest and increased access constraints for humanitarian organisations",
+      "country": "Sudan",
+      "similarity": 0.509,
+      "outcome": "Materialised",
+      "what_happened": "Protests by non-Arab tribes in eastern Sudan, which started in mid-September 2021, have intensified after the coup attempt as fears about the military taking over the Government increased. The Beja tribes shut down ports, blocked roads, and closed th..."
+    },
+    {
+      "risk_id": "R0018",
+      "title": "Economic crisis leads to increased food insecurity, socio-political instability, and protection concerns amid protest",
+      "country": "Sudan",
+      "similarity": 0.506,
+      "outcome": "Materialised",
+      "what_happened": "The country faced severe shortages of hard currency and basic commodities like fuel, flour, and medicines, leading to skyrocketing prices. Households across Sudan, including most IDPs, struggled to meet their basic needs as staple food prices for whe..."
+    },
+    {
+      "risk_id": "R0522",
+      "title": "The escalation of conflict in Amhara Region resulting in displacement of people, destruction of infrastructure and fatalities",
+      "country": "Ethiopia",
+      "similarity": 0.483,
+      "outcome": "Materialised",
+      "what_happened": "No description recorded."
+    }
+  ],
+  "R1049": [
+    {
+      "risk_id": "R0018",
+      "title": "Economic crisis leads to increased food insecurity, socio-political instability, and protection concerns amid protest",
+      "country": "Sudan",
+      "similarity": 0.56,
+      "outcome": "Materialised",
+      "what_happened": "The country faced severe shortages of hard currency and basic commodities like fuel, flour, and medicines, leading to skyrocketing prices. Households across Sudan, including most IDPs, struggled to meet their basic needs as staple food prices for whe..."
+    },
+    {
+      "risk_id": "R0200",
+      "title": "Tensions between the military and political components in Sudan’s transitional government result in social unrest and increased access constraints for humanitarian organisations",
+      "country": "Sudan",
+      "similarity": 0.524,
+      "outcome": "Materialised",
+      "what_happened": "Protests by non-Arab tribes in eastern Sudan, which started in mid-September 2021, have intensified after the coup attempt as fears about the military taking over the Government increased. The Beja tribes shut down ports, blocked roads, and closed th..."
+    },
+    {
+      "risk_id": "R0120",
+      "title": "Growing inflation and an economic crisis in Sudan result in high food insecurity levels",
+      "country": "Sudan",
+      "similarity": 0.485,
+      "outcome": "Materialised",
+      "what_happened": "Sudan's inflation remained one of the highest globally, exceeding 300% in 2021. This drastically affected food prices and household purchasing power. Food insecurity in Sudan escalated. In 2022, approximately 18 million people were food insecure, a f..."
+    }
+  ],
+  "R1051": [
+    {
+      "risk_id": "R0018",
+      "title": "Economic crisis leads to increased food insecurity, socio-political instability, and protection concerns amid protest",
+      "country": "Sudan",
+      "similarity": 0.692,
+      "outcome": "Materialised",
+      "what_happened": "The country faced severe shortages of hard currency and basic commodities like fuel, flour, and medicines, leading to skyrocketing prices. Households across Sudan, including most IDPs, struggled to meet their basic needs as staple food prices for whe..."
+    },
+    {
+      "risk_id": "R0200",
+      "title": "Tensions between the military and political components in Sudan’s transitional government result in social unrest and increased access constraints for humanitarian organisations",
+      "country": "Sudan",
+      "similarity": 0.62,
+      "outcome": "Materialised",
+      "what_happened": "Protests by non-Arab tribes in eastern Sudan, which started in mid-September 2021, have intensified after the coup attempt as fears about the military taking over the Government increased. The Beja tribes shut down ports, blocked roads, and closed th..."
+    },
+    {
+      "risk_id": "R0120",
+      "title": "Growing inflation and an economic crisis in Sudan result in high food insecurity levels",
+      "country": "Sudan",
+      "similarity": 0.596,
+      "outcome": "Materialised",
+      "what_happened": "Sudan's inflation remained one of the highest globally, exceeding 300% in 2021. This drastically affected food prices and household purchasing power. Food insecurity in Sudan escalated. In 2022, approximately 18 million people were food insecure, a f..."
+    }
+  ],
+  "R1052": [
+    {
+      "risk_id": "R0002",
+      "title": "Establishment of military regime leads to increased conflict and spread of violence across Sudan",
+      "country": "Sudan",
+      "similarity": 0.64,
+      "outcome": "Materialised",
+      "what_happened": "After the removal of Omar Al Bashir in April 2019, Sudan's Transitional Military Council (TMC) faced massive protests led by the Forces of Freedom and Change. Protesters demanded a transition to civilian rule, accusing the TMC of perpetuating Al Bash..."
+    },
+    {
+      "risk_id": "R0200",
+      "title": "Tensions between the military and political components in Sudan’s transitional government result in social unrest and increased access constraints for humanitarian organisations",
+      "country": "Sudan",
+      "similarity": 0.599,
+      "outcome": "Materialised",
+      "what_happened": "Protests by non-Arab tribes in eastern Sudan, which started in mid-September 2021, have intensified after the coup attempt as fears about the military taking over the Government increased. The Beja tribes shut down ports, blocked roads, and closed th..."
+    },
+    {
+      "risk_id": "R1056",
+      "title": "Resource-related clashes and political tensions in Tindouf camps restrict humanitarian access and increase protection risks for Sahrawi refugees",
+      "country": "Algeria",
+      "similarity": 0.578,
+      "outcome": "Materialised",
+      "what_happened": "The risk's hazard materialised, but the anticipated impact did not. The hazard was evident in August, with an armed clash within the Polisario Front on 7 August and two peaceful protests on 15 August over detainee treatment and perceived unequal acce..."
+    }
+  ],
+  "R1053": [
+    {
+      "risk_id": "R0018",
+      "title": "Economic crisis leads to increased food insecurity, socio-political instability, and protection concerns amid protest",
+      "country": "Sudan",
+      "similarity": 0.557,
+      "outcome": "Materialised",
+      "what_happened": "The country faced severe shortages of hard currency and basic commodities like fuel, flour, and medicines, leading to skyrocketing prices. Households across Sudan, including most IDPs, struggled to meet their basic needs as staple food prices for whe..."
+    },
+    {
+      "risk_id": "R1026",
+      "title": "Potential Red Sea disruptions from a US–Iran conflict reduce foreign currency earnings, heighten food insecurity, and disrupt services across Egypt",
+      "country": "Egypt",
+      "similarity": 0.53,
+      "outcome": "Materialised",
+      "what_happened": "The anticipated impacts partially materialised through wider conflict-related disruptions, with food inflation reaching an estimated 28% by March 2026, fertiliser prices rising by 75–87% by May, the Egyptian pound depreciating by 14% in the first mon..."
+    },
+    {
+      "risk_id": "R0357",
+      "title": "Türkiye's military incursion into northern Syria triggered by the nearing general elections results in the displacement of people from areas of conflict.",
+      "country": "Syria",
+      "similarity": 0.508,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    }
+  ],
+  "R1054": [
+    {
+      "risk_id": "R0018",
+      "title": "Economic crisis leads to increased food insecurity, socio-political instability, and protection concerns amid protest",
+      "country": "Sudan",
+      "similarity": 0.516,
+      "outcome": "Materialised",
+      "what_happened": "The country faced severe shortages of hard currency and basic commodities like fuel, flour, and medicines, leading to skyrocketing prices. Households across Sudan, including most IDPs, struggled to meet their basic needs as staple food prices for whe..."
+    },
+    {
+      "risk_id": "R0367",
+      "title": "The government offensive in Deir-ez-Zor city results in displacement and damage to critical infrastructure, generating WASH needs.",
+      "country": "Syria",
+      "similarity": 0.489,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R0522",
+      "title": "The escalation of conflict in Amhara Region resulting in displacement of people, destruction of infrastructure and fatalities",
+      "country": "Ethiopia",
+      "similarity": 0.478,
+      "outcome": "Materialised",
+      "what_happened": "No description recorded."
+    }
+  ],
+  "R1055": [
+    {
+      "risk_id": "R0031",
+      "title": "A rising number of Syrian refugees opt for an unsafe return to Syria to avoid a deepening economic crisis in Lebanon and the repercussions of the 2020 Beirut explosion",
+      "country": "Lebanon",
+      "similarity": 0.638,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R0018",
+      "title": "Economic crisis leads to increased food insecurity, socio-political instability, and protection concerns amid protest",
+      "country": "Sudan",
+      "similarity": 0.634,
+      "outcome": "Materialised",
+      "what_happened": "The country faced severe shortages of hard currency and basic commodities like fuel, flour, and medicines, leading to skyrocketing prices. Households across Sudan, including most IDPs, struggled to meet their basic needs as staple food prices for whe..."
+    },
+    {
+      "risk_id": "R0248",
+      "title": "Camps and basic services in East Darfur state are stretched beyond capacity following the influx of up to 100,000 South Sudanese refugees by June 2016 ",
+      "country": "Sudan",
+      "similarity": 0.633,
+      "outcome": "Materialised",
+      "what_happened": "This rapid influx strained resources and led to overcrowding at refugee sites. Water shortages and inadequate sanitation at camps, such as Khor Omer, worsened living conditions, with most sites failing to meet emergency standards for water and sanita..."
+    }
+  ],
+  "R1068": [
+    {
+      "risk_id": "R1001",
+      "title": "Further Israeli expansion in southern Syria triggers armed group resistance, displacement, and heightened food insecurity",
+      "country": "Syria",
+      "similarity": 0.79,
+      "outcome": "Materialised",
+      "what_happened": "The expected humanitarian impacts partially materialised. Continued Israeli incursions displaced additional households, damaged homes, roads, water infrastructure, and agricultural land, and restricted civilian access to farmland and essential servic..."
+    },
+    {
+      "risk_id": "R0999",
+      "title": "Escalations between loyalists to former President Bashar Al Assad and Sunni armed groups result in internal and cross-border displacement",
+      "country": "Syria",
+      "similarity": 0.694,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R0357",
+      "title": "Türkiye's military incursion into northern Syria triggered by the nearing general elections results in the displacement of people from areas of conflict.",
+      "country": "Syria",
+      "similarity": 0.688,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    }
+  ],
+  "R1065": [
+    {
+      "risk_id": "R1025",
+      "title": "The US–Iran escalation leads to strikes on Houthi-held ports, crippling infrastructure and disrupting vital humanitarian supply chains in Yemen",
+      "country": "Yemen",
+      "similarity": 0.812,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    },
+    {
+      "risk_id": "R1030",
+      "title": "Direct US–Iran military confrontation causes mass civilian casualties in Iran and regional conflict spillover, leading to displacement and service collapse",
+      "country": "Iran",
+      "similarity": 0.67,
+      "outcome": "Materialised",
+      "what_happened": "The anticipated escalation scenario has largely materialised in Iran following the outbreak of hostilities on 28 February 2026. Initial US–Israeli airstrikes on strategic military and nuclear sites quickly triggered Iranian retaliation through missil..."
+    },
+    {
+      "risk_id": "R0525",
+      "title": "The Southern Transitional Council push for an independence of the south results in local fighting, leading to displacements and increased needs for the affected ",
+      "country": "Yemen",
+      "similarity": 0.618,
+      "outcome": "Not materialised",
+      "what_happened": "No description recorded."
+    }
+  ]
+}

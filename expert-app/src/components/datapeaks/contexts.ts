@@ -1,30 +1,80 @@
 /**
  * Monitored contexts shown as red dots on the Home globe.
- * DEMO SNAPSHOT: illustrative context centres, not attack locations and not a complete conflict inventory.
- * Only Chad (R1043) is linked to the live question from the backend (GET /q/{token}).
+ * Loaded from GET /public/contexts: countries with active risks ranked by the Data Peaks pipeline
+ * (data/processed/ranked_risks.json joined with the ACAPS Risk Radar). Dots sit at approximate
+ * country centres, not at event locations.
  */
+import { useEffect, useState } from "react";
+import { api, type ApiContext } from "@/lib/api";
+
+export interface ContextRisk {
+  id: string;
+  title: string;
+  riskLevel: string;
+  priority: number | null;
+}
+
 export interface ConflictContext {
   id: string;
   name: { en: string; fr: string };
   iso: string;
   lat: number;
   lng: number;
+  /** Highest-priority risk in this country. */
   riskTitle: string;
   riskLevel: string;
-  /** Risk id of the live backend question this context belongs to, if any. */
-  liveRiskId?: string;
-  isDemo: true;
+  /** Up to three ranked risks, highest priority first. */
+  risks: ContextRisk[];
+  /** True when the expert behind this link has an open question here. */
+  hasQuestion: boolean;
 }
 
-export const CONTEXTS: ConflictContext[] = [
-  { id: "chad", name: { en: "Chad", fr: "Tchad" }, iso: "TCD", lat: 15.45, lng: 18.73, riskTitle: "Escalating cross-border insecurity linked to the Sudan conflict increases protection risks and humanitarian needs in eastern Chad", riskLevel: "High", liveRiskId: "R1043", isDemo: true },
-  { id: "sudan", name: { en: "Sudan", fr: "Soudan" }, iso: "SDN", lat: 12.86, lng: 30.22, riskTitle: "Conflict spreads to new states, increasing displacement and access constraints", riskLevel: "High", isDemo: true },
-  { id: "south-sudan", name: { en: "South Sudan", fr: "Soudan du Sud" }, iso: "SSD", lat: 6.88, lng: 31.31, riskTitle: "Renewed subnational violence disrupts aid delivery during the lean season", riskLevel: "Medium", isDemo: true },
-  { id: "drc", name: { en: "DR Congo", fr: "RD Congo" }, iso: "COD", lat: -4.04, lng: 21.76, riskTitle: "Armed group offensives in the east trigger new displacement", riskLevel: "High", isDemo: true },
-  { id: "somalia", name: { en: "Somalia", fr: "Somalie" }, iso: "SOM", lat: 5.15, lng: 46.2, riskTitle: "Drought and conflict combine to raise displacement above seasonal levels", riskLevel: "Medium", isDemo: true },
-  { id: "yemen", name: { en: "Yemen", fr: "Yémen" }, iso: "YEM", lat: 15.55, lng: 48.52, riskTitle: "Frontline escalation worsens food insecurity and access", riskLevel: "Medium", isDemo: true },
-  { id: "myanmar", name: { en: "Myanmar", fr: "Myanmar" }, iso: "MMR", lat: 21.92, lng: 95.96, riskTitle: "Intensified fighting increases protection needs and displacement", riskLevel: "High", isDemo: true },
-  { id: "ukraine", name: { en: "Ukraine", fr: "Ukraine" }, iso: "UKR", lat: 48.38, lng: 31.17, riskTitle: "Attacks on energy infrastructure increase winter humanitarian needs", riskLevel: "High", isDemo: true },
-];
+// French country names for the UI only; the data comes from the backend.
+const FR: Record<string, string> = {
+  AFG: "Afghanistan", CMR: "Cameroun", COL: "Colombie", ETH: "Éthiopie", IDN: "Indonésie",
+  KEN: "Kenya", MDG: "Madagascar", MLI: "Mali", MMR: "Myanmar", MOZ: "Mozambique",
+  NER: "Niger", NGA: "Nigeria", PHL: "Philippines", PSE: "Palestine", SDN: "Soudan",
+  SSD: "Soudan du Sud", SYR: "Syrie", TCD: "Tchad", YEM: "Yémen",
+};
+
+function toContext(c: ApiContext): ConflictContext {
+  const risks = c.risks.map((r) => ({ id: r.id, title: r.title, riskLevel: r.risk_level ?? "—", priority: r.priority_score }));
+  return {
+    id: c.iso3.toLowerCase(),
+    name: { en: c.country, fr: FR[c.iso3] ?? c.country },
+    iso: c.iso3,
+    lat: c.lat,
+    lng: c.lng,
+    riskTitle: risks[0]?.title ?? "",
+    riskLevel: risks[0]?.riskLevel ?? "—",
+    risks,
+    hasQuestion: c.has_question,
+  };
+}
+
+/** Fetches the globe contexts once. `rankedAt` is the date of the ranking file. */
+export function useContexts(token: string | null) {
+  const [contexts, setContexts] = useState<ConflictContext[]>([]);
+  const [rankedAt, setRankedAt] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .getContexts(token)
+      .then((res) => {
+        if (cancelled) return;
+        setContexts(res.contexts.map(toContext));
+        setRankedAt(res.ranked_at);
+      })
+      .catch(() => {
+        /* Backend offline: the globe shows no dots; the rest of Home shows its offline card. */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
+  return { contexts, rankedAt };
+}
 
 export const START_VIEW = { lat: 10, lng: 22, altitude: 1.45 };

@@ -8,7 +8,7 @@ import { MeshPhongMaterial, Color } from "three";
 import { feature } from "topojson-client";
 import type { Topology, GeometryCollection } from "topojson-specification";
 import countries110m from "world-atlas/countries-110m.json";
-import { CONTEXTS, START_VIEW, type ConflictContext } from "./contexts";
+import { START_VIEW, type ConflictContext } from "./contexts";
 
 const cssVar = (name: string, fallback: string) => {
   if (typeof window === "undefined") return fallback;
@@ -77,7 +77,7 @@ export default function Globe({ size, contexts, assignedIds, selectedId, onSelec
   // Bring the selected context to the front.
   useEffect(() => {
     if (!ready || !selectedId) return;
-    const c = CONTEXTS.find((x) => x.id === selectedId);
+    const c = contexts.find((x) => x.id === selectedId);
     const alt = ref.current?.pointOfView().altitude ?? START_VIEW.altitude;
     if (c) ref.current?.pointOfView({ lat: c.lat, lng: c.lng, altitude: alt }, reducedMotion ? 0 : 700);
     // eslint-disable-next-line react-hooks/exhaustive-deps

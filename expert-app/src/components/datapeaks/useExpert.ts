@@ -104,8 +104,12 @@ export function useExpert() {
         if (!(e instanceof ApiError && e.status === 409)) throw e;
       }
       await refresh();
+      // The backend writes the AI summary of reasons in the background; look again shortly.
+      for (const delay of [8000, 20000]) {
+        setTimeout(() => void loadGroup(token).catch(() => undefined), delay);
+      }
     },
-    [token, data, refresh],
+    [token, data, refresh, loadGroup],
   );
 
   const submitRevision = useCallback(
@@ -135,8 +139,8 @@ export function useExpert() {
   );
 
   return useMemo(
-    () => ({ state, data, group, groupLocked, settings, track, own, refresh, submitAnswer, submitRevision, saveSettings }),
-    [state, data, group, groupLocked, settings, track, own, refresh, submitAnswer, submitRevision, saveSettings],
+    () => ({ token, state, data, group, groupLocked, settings, track, own, refresh, submitAnswer, submitRevision, saveSettings }),
+    [token, state, data, group, groupLocked, settings, track, own, refresh, submitAnswer, submitRevision, saveSettings],
   );
 }
 
