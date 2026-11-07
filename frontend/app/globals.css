@@ -8,25 +8,36 @@
  * Tap targets: use min-h-11 (44px) on anything tappable.
  */
 @theme {
-  /* Neutrals */
-  --color-canvas: #f8fafc; /* page background */
-  --color-surface: #ffffff; /* cards, inputs */
-  --color-surface-muted: #f1f5f9; /* quiet panels */
-  --color-ink: #0f172a; /* main text */
-  --color-ink-muted: #475569; /* secondary text, AA on canvas, surface and surface-muted */
-  --color-line: #e2e8f0; /* decorative dividers only */
-  --color-line-strong: #64748b; /* form-control borders, at least 3:1 on surface */
+  /* Primary accent (teal) — buttons, active states, links, progress, expert's own mark */
+  --color-primary-700: #0e6b65;     /* hover and active text */
+  --color-primary-600: #14776e;     /* buttons, active states */
+  --color-primary-500: #16827b;     /* accents, progress marks */
+  --color-primary-100: #e6f2f0;     /* teal chip background */
+  --color-primary-50: #e6f4f1;      /* active nav background */
 
-  /* The one accent: links, primary buttons, focus outline, the expert's own mark */
-  --color-accent: #1d4ed8;
-  --color-accent-hover: #1e40af;
-  --color-accent-soft: #eff6ff;
-  --color-on-accent: #ffffff;
+  /* Neutrals — text, borders, surfaces */
+  --color-ink-900: #173247;         /* headings and main text */
+  --color-ink-700: #23455a;         /* secondary buttons, tab text */
+  --color-ink-500: #5d7280;         /* muted copy, secondary text */
+  --color-ink-400: #728692;         /* footer, fine print */
 
-  /* ACAPS's probability band, shaded on the 0–100 axis (always labelled too) */
-  --color-band: #dbeafe;
+  --color-surface-page: #edf2f4;    /* page background */
+  --color-surface-card: #f5f8f9;    /* cards */
+  --color-surface-white: #ffffff;   /* sheets, inputs, whitecards */
 
-  /* Risk levels: text on the -soft background; -solid for bars and marks. Never colour alone: pair with a label. */
+  --color-border-subtle: #dce7ea;   /* card borders */
+  --color-border-default: #c9d9df;  /* form field borders */
+  --color-line: #e2eaed;            /* decorative dividers */
+
+  /* Warning/gold — "High" risk chips, caution notices */
+  --color-gold-700: #866017;        /* gold chip text */
+  --color-gold-50: #fbf1dc;         /* gold chip background */
+
+  /* Signal/grey — neutral chips, secondary badges */
+  --color-grey-chip-700: #496271;   /* grey chip text */
+  --color-grey-chip-50: #e9eff1;    /* grey chip background */
+
+  /* Risk levels (ACAPS): never colour alone, always pair with a label */
   --color-risk-low: #166534;
   --color-risk-low-soft: #f0fdf4;
   --color-risk-low-solid: #15803d;
@@ -36,6 +47,21 @@
   --color-risk-high: #991b1b;
   --color-risk-high-soft: #fef2f2;
   --color-risk-high-solid: #b91c1c;
+
+  /* ACAPS's probability band, shaded on the 0–100 axis (always labelled too) */
+  --color-band: #dbeafe;
+
+  /* Semantic aliases for existing component names (for gradual migration) */
+  --color-canvas: var(--color-surface-page);
+  --color-surface: var(--color-surface-white);
+  --color-surface-muted: var(--color-surface-card);
+  --color-ink: var(--color-ink-900);
+  --color-ink-muted: var(--color-ink-500);
+  --color-line-strong: var(--color-border-default);
+  --color-accent: var(--color-primary-600);
+  --color-accent-hover: var(--color-primary-700);
+  --color-accent-soft: var(--color-primary-50);
+  --color-on-accent: var(--color-surface-white);
 }
 
 @theme inline {
@@ -49,20 +75,128 @@
   }
 
   body {
-    background: var(--color-canvas);
-    color: var(--color-ink);
+    background: var(--color-surface-page);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 800;
+    color: var(--color-ink-900);
+  }
+
+  h1 {
+    font-size: 25px;
+    line-height: 1.18;
+    letter-spacing: -0.7px;
+  }
+
+  h2 {
+    font-size: 20px;
+    line-height: 1.3;
+    letter-spacing: -0.5px;
+  }
+
+  h3 {
+    font-size: 16px;
+    line-height: 1.4;
+    letter-spacing: -0.3px;
+  }
+
+  label {
+    font-size: 13px;
+    font-weight: 750;
+    color: var(--color-ink-900);
+  }
+
+  input, textarea, select {
+    font-size: 15px;
     font-family: var(--font-sans);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 3px solid #64a7b7;
     outline-offset: 2px;
+  }
+}
+
+/* Utility classes for typography */
+@layer components {
+  .text-eyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--color-ink-500);
+  }
+
+  .text-big {
+    font-size: 36px;
+    font-weight: 850;
+    letter-spacing: -1px;
+    line-height: 1;
+    color: var(--color-ink-900);
+  }
+
+  .text-body {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--color-ink-900);
+  }
+
+  .text-label {
+    font-size: 13px;
+    font-weight: 750;
+    color: var(--color-ink-900);
+  }
+
+  .text-help {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--color-ink-500);
+  }
+
+  .text-muted {
+    font-size: 13px;
+    color: var(--color-ink-500);
+  }
+
+  .text-footer {
+    font-size: 12px;
+    color: var(--color-ink-400);
+  }
+
+  /* Form field base styles */
+  .field-base {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: 13px;
+    font-size: 15px;
+    border: 1px solid var(--color-border-default);
+    border-radius: 11px;
+    background: var(--color-surface-white);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+  }
+
+  .field-base::placeholder {
+    color: var(--color-ink-500);
+  }
+
+  .field-base:focus {
+    outline: none;
+    border-color: var(--color-primary-600);
+    box-shadow: 0 0 0 3px rgba(20, 119, 110, 0.1);
   }
 }
 
 /*
  * Probability slider: a 44px-tall touch target with our own track, so nothing is filled until the expert
  * sets a value (no visual anchor at 50). --fill is set inline to the chosen percent.
+ * Uses teal primary color (#14776e) for the filled portion.
  */
 .probability-range {
   -webkit-appearance: none;
@@ -70,22 +204,24 @@
   height: 2.75rem;
   background: transparent;
   cursor: pointer;
-  --track: linear-gradient(to right, var(--color-accent) var(--fill, 0%), var(--color-line) var(--fill, 0%));
+  --track: linear-gradient(to right, #14776e var(--fill, 0%), #e2eaed var(--fill, 0%));
+  width: 100%;
 }
 .probability-range.is-unset {
-  --track: var(--color-line);
+  --track: #e2eaed;
 }
 .probability-range::-webkit-slider-runnable-track {
   height: 0.5rem;
   border-radius: 9999px;
   background: var(--track);
-  box-shadow: inset 0 0 0 1px var(--color-line-strong);
+  box-shadow: inset 0 0 0 1px #c9d9df;
 }
 .probability-range::-moz-range-track {
   height: 0.5rem;
   border-radius: 9999px;
   background: var(--track);
-  box-shadow: inset 0 0 0 1px var(--color-line-strong);
+  box-shadow: inset 0 0 0 1px #c9d9df;
+  border: none;
 }
 .probability-range::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -93,16 +229,19 @@
   height: 1.75rem;
   margin-top: -0.625rem;
   border-radius: 9999px;
-  border: 3px solid var(--color-surface);
-  background: var(--color-accent);
-  box-shadow: 0 0 0 1px var(--color-accent);
+  border: 3px solid #ffffff;
+  background: #14776e;
+  box-shadow: 0 0 0 1px #14776e;
+  cursor: pointer;
 }
 .probability-range::-moz-range-thumb {
   width: 1.75rem;
   height: 1.75rem;
   border-radius: 9999px;
-  border: 3px solid var(--color-surface);
-  background: var(--color-accent);
+  border: 3px solid #ffffff;
+  background: #14776e;
+  box-shadow: 0 0 0 1px #14776e;
+  cursor: pointer;
 }
 .probability-range.is-unset::-webkit-slider-thumb {
   opacity: 0;
