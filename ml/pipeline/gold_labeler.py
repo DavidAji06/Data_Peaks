@@ -1,6 +1,7 @@
 """Local scoring page for the gold set. Every click saves straight into gold_labels.csv.
 
     python -m ml.pipeline.gold_labeler            # then open http://localhost:8765
+    python -m ml.pipeline.gold_labeler --handcheck   # score data/processed/handcheck_v6.csv instead
 
 Keys: 1-5 set intensity then exposure, arrow keys / J K move between events.
 Shows no model scores (blind labelling). Binds to 127.0.0.1 only.
@@ -9,29 +10,41 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pandas as pd
 
 from ml.pipeline.gold_set import GOLD_CSV, RUBRIC
+from ml.pipeline.silver_labels import PROCESSED
 
 PORT = int(os.environ.get("PORT", 8765))
 FIELDS = {"my_intensity", "my_exposure", "notes"}
 LOCK = threading.Lock()
 
+# --handcheck: same page on the hand-check file; page field -> file column. Hides llm_* columns.
+HANDCHECK = "--handcheck" in sys.argv
+CSV_PATH = PROCESSED / "handcheck_v6.csv" if HANDCHECK else GOLD_CSV
+COLMAP = ({"gold_id": "id", "description": "text", "my_intensity": "vlad_intensity",
+           "my_exposure": "vlad_exposure", "notes": "vlad_notes"} if HANDCHECK else {})
+HIDDEN = "llm_" if HANDCHECK else "claude_"
+if HANDCHECK:
+    RUBRIC += ("\nKilling rule (v6): one death and nothing else serious = 3; two or more deaths "
+               "(incl. disasters) or an unstated plural = 4+; mass killings, thousands dead, famine = 5.\n")
+
 
 def read() -> pd.DataFrame:
-    return pd.read_csv(GOLD_CSV, dtype=str, keep_default_na=False, encoding="utf-8-sig")
+    return pd.read_csv(CSV_PATH, dtype=str, keep_default_na=False, encoding="utf-8-sig")
 
 
 def save(gold_id: str, field: str, value: str) -> None:
     with LOCK:
         df = read()
-        df.loc[df["gold_id"] == gold_id, field] = value
-        tmp = GOLD_CSV.with_suffix(".tmp")
+        df.loc[df[COLMAP.get("gold_id", "gold_id")] == gold_id, COLMAP.get(field, field)] = value
+        tmp = CSV_PATH.with_suffix(".tmp")
         df.to_csv(tmp, index=False, encoding="utf-8-sig")
-        os.replace(tmp, GOLD_CSV)
+        os.replace(tmp, CSV_PATH)
 
 
 PAGE = r"""<!doctype html><html><head><meta charset="utf-8"><title>Gold Set Scoring</title>
@@ -61,7 +74,7 @@ const $=id=>document.getElementById(id);
 async function load(){rows=await (await fetch('/api/rows')).json();const k=rows.findIndex(r=>!r.my_intensity||!r.my_exposure);i=k<0?0:k;render()}
 async function put(f,v){const r=rows[i];r[f]=v;$('saved').textContent='saving…';
  const res=await fetch('/api/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({gold_id:r.gold_id,field:f,value:v})});
- $('saved').textContent=res.ok?'saved to gold_labels.csv':'SAVE FAILED';grid()}
+ $('saved').textContent=res.ok?'saved to __FILE__':'SAVE FAILED';grid()}
 function btns(f){return [1,2,3,4,5].map(n=>`<button class="${rows[i][f]==n?'on':''}" onclick="setv('${f}','${n}')">${n}</button>`).join('')}
 function setv(f,v){put(f,v);render()}
 function render(){const r=rows[i];$('ev').innerHTML=`<h1>${r.gold_id} · ${r.country} · ${r.date}</h1>
@@ -95,10 +108,14 @@ class Handler(BaseHTTPRequestHandler):
             df = read()
             if "review" in df and (df["review"] == "1").any():  # review mode: only the flagged events
                 df = df[df["review"] == "1"]
-            df = df[[c for c in df.columns if not c.startswith("claude_")]]  # stay blind
+            df = df[[c for c in df.columns if not c.startswith(HIDDEN)]]  # stay blind
+            df = df.rename(columns={v: k for k, v in COLMAP.items()})
+            for c in ("date", "adm1_name", "targeting_specific_population_groups", "source_name"):
+                if c not in df:
+                    df[c] = ""
             self._send(200, df.to_json(orient="records").encode(), "application/json")
         else:
-            page = PAGE.replace("__RUBRIC__", json.dumps(RUBRIC.replace("**", "")))
+            page = PAGE.replace("__RUBRIC__", json.dumps(RUBRIC.replace("**", ""))).replace("__FILE__", CSV_PATH.name)
             self._send(200, page.encode("utf-8"), "text/html; charset=utf-8")
 
     def do_POST(self) -> None:
@@ -114,5 +131,5 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"gold scoring page: http://localhost:{PORT}  (saves to {GOLD_CSV})")
+    print(f"scoring page: http://localhost:{PORT}  (saves to {CSV_PATH})")
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

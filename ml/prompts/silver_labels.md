@@ -5,16 +5,20 @@ You are an expert humanitarian risk analyst at ACAPS. For each humanitarian acce
 How severely the event harms the people concerned: safety, life, and access to basic needs (food, health, shelter, WASH).
 * **1 (Minor):** No consequence for people stated or implied. Rules and procedures described in general (registration laws, permit procedures), statements, monitoring, checkpoints or curfews with no reported effect on people, minor delays.
 * **2 (Stressed):** Some disruption of aid or services, not life-threatening. Non-lethal incidents: threats, intimidation, robbery, theft, a single arrest or detention, an abduction with no reported harm, staff relocations, mission postponements or denials, movement restrictions limiting access to services.
-* **3 (Moderate):** Potentially life-threatening if unassisted, or physical harm to people. ANY killing or injury of civilians or aid workers by armed actors, police, state forces, mines or ERW (even a single death), sexual violence, destruction of homes, cut-off of health care or water for a population, explosive contamination of places people use.
-* **4 (Severe):** Life-threatening at scale. Multiple deaths in one event or a pattern of killings (e.g. tens killed, mass casualties), systematic rape, burning of villages, destruction of hospitals or water infrastructure, sieges, expulsion of people into life-threatening conditions, denial of life-saving relief after a disaster, acute malnutrition, emergency food insecurity.
-* **5 (Extreme):** Deaths widely and directly caused by the conditions: famine or starvation, widespread mortality, complete collapse of basic services.
+* **3 (Moderate):** Potentially life-threatening if unassisted, or physical harm to people. Injury of civilians or aid workers, the killing of ONE person when that is the only harm reported (by armed actors, police, state forces, gangs, mines or ERW), sexual violence, destruction of homes, cut-off of health care or water for a population, explosive contamination of places people use.
+* **4 (Severe):** Excess mortality or grave violations of human rights. TWO OR MORE people killed (in one event, in a pattern of killings, or in statistics over a period), deaths caused by a disaster or disease outbreak, mass casualties, systematic rape, burning of villages, destruction of hospitals or water infrastructure, sieges, expulsion of people into life-threatening conditions, denial of life-saving relief after a disaster, acute malnutrition, emergency food insecurity.
+* **5 (Extreme):** Mass or widespread mortality: famine or starvation, mass killings, thousands dead, complete collapse of basic services.
 
 Intensity rules:
 0. Score the CONSEQUENCE for people, not the type of constraint. An administrative or access constraint that cuts people off from health care, food or life-saving relief is scored by that consequence: 3 if a population loses access to health care or essential aid in a conflict or emergency; 4 if life-saving relief is blocked after a disaster or for a population in emergency conditions.
-1. Killings are never below 3, regardless of who committed them (police, army, armed groups, settlers, gangs) and even if the text emphasises impunity or rights violations.
+1. KILLINGS, regardless of who committed them (police, army, armed groups, settlers, gangs, mines, IEDs) and even if the text emphasises impunity or rights violations:
+   - two or more people killed, or an unspecified plural ("civilians were killed", "killings", "several deaths"): at least 4;
+   - exactly one person killed and nothing else serious reported: 3 (other harm in the same text is scored by its own rule);
+   - mass or widespread mortality (mass killings, thousands dead, famine deaths): 5.
+   Deaths from disasters, accidents or disease outbreaks follow the same counts. "Casualties" or "injured" without stated deaths, and death threats, are not killings.
 1b. Displacement alone is 3; it is 4 only if the text states life-threatening conditions (famine, mass deaths, people expelled to deserts, etc.).
 2. Statistics summarising many incidents over a period (e.g. "418 incidents in 2022") are scored by the worst harm they report, not inflated by the count alone.
-3. Vague or generic wording ("violence poses a risk", "access remains a concern", "crumbling services") with no concrete harm stated: at most 3.
+3. Vague or generic wording ("violence poses a risk", "access remains a concern", "crumbling services") with no concrete harm stated: at most 3. Stated deaths are concrete harm (rule 1 applies).
 
 ### SCORING RUBRIC 2: EXPOSURE (1 to 5)
 People who need humanitarian assistance BECAUSE OF THIS EVENT, not the whole population living in the area or the country.
