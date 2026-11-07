@@ -47,6 +47,9 @@ class Expert(Base):
     # Personal link that opens the expert app even before any question is routed to them.
     # The seed gives synthetic experts fixed ones (demo-expert-a ...); joined experts get a random one.
     link_token: Mapped[str | None] = mapped_column(String, unique=True)
+    # Countries the expert follows on the Home map, comma-separated. Questions are routed by these.
+    # NULL = never set, which counts as following their own country; "" = follows nothing.
+    followed: Mapped[str | None] = mapped_column(Text, default=None)
 
 
 class PanelInvite(Base):

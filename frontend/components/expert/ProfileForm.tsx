@@ -36,7 +36,7 @@ export function ProfileForm(props: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [joined, setJoined] = useState<string | null>(null); // pseudonym after joining
+  const [joined, setJoined] = useState<{ pseudonym: string; appLink: string | null } | null>(null);
 
   // Topics the backend already has that aren't in our list stay visible and selectable.
   const topicKeys = [...TOPIC_KEYS, ...topics.filter((t) => !TOPIC_KEYS.includes(t))];
@@ -70,7 +70,7 @@ export function ProfileForm(props: Props) {
           topics,
           max_open_questions: load,
         });
-        setJoined(r.pseudonym);
+        setJoined(r);
       } else {
         const u = changes();
         if (Object.keys(u).length === 0) {
@@ -100,8 +100,17 @@ export function ProfileForm(props: Props) {
     return (
       <Card className="mt-4">
         <h1 className="text-xl font-semibold text-ink">{s.join.doneTitle}</h1>
-        <p className="mt-2 text-ink">{s.join.donePseudonym(joined)}</p>
+        <p className="mt-2 text-ink">{s.join.donePseudonym(joined.pseudonym)}</p>
         <p className="mt-2 text-ink-muted">{s.join.doneNext}</p>
+        {joined.appLink && (
+          <>
+            <p className="mt-4 text-ink">{s.join.doneLinkHelp}</p>
+            <a href={joined.appLink} className={`mt-3 inline-flex ${buttonClass.primary}`}>
+              {s.join.doneOpenApp}
+            </a>
+            <p className="mt-2 break-all text-sm text-ink-muted">{joined.appLink}</p>
+          </>
+        )}
       </Card>
     );
   }

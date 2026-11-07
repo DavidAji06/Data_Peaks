@@ -34,9 +34,32 @@ def resolve_link(db: Session, token: str) -> tuple[Expert, Invite | None]:
     return expert, current_invite(db, expert.id)
 
 
-def require_invite(db: Session, token: str) -> Invite:
-    """For question routes: 404 when the link is unknown or has no open question yet."""
-    _, invite = resolve_link(db, token)
+def expert_invites(db: Session, expert_id: str) -> list[tuple[Invite, Question]]:
+    """Every question this expert was invited to: open ones first, then newest first."""
+    rows = db.execute(
+        select(Invite, Question)
+        .join(Question, Invite.question_id == Question.id)
+        .where(Invite.expert_id == expert_id)
+        .order_by(Invite.created_at.desc(), Question.id.desc())
+    ).all()
+    return sorted(rows, key=lambda row: row[1].status != "open")  # Stable: keeps newest first
+
+
+def require_invite(db: Session, token: str, question_id: str | None = None) -> Invite:
+    """
+    For question routes. With question_id, the expert's invite to that exact question (404 if
+    they were never invited to it). Without it, the link's own question: the invite behind an
+    invite token, or the newest open one for a personal link. Clients should always send
+    question_id, so an answer can never land on a question that arrived in the meantime.
+    """
+    expert, invite = resolve_link(db, token)
+    if question_id is not None:
+        invite = db.scalar(
+            select(Invite).where(Invite.expert_id == expert.id, Invite.question_id == question_id)
+        )
+        if invite is None:
+            raise HTTPException(status_code=404, detail="You were not invited to this question")
+        return invite
     if invite is None:
         raise HTTPException(status_code=404, detail="No open question for this link yet")
     return invite

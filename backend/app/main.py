@@ -12,9 +12,10 @@ import threading
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from .db import Base, SessionLocal, engine, get_db
+from .db import Base, SessionLocal, add_missing_columns, engine, get_db
 from .models import Alert, Expert, Invite, PanelInvite, Question, Response, Risk, RiskDecision
 from .routers.moderator import router as moderator_router
 from .routers.public import router as public_router
@@ -29,8 +30,8 @@ from .schemas import (
 from .services import ml_outputs
 from .services.alert_import import import_alert_items
 from .services.auth import require_moderator
-from .services.links import require_invite, resolve_link
-from .services.routing import route_question, should_notify
+from .services.links import expert_invites, require_invite, resolve_link
+from .services.routing import clean_followed, followed_countries, route_question, should_notify
 from .services.scoring import expert_scores, latest_answers
 
 FRONTEND_URL = "http://localhost:3000"  # Moderator dashboard (and its CORS origin)
@@ -39,6 +40,7 @@ MODERATOR_ONLY = [Depends(require_moderator)]
 MIN_GROUP_SIZE = 5  # Below this, group figures could reveal individual answers
 
 Base.metadata.create_all(engine)
+add_missing_columns(engine)
 
 app = FastAPI(title="Data Peaks API")
 app.state.session_factory = SessionLocal  # Background jobs open their own session; tests swap this
@@ -113,9 +115,18 @@ def summarise_question(question_id: str, session_factory=SessionLocal):
             _summarising.discard(question_id)
 
 
-def get_invite(db: Session, token: str) -> Invite:
-    """The invite behind an invite token or a personal link. 404 if there is no open question."""
-    return require_invite(db, token)
+def get_invite(db: Session, token: str, question_id: str | None = None) -> Invite:
+    """The invite behind a link, for one question (see require_invite)."""
+    return require_invite(db, token, question_id)
+
+
+def commit_once(db: Session, conflict_detail: str):
+    """Commits an answer; two submits at the same moment hit the unique constraint and get 409, not 500."""
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=conflict_detail)
 
 
 def nickname_taken(db: Session, name: str, expert_id: str | None = None) -> bool:
@@ -174,6 +185,7 @@ def settings_dict(expert: Expert):
         "topics": [topic for topic in expert.topics.split(",") if topic],
         "language": expert.language,
         "max_open_questions": expert.max_open_questions,
+        "followed": followed_countries(expert),
     }
 
 
@@ -322,10 +334,12 @@ def join_panel(token: str, body: JoinIn, db: Session = Depends(get_db)):
         max_open_questions=body.max_open_questions,
         email=invite.email,
         link_token=secrets.token_urlsafe(16),
+        followed=clean_followed([body.country]),  # Starts by following the country they joined for
     )
     db.add(expert)
     invite.used = True
     db.commit()
+    print(f"[notify] {expert.id} joined: {EXPERT_APP_URL}/?token={expert.link_token}")  # Stand-in for an email
     return {
         "status": "joined",
         "pseudonym": expert.pseudonym,
@@ -335,9 +349,28 @@ def join_panel(token: str, body: JoinIn, db: Session = Depends(get_db)):
 
 # Expert: secret-link routes
 
+@app.get("/q/{token}/questions")
+def expert_questions(token: str, db: Session = Depends(get_db)):
+    """Every question this expert was invited to, open ones first, so none disappears when a new one arrives."""
+    expert, _ = resolve_link(db, token)
+    items = []
+    for invite, question in expert_invites(db, expert.id):
+        risk = db.get(Risk, question.risk_id)
+        items.append({
+            "question_id": question.id,
+            "text": question.text,
+            "deadline": question.deadline,
+            "status": question.status,
+            "risk": {"id": risk.id, "title": risk.title, "country": risk.country},
+            "answered": get_response(db, question.id, expert.id, 1) is not None,
+            "revised": get_response(db, question.id, expert.id, 2) is not None,
+        })
+    return items
+
+
 @app.get("/q/{token}")
-def expert_question(token: str, db: Session = Depends(get_db)):
-    invite = get_invite(db, token)
+def expert_question(token: str, question_id: str | None = None, db: Session = Depends(get_db)):
+    invite = get_invite(db, token, question_id)
     question = db.get(Question, invite.question_id)
     risk = db.get(Risk, question.risk_id)
     alert = db.get(Alert, question.alert_id) if question.alert_id else None
@@ -368,9 +401,10 @@ def submit_answer(
     token: str,
     body: AnswerIn,
     background: BackgroundTasks,
+    question_id: str | None = None,
     db: Session = Depends(get_db),
 ):
-    invite = get_invite(db, token)
+    invite = get_invite(db, token, question_id)
     require_open(db.get(Question, invite.question_id))
     if get_response(db, invite.question_id, invite.expert_id, 1):
         raise HTTPException(status_code=409, detail="Already answered")
@@ -383,7 +417,7 @@ def submit_answer(
         round=1,
         **answer_labels(db.get(Expert, invite.expert_id)),
     ))
-    db.commit()
+    commit_once(db, "Already answered")
 
     question = db.get(Question, invite.question_id)
     if not question.themes and len(latest_answers(db, question.id)) >= MIN_GROUP_SIZE:
@@ -392,8 +426,8 @@ def submit_answer(
 
 
 @app.post("/q/{token}/revision")
-def submit_revision(token: str, body: AnswerIn, db: Session = Depends(get_db)):
-    invite = get_invite(db, token)
+def submit_revision(token: str, body: AnswerIn, question_id: str | None = None, db: Session = Depends(get_db)):
+    invite = get_invite(db, token, question_id)
     require_open(db.get(Question, invite.question_id))
     if not get_response(db, invite.question_id, invite.expert_id, 1):
         raise HTTPException(status_code=403, detail="Submit your first answer before revising")
@@ -408,13 +442,13 @@ def submit_revision(token: str, body: AnswerIn, db: Session = Depends(get_db)):
         round=2,
         **answer_labels(db.get(Expert, invite.expert_id)),
     ))
-    db.commit()
+    commit_once(db, "Already revised")
     return {"status": "revised"}
 
 
 @app.get("/q/{token}/group")
-def group_view(token: str, db: Session = Depends(get_db)):
-    invite = get_invite(db, token)
+def group_view(token: str, question_id: str | None = None, db: Session = Depends(get_db)):
+    invite = get_invite(db, token, question_id)
     if not get_response(db, invite.question_id, invite.expert_id, 1):
         raise HTTPException(status_code=403, detail="Submit your answer before seeing the group view")
 
@@ -484,6 +518,8 @@ def update_settings(token: str, body: SettingsUpdate, db: Session = Depends(get_
         raise HTTPException(status_code=409, detail="That nickname is already taken. Try another one.")
     if "topics" in updates:
         updates["topics"] = clean_topics(updates["topics"])
+    if "followed" in updates:
+        updates["followed"] = clean_followed(updates["followed"])
     for field, value in updates.items():
         setattr(expert, field, value)
 

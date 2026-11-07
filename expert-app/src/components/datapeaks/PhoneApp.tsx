@@ -22,11 +22,6 @@ type Prefs = { reducedMotion: boolean; listView: boolean };
 const MIN_GROUP = 5;
 const toApiPrivacy: Record<Privacy, AnonymityLevel> = { known: "known_to_acaps", nickname: "pseudonymous", anonymous: "anonymous" };
 const fromApiPrivacy: Record<AnonymityLevel, Privacy> = { known_to_acaps: "known", pseudonymous: "nickname", anonymous: "anonymous" };
-const COUNTRIES_EN = ["Chad", "Sudan", "South Sudan", "Niger", "Mali", "CAR"];
-const COUNTRIES_FR = ["Tchad", "Soudan", "Soudan du Sud", "Niger", "Mali", "RCA"];
-const TOPICS_API = ["conflict", "displacement", "protection", "food security", "humanitarian access"];
-const FREQ_TO_MAX = [2, 4, 1]; // index of t.freqList -> max_open_questions
-const PREFS_KEY = "dp-prefs";
 
 const L = (lang: Lang, en: string, fr: string) => (lang === "fr" ? fr : en);
 const fmtDate = (lang: Lang, iso: string | null | undefined) => {
@@ -36,16 +31,6 @@ const fmtDate = (lang: Lang, iso: string | null | undefined) => {
 };
 const to100 = (p: number) => Math.round(p * 100);
 
-function readPrefs(): Prefs {
-  try {
-    const raw = localStorage.getItem(PREFS_KEY);
-    if (raw) return { reducedMotion: false, listView: false, ...(JSON.parse(raw) as Partial<Prefs>) };
-  } catch {
-    /* storage unavailable */
-  }
-  return { reducedMotion: false, listView: false };
-}
-
 export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
   const t = dict[lang];
   const ex = useExpert();
@@ -53,20 +38,11 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
   const [groupView, setGroupView] = useState<GroupView>("compare");
   const [answer, setAnswer] = useState(50);
   const [reason, setReason] = useState("");
-  const [prefs, setPrefsState] = useState<Prefs>({ reducedMotion: false, listView: false });
+  // Reduced motion follows the device setting; the globe/list choice is the toggle on Home.
+  const [prefs, setPrefs] = useState<Prefs>({ reducedMotion: false, listView: false });
   useEffect(() => {
-    const p = readPrefs();
-    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) p.reducedMotion = true;
-    setPrefsState(p);
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) setPrefs({ reducedMotion: true, listView: false });
   }, []);
-  const setPrefs = (p: Prefs) => {
-    setPrefsState(p);
-    try {
-      localStorage.setItem(PREFS_KEY, JSON.stringify(p));
-    } catch {
-      /* storage unavailable */
-    }
-  };
 
   const go = (s: Screen, gv: GroupView = "compare") => {
     setScreen(s);
@@ -79,7 +55,18 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
     questions: [L(lang, "Questions", "Questions"), L(lang, "Share your view on a developing risk", "Votre avis sur un risque émergent")],
     group: [L(lang, "Group view", "Avis du groupe"), L(lang, "How does your view compare?", "Comparez votre réponse")],
   };
-  const pending = ex.data && !ex.data.answered && ex.data.question.status === "open" ? 1 : 0;
+  const pending = ex.questions.filter((q) => q.status === "open" && !q.answered).length;
+  // A different question starts with a fresh answer form and the group comparison.
+  const shownId = ex.data?.question.id;
+  useEffect(() => {
+    setAnswer(50);
+    setReason("");
+    setGroupView("compare");
+  }, [shownId]);
+  const openQuestion = (id: string, s: Screen) => {
+    ex.selectQuestion(id);
+    go(s);
+  };
   const nav: [Screen, string, typeof House][] = [
     ["profile", L(lang, "Profile", "Profil"), UserRound],
     ["home", L(lang, "Home", "Accueil"), House],
@@ -116,9 +103,10 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
       <main className="flex-1 overflow-y-auto px-5 py-6">
         {/* Home stays mounted so the globe keeps its camera and selection between tabs. */}
         <div hidden={screen !== "home"}>
-          <Home t={t} lang={lang} ex={ex} active={screen === "home"} prefs={prefs} onQuestions={() => go("questions")} onGroup={() => go("group")} />
+          <Home t={t} lang={lang} ex={ex} active={screen === "home"} prefs={prefs} onQuestions={() => go("questions")} onGroup={() => go("group")} onOpen={openQuestion} />
         </div>
         {blocked && <LoadNotice lang={lang} t={t} ex={ex} />}
+        {!blocked && needsData && <QuestionSwitcher lang={lang} ex={ex} />}
         {!blocked && screen === "questions" && (
           <Question t={t} lang={lang} ex={ex} answer={answer} setAnswer={setAnswer} reason={reason} setReason={setReason}
             onSubmitted={() => go("group")} onGroup={() => go("group")} />
@@ -127,13 +115,50 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
           <Group t={t} lang={lang} ex={ex} view={groupView} setView={setGroupView}
             onQuestion={() => go("questions")} onHome={() => go("home")} onProfile={() => go("profile")} />
         )}
-        {screen === "profile" && <Profile t={t} lang={lang} ex={ex} prefs={prefs} setPrefs={setPrefs} onOpen={(s) => go(s)} />}
+        {screen === "profile" && <Profile t={t} lang={lang} ex={ex} onOpen={openQuestion} />}
       </main>
     </div>
   );
 }
 
 /* ------------------------------------------------------------------ shared bits */
+
+function questionStatus(lang: Lang, q: { status: string; answered: boolean; revised: boolean }) {
+  if (q.status !== "open") return L(lang, "Closed", "Close");
+  if (q.revised) return L(lang, "Revised", "Révisée");
+  if (q.answered) return L(lang, "Answered", "Répondue");
+  return L(lang, "Open", "Ouverte");
+}
+
+/** Open and closed questions. Resolved ones are listed under Track record instead. */
+const liveQuestions = (ex: Expert) => ex.questions.filter((q) => q.status !== "resolved" || q.question_id === ex.data?.question.id);
+
+/** Lets the expert move between all their questions; shown on Questions and Group when there is more than one. */
+function QuestionSwitcher({ lang, ex }: { lang: Lang; ex: Expert }) {
+  const live = liveQuestions(ex);
+  if (live.length < 2) return null;
+  return (
+    <div className="mb-5">
+      <Eyebrow>{L(lang, `Your questions (${live.length})`, `Vos questions (${live.length})`)}</Eyebrow>
+      <div className="-mx-5 mt-2 flex gap-2 overflow-x-auto px-5 pb-1" role="tablist" aria-label={L(lang, "Your questions", "Vos questions")}>
+        {live.map((q) => {
+          const on = q.question_id === ex.data?.question.id;
+          const todo = q.status === "open" && !q.answered;
+          return (
+            <button key={q.question_id} role="tab" aria-selected={on} onClick={() => ex.selectQuestion(q.question_id)}
+              className={`min-h-11 w-44 shrink-0 rounded-lg border px-3 py-2 text-left ${on ? "border-primary bg-accent" : "bg-card"}`}>
+              <span className="flex items-center justify-between gap-2 font-condensed text-xs font-bold text-navy">
+                <span className="truncate">{q.risk.country}</span>
+                <span className={todo ? "text-risk" : "text-muted-foreground"}>{questionStatus(lang, q)}</span>
+              </span>
+              <span className="mt-1 line-clamp-2 block text-xs leading-snug">{q.text}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function LoadNotice({ t, lang, ex }: { t: T; lang: Lang; ex: Expert }) {
   if (ex.state === "loading")
@@ -210,17 +235,6 @@ function Chips({ options, selected, onChange, single = false }: { options: strin
   );
 }
 
-function Switch({ label, hint, checked, onChange }: { label: string; hint?: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button role="switch" aria-checked={checked} onClick={() => onChange(!checked)} className="flex w-full items-center justify-between gap-3 py-2 text-left">
-      <span><span className="block font-medium">{label}</span>{hint && <span className="block text-xs text-muted-foreground">{hint}</span>}</span>
-      <span className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${checked ? "bg-primary" : "bg-input"}`}>
-        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-card shadow transition-all ${checked ? "left-[22px]" : "left-0.5"}`} />
-      </span>
-    </button>
-  );
-}
-
 /* ------------------------------------------------------------------ HOME */
 
 function hasWebGL() {
@@ -232,9 +246,11 @@ function hasWebGL() {
   }
 }
 
-function Home({ t, lang, ex, active, prefs, onQuestions, onGroup }: { t: T; lang: Lang; ex: Expert; active: boolean; prefs: Prefs; onQuestions: () => void; onGroup: () => void }) {
+function Home({ t, lang, ex, active, prefs, onQuestions, onGroup, onOpen }: { t: T; lang: Lang; ex: Expert; active: boolean; prefs: Prefs; onQuestions: () => void; onGroup: () => void; onOpen: (id: string, s: Screen) => void }) {
   const [filter, setFilter] = useState<0 | 1 | 2>(0); // all, following, my questions
-  const [following, setFollowing] = useState<string[]>(["sdn", "tcd"]);
+  const [followError, setFollowError] = useState(false);
+  // Follows live on the server (by country name) so they survive reloads and devices.
+  const followedNames = (ex.settings?.followed ?? []).map((n) => n.toLowerCase());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [resetSignal, setResetSignal] = useState(0);
   const [zoomSignal, setZoomSignal] = useState<{ n: number; dir: 1 | -1 }>({ n: 0, dir: 1 });
@@ -260,8 +276,23 @@ function Home({ t, lang, ex, active, prefs, onQuestions, onGroup }: { t: T; lang
   }, []);
 
   const { contexts, rankedAt, failed: contextsFailed } = useContexts(ex.token);
-  const liveCountry = ex.data?.question.status === "open" ? ex.data.risk.country : null;
-  const assignedIds = contexts.filter((c) => c.hasQuestion || c.name.en === liveCountry).map((c) => c.id);
+  const inCountry = (country: string, ctx: ConflictContext) =>
+    country.split(",").some((n) => n.trim().toLowerCase() === ctx.name.en.toLowerCase());
+  const assignedIds = contexts
+    .filter((c) => c.hasQuestion || ex.questions.some((q) => q.status === "open" && inCountry(q.risk.country, c)))
+    .map((c) => c.id);
+  const following = contexts.filter((c) => followedNames.includes(c.name.en.toLowerCase())).map((c) => c.id);
+  const toggleFollow = async (ctx: ConflictContext) => {
+    const current = ex.settings?.followed ?? [];
+    const isOn = current.some((n) => n.toLowerCase() === ctx.name.en.toLowerCase());
+    const next = isOn ? current.filter((n) => n.toLowerCase() !== ctx.name.en.toLowerCase()) : [...current, ctx.name.en];
+    setFollowError(false);
+    try {
+      await ex.saveSettings({ followed: next });
+    } catch {
+      setFollowError(true);
+    }
+  };
   const rankedLabel = L(lang, "Ranked by Data Peaks pipeline", "Classé par le pipeline Data Peaks") + (rankedAt ? ` · ${fmtDate(lang, rankedAt)}` : "");
   const shown = contexts.filter((c) => (filter === 1 ? following.includes(c.id) : filter === 2 ? assignedIds.includes(c.id) : true));
   const results = contexts.filter((c) => (c.name.en + " " + c.name.fr).toLowerCase().includes(query.trim().toLowerCase()));
@@ -360,10 +391,11 @@ function Home({ t, lang, ex, active, prefs, onQuestions, onGroup }: { t: T; lang
         </div>
 
         {selected && (
-          <ContextSheet lang={lang} ex={ex} ctx={selected} rankedLabel={rankedLabel} assigned={assignedIds.includes(selected.id)}
-            following={following.includes(selected.id)}
-            onFollow={() => setFollowing((f) => (f.includes(selected.id) ? f.filter((x) => x !== selected.id) : [...f, selected.id]))}
-            onClose={() => setSelectedId(null)} onQuestions={onQuestions} onGroup={onGroup} />
+          <ContextSheet lang={lang} ex={ex} ctx={selected} rankedLabel={rankedLabel}
+            question={ex.questions.find((q) => q.status === "open" && inCountry(q.risk.country, selected)) ?? null} onOpen={onOpen}
+            following={following.includes(selected.id)} followError={followError} canFollow={!!ex.settings}
+            onFollow={() => void toggleFollow(selected)}
+            onClose={() => setSelectedId(null)} />
         )}
       </section>
 
@@ -372,28 +404,29 @@ function Home({ t, lang, ex, active, prefs, onQuestions, onGroup }: { t: T; lang
   );
 }
 
-function ContextSheet({ lang, ex, ctx, rankedLabel, assigned, following, onFollow, onClose, onQuestions, onGroup }: {
-  lang: Lang; ex: Expert; ctx: ConflictContext; rankedLabel: string; assigned: boolean; following: boolean; onFollow: () => void; onClose: () => void; onQuestions: () => void; onGroup: () => void;
+function ContextSheet({ lang, ex, ctx, rankedLabel, question, following, followError, canFollow, onFollow, onClose, onOpen }: {
+  lang: Lang; ex: Expert; ctx: ConflictContext; rankedLabel: string; question: Expert["questions"][number] | null; following: boolean; followError: boolean; canFollow: boolean; onFollow: () => void; onClose: () => void; onOpen: (id: string, s: Screen) => void;
 }) {
-  const d = assigned ? ex.data : null;
+  // Full details (trigger update, risk level) are only loaded for the question on screen.
+  const d = question && ex.data?.question.id === question.question_id ? ex.data : null;
   const update = d?.trigger_update;
-  const open = d && d.question.status === "open";
+  const riskId = question?.risk.id ?? ctx.risks[0]?.id;
   return (
     <div className="rounded-t-2xl rounded-b-lg border border-t-4 border-t-primary bg-card p-4 shadow-md" role="dialog" aria-label={ctx.name[lang]}>
       <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-input" aria-hidden />
       <div className="flex items-start justify-between gap-2">
         <div>
-          <Eyebrow><MapPin className="mr-1 inline h-3 w-3" />{L(lang, "Context", "Contexte")}{assigned && d ? ` · Risk ${d.risk.id}` : ""}</Eyebrow>
+          <Eyebrow><MapPin className="mr-1 inline h-3 w-3" />{L(lang, "Context", "Contexte")}{question ? ` · Risk ${question.risk.id}` : ""}</Eyebrow>
           <h3 className="font-display text-3xl leading-none text-navy">{ctx.name[lang]}</h3>
         </div>
         <button onClick={onClose} aria-label={L(lang, "Close", "Fermer")} className="flex h-11 w-11 items-center justify-center rounded-full border"><X className="h-5 w-5" /></button>
       </div>
-      <p className="mt-2 text-sm leading-snug">{d?.risk.title ?? ctx.riskTitle}</p>
+      <p className="mt-2 text-sm leading-snug">{question?.risk.title ?? ctx.riskTitle}</p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <Badge tone="risk">{L(lang, "ACAPS risk level", "Niveau de risque ACAPS")}: {d?.risk.risk_level ?? ctx.riskLevel}</Badge>
+        <Badge tone="risk">{L(lang, "ACAPS risk level", "Niveau de risque ACAPS")}: {d?.risk.risk_level ?? ctx.risks.find((r) => r.id === riskId)?.riskLevel ?? ctx.riskLevel}</Badge>
         <Badge tone="muted">{rankedLabel}</Badge>
       </div>
-      {ctx.risks.filter((r) => r.id !== (d?.risk.id ?? ctx.risks[0]?.id)).map((r) => (
+      {ctx.risks.filter((r) => r.id !== riskId).map((r) => (
         <div key={r.id} className="mt-3 border-t pt-2">
           <p className="text-sm leading-snug">{r.title}</p>
           <Badge tone="risk">{L(lang, "ACAPS risk level", "Niveau de risque ACAPS")}: {r.riskLevel}</Badge>
@@ -407,12 +440,22 @@ function ContextSheet({ lang, ex, ctx, rankedLabel, assigned, following, onFollo
         </div>
       )}
       <div className="mt-4 space-y-2">
-        {assigned && d ? (
-          d.answered ? <Button className="h-12 w-full" onClick={onGroup}>{L(lang, "View group insight", "Voir l'avis du groupe")}</Button>
-            : open ? <Button className="h-12 w-full" onClick={onQuestions}>{L(lang, "Share your view", "Donner mon avis")}</Button>
-              : <p className="text-sm text-muted-foreground">{L(lang, "This question has closed.", "Cette question est close.")}</p>
+        {question ? (
+          question.answered ? <Button className="h-12 w-full" onClick={() => onOpen(question.question_id, "group")}>{L(lang, "View group insight", "Voir l'avis du groupe")}</Button>
+            : <Button className="h-12 w-full" onClick={() => onOpen(question.question_id, "questions")}>{L(lang, "Share your view", "Donner mon avis")}</Button>
         ) : <p className="text-sm text-muted-foreground">{L(lang, "No question assigned to you here.", "Aucune question ne vous est attribuée ici.")}</p>}
-        <Button variant="ghost" className="w-full" onClick={onFollow}>{following ? L(lang, "✓ Following", "✓ Suivi") : L(lang, "Follow", "Suivre")}</Button>
+        {canFollow && (
+          <>
+            <Button variant="ghost" className="w-full" onClick={onFollow}>{following ? L(lang, "✓ Following", "✓ Suivi") : L(lang, "Follow", "Suivre")}</Button>
+            <p className="text-center text-xs text-muted-foreground">
+              {followError
+                ? L(lang, "Couldn't save. Try again.", "Échec de l'enregistrement. Réessayez.")
+                : following
+                  ? L(lang, "You'll get ACAPS questions about this country.", "Vous recevrez les questions de l'ACAPS sur ce pays.")
+                  : L(lang, "Follow to get ACAPS questions about this country.", "Suivez ce pays pour recevoir les questions de l'ACAPS.")}
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
@@ -801,12 +844,9 @@ function Done({ t, lang, ex, onGroup, onHome, onProfile }: { t: T; lang: Lang; e
 
 /* ------------------------------------------------------------------ PROFILE */
 
-function Profile({ t, lang, ex, prefs, setPrefs, onOpen }: { t: T; lang: Lang; ex: Expert; prefs: Prefs; setPrefs: (p: Prefs) => void; onOpen: (s: Screen) => void }) {
+function Profile({ t, lang, ex, onOpen }: { t: T; lang: Lang; ex: Expert; onOpen: (id: string, s: Screen) => void }) {
   const s = ex.settings;
   const [privacy, setPrivacy] = useState<Privacy>("nickname");
-  const [countries, setCountries] = useState<number[]>([0]);
-  const [topics, setTopics] = useState<number[]>([0, 1]);
-  const [freq, setFreq] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<"idle" | "ok" | "err">("idle");
   const [whoSees, setWhoSees] = useState(false);
@@ -817,24 +857,13 @@ function Profile({ t, lang, ex, prefs, setPrefs, onOpen }: { t: T; lang: Lang; e
   useEffect(() => {
     if (!s) return;
     setPrivacy(fromApiPrivacy[s.anonymity_level]);
-    const c = COUNTRIES_EN.findIndex((x) => x.toLowerCase() === s.country.toLowerCase());
-    if (c >= 0) setCountries([c]);
-    const tp = s.topics.map((x) => TOPICS_API.indexOf(x.toLowerCase())).filter((i) => i >= 0);
-    if (tp.length) setTopics(tp);
-    const f = FREQ_TO_MAX.indexOf(s.max_open_questions);
-    setFreq(f >= 0 ? f : 0);
   }, [s]);
 
   const save = async () => {
     setSaving(true);
     setSaved("idle");
     try {
-      await ex.saveSettings({
-        anonymity_level: toApiPrivacy[privacy],
-        ...(countries.length ? { country: COUNTRIES_EN[countries[0]!] } : {}),
-        topics: topics.map((i) => TOPICS_API[i]!),
-        max_open_questions: FREQ_TO_MAX[freq] ?? 2,
-      });
+      await ex.saveSettings({ anonymity_level: toApiPrivacy[privacy] });
       setSaved("ok");
     } catch {
       setSaved("err");
@@ -902,22 +931,7 @@ function Profile({ t, lang, ex, prefs, setPrefs, onOpen }: { t: T; lang: Lang; e
             <button onClick={() => setEditingName(false)} className="text-sm font-medium text-primary-strong">{L(lang, "Cancel", "Annuler")}</button>
           </div>
         )}
-        {savedPrivacy !== "anonymous" && (
-          <p className="text-xs text-muted-foreground">{L(lang, "Other experts never see your nickname. ACAPS moderators see it unless you choose Fully anonymous.", "Les autres experts ne voient jamais votre pseudonyme. Les modérateurs ACAPS le voient, sauf si vous choisissez Entièrement anonyme.")}</p>
-        )}
       </div>
-
-      {/* A. Participation */}
-      <section className="space-y-5">
-        <Eyebrow>{L(lang, "Your participation", "Votre participation")}</Eyebrow>
-        <div><SectionLabel>{t.countries}</SectionLabel><Chips options={lang === "fr" ? COUNTRIES_FR : COUNTRIES_EN} selected={countries} onChange={setCountries} single /></div>
-        <div><SectionLabel>{t.topics}</SectionLabel><Chips options={t.topicList} selected={topics} onChange={setTopics} /></div>
-        <div>
-          <SectionLabel>{t.frequency}</SectionLabel>
-          <select value={freq} onChange={(e) => setFreq(+e.target.value)} className="h-12 w-full rounded-md border bg-card px-3">{t.freqList.map((f, i) => <option key={f} value={i}>{f}</option>)}</select>
-        </div>
-        <p className="text-xs text-muted-foreground">{t.noPassword}</p>
-      </section>
 
       {/* B. Privacy */}
       <section className="space-y-3">
@@ -943,23 +957,23 @@ function Profile({ t, lang, ex, prefs, setPrefs, onOpen }: { t: T; lang: Lang; e
         {saved === "err" && <p className="text-sm text-risk">{L(lang, "Couldn't save. Your choices are still here — try again.", "Échec de l'enregistrement. Vos choix sont conservés — réessayez.")}</p>}
       </div>
 
-      {/* C. Contribution history */}
-      {d && (
+      {/* C. Contribution history: every question, so none disappears when a new one arrives */}
+      {liveQuestions(ex).length > 0 && (
         <section className="space-y-3">
           <Eyebrow>{L(lang, "Your contributions", "Vos contributions")}</Eyebrow>
-          <button onClick={() => onOpen(d.answered ? "group" : "questions")} className="w-full text-left">
-            <Card className="py-3">
-              <div className="flex items-start justify-between gap-2">
-                <p className="line-clamp-2 text-sm font-medium leading-snug">{d.question.text}</p>
-                <Badge tone={d.answered ? "primary" : "muted"}>{d.question.status !== "open" ? L(lang, "Closed", "Close") : d.revised ? L(lang, "Revised", "Révisée") : d.answered ? L(lang, "Answered", "Répondue") : L(lang, "Open", "Ouverte")}</Badge>
-              </div>
-              <p className="mt-2 font-condensed text-xs text-muted-foreground">
-                {d.risk.country} · Risk {d.risk.id}
-                {ex.own.first !== null && ` · ${L(lang, "First", "Première")} ${pct(lang, ex.own.first)}`}
-                {ex.own.latest !== null && ex.own.latest !== ex.own.first && ` · ${L(lang, "Latest", "Dernière")} ${pct(lang, ex.own.latest)}`}
-              </p>
-            </Card>
-          </button>
+          {liveQuestions(ex).map((q) => (
+            <button key={q.question_id} onClick={() => onOpen(q.question_id, q.answered ? "group" : "questions")} className="w-full text-left">
+              <Card className="py-3">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="line-clamp-2 text-sm font-medium leading-snug">{q.text}</p>
+                  <Badge tone={q.answered ? "primary" : "muted"}>{questionStatus(lang, q)}</Badge>
+                </div>
+                <p className="mt-2 font-condensed text-xs text-muted-foreground">
+                  {q.risk.country} · Risk {q.risk.id} · {L(lang, "Outcome by", "Résultat le")} {fmtDate(lang, q.deadline)}
+                </p>
+              </Card>
+            </button>
+          ))}
         </section>
       )}
 
@@ -985,16 +999,6 @@ function Profile({ t, lang, ex, prefs, setPrefs, onOpen }: { t: T; lang: Lang; e
 
       {/* E. How input was used */}
       <section><SectionLabel>{t.used}</SectionLabel><Card className="border-l-4 border-l-primary text-sm">{t.usedT} <span className="text-muted-foreground">({L(lang, "simulated example", "exemple simulé")})</span></Card></section>
-
-      {/* F. App preferences */}
-      <section>
-        <SectionLabel>{L(lang, "App preferences", "Préférences de l'application")}</SectionLabel>
-        <Card className="divide-y py-1">
-          <Switch label={L(lang, "Reduced motion", "Animations réduites")} hint={L(lang, "No globe animation or pulsing markers", "Pas d'animation du globe")} checked={prefs.reducedMotion} onChange={(v) => setPrefs({ ...prefs, reducedMotion: v })} />
-          <Switch label={L(lang, "Show map as list", "Afficher la carte en liste")} hint={L(lang, "Use a list instead of the 3D globe on Home", "Liste au lieu du globe 3D")} checked={prefs.listView} onChange={(v) => setPrefs({ ...prefs, listView: v })} />
-        </Card>
-        <p className="mt-2 text-xs text-muted-foreground">{L(lang, "Saved on this device.", "Enregistré sur cet appareil.")}</p>
-      </section>
     </div>
   );
 }

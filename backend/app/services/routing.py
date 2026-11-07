@@ -1,8 +1,9 @@
 """
-Sends a question to every expert in the region.
+Sends a question to every expert who follows one of the risk's countries.
 
-For now "region" means the expert's country: an expert is invited when their country is one
-of the risk's countries, so a risk on "Chad, Niger, Cameroon, Nigeria" reaches all four.
+Experts choose what to follow on the Home map of the expert app (Expert.followed).
+An expert who never changed their follows counts as following their own country.
+A risk on "Chad, Niger, Cameroon, Nigeria" reaches everyone following any of the four.
 There is no panel cap.
 
 max_open_questions is a notification preference, not a filter: experts already at their
@@ -31,17 +32,35 @@ def parse_countries(country: str) -> set[str]:
     return {name.strip().lower() for name in country.split(",") if name.strip()}
 
 
+def clean_followed(countries: list[str]) -> str:
+    """Stores followed countries comma-separated, trimmed, without duplicates (case-insensitive)."""
+    seen: dict[str, str] = {}
+    for name in countries:
+        name = " ".join(name.split())
+        if name and name.lower() not in seen:
+            seen[name.lower()] = name
+    return ",".join(seen.values())
+
+
+def followed_countries(expert: Expert) -> list[str]:
+    if expert.followed is None:  # Never set: follows their own country
+        return [expert.country] if expert.country else []
+    return [name for name in expert.followed.split(",") if name]
+
+
 def should_notify(db: Session, expert: Expert) -> bool:
     """True when the expert is under their max_open_questions (counting the new invite)."""
     return open_invite_count(db, expert.id) <= expert.max_open_questions
 
 
 def route_question(db: Session, question: Question, country: str) -> list[Invite]:
-    """Invites every expert whose country matches. Returns the new invites."""
+    """Invites every expert who follows one of the risk's countries. Returns the new invites."""
     countries = parse_countries(country)
-    experts = db.scalars(
-        select(Expert).where(func.lower(Expert.country).in_(countries)).order_by(Expert.id)
-    ).all()
+    experts = [
+        expert
+        for expert in db.scalars(select(Expert).order_by(Expert.id)).all()
+        if countries & {name.lower() for name in followed_countries(expert)}
+    ]
 
     invites = []
     for expert in experts:

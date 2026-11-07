@@ -58,6 +58,17 @@ export interface ApiExpertQuestion {
   revised: boolean;
 }
 
+/** GET /q/{token}/questions: every question the expert was invited to, open ones first. */
+export interface ApiQuestionSummary {
+  question_id: string;
+  text: string;
+  deadline: string;
+  status: QuestionStatus;
+  risk: { id: string; title: string; country: string };
+  answered: boolean;
+  revised: boolean;
+}
+
 export interface ApiThemes {
   agreement: string[];
   disagreement: string[];
@@ -93,6 +104,8 @@ export interface ApiSettings {
   topics: string[];
   language: string;
   max_open_questions: number;
+  /** Countries followed on the Home map (English names). Questions are routed by these. */
+  followed: string[];
 }
 
 export interface ApiContext {
@@ -167,22 +180,25 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 const q = (token: string) => `/q/${encodeURIComponent(token)}`;
+/** Every question call names its question, so an answer never lands on one that arrived meanwhile. */
+const qid = (questionId: string) => `?question_id=${encodeURIComponent(questionId)}`;
 
 export const api = {
   getContexts: (token: string | null) =>
     request<ApiContexts>(`/public/contexts${token ? `?token=${encodeURIComponent(token)}` : ""}`),
-  getQuestion: (token: string) => request<ApiExpertQuestion>(q(token)),
-  submitAnswer: (token: string, probability: number, reason: string) =>
-    request<{ status: string }>(`${q(token)}/responses`, {
+  getQuestions: (token: string) => request<ApiQuestionSummary[]>(`${q(token)}/questions`),
+  getQuestion: (token: string, questionId: string) => request<ApiExpertQuestion>(`${q(token)}${qid(questionId)}`),
+  submitAnswer: (token: string, questionId: string, probability: number, reason: string) =>
+    request<{ status: string }>(`${q(token)}/responses${qid(questionId)}`, {
       method: "POST",
       body: JSON.stringify({ probability, reason }),
     }),
-  submitRevision: (token: string, probability: number, reason: string) =>
-    request<{ status: string }>(`${q(token)}/revision`, {
+  submitRevision: (token: string, questionId: string, probability: number, reason: string) =>
+    request<{ status: string }>(`${q(token)}/revision${qid(questionId)}`, {
       method: "POST",
       body: JSON.stringify({ probability, reason }),
     }),
-  getGroup: (token: string) => request<ApiGroupView>(`${q(token)}/group`),
+  getGroup: (token: string, questionId: string) => request<ApiGroupView>(`${q(token)}/group${qid(questionId)}`),
   getTrackRecord: (token: string) => request<ApiTrackRecord>(`${q(token)}/track-record`),
   getSettings: (token: string) => request<ApiSettings>(`${q(token)}/settings`),
   updateSettings: (token: string, body: Partial<ApiSettings>) =>

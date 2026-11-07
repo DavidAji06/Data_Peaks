@@ -22,6 +22,14 @@ class Base(DeclarativeBase):
     pass
 
 
+def add_missing_columns(bind=engine):
+    """create_all never alters existing tables, so columns added later are added here (SQLite)."""
+    with bind.begin() as conn:
+        columns = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info(experts)")}
+        if columns and "followed" not in columns:
+            conn.exec_driver_sql("ALTER TABLE experts ADD COLUMN followed TEXT")
+
+
 def get_db():
     db = SessionLocal()
     try:
