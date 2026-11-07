@@ -2,6 +2,8 @@
  * Moderator dashboard text. All UI text in this app is English.
  * Same tone rules as en.ts: calm, plain, no gamification. AI output is labelled and moderator-only.
  */
+import { IMPACT_SCALE } from '@/lib/moderator-data';
+
 export const mod = {
   nav: {
     label: 'Moderator sections',
@@ -205,7 +207,11 @@ export const mod = {
   risk: {
     level: (l: string) => `Risk level ${l}`,
     probability: (p: string) => `Probability ${p}`,
-    impact: (n: number) => `Impact ${n}/5`,
+    impact: (n: number | null) => {
+      if (n === null) return '';
+      const label = IMPACT_SCALE[n];
+      return label ? `Impact: ${label} (${n}/5)` : `Impact ${n}/5`;
+    },
     exposure: (e: string) => `Exposure ${e}`,
     triggers: 'Triggers',
     noTriggers: 'No triggers recorded for this risk.',
