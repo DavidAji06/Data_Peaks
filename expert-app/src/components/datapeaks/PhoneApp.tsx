@@ -9,18 +9,18 @@ import convoyImg from "@/assets/convoy_chad.jpg";
 import { Badge, Button, Card, LangToggle, SectionLabel, Wordmark, type Lang } from "./shared";
 import { useExpert, type Expert } from "./useExpert";
 import { useContexts, type ConflictContext } from "./contexts";
-import { ApiError, type AnonymityLevel, type ApiSimilarRisk } from "@/lib/api";
+import { ApiError, type AnonymityLevel, type ApiSimilarRisk, type PanelStatus } from "@/lib/api";
 
 const Globe = lazy(() => import("./Globe"));
 
 type Screen = "profile" | "home" | "questions" | "group";
 type GroupView = "compare" | "revise" | "done";
-type Privacy = "known" | "nickname" | "anonymous";
+export type Privacy = "known" | "nickname" | "anonymous";
 type T = (typeof dict)["en"];
 type Prefs = { reducedMotion: boolean; listView: boolean };
 
 const MIN_GROUP = 5;
-const toApiPrivacy: Record<Privacy, AnonymityLevel> = { known: "known_to_acaps", nickname: "pseudonymous", anonymous: "anonymous" };
+export const toApiPrivacy: Record<Privacy, AnonymityLevel> = { known: "known_to_acaps", nickname: "pseudonymous", anonymous: "anonymous" };
 const fromApiPrivacy: Record<AnonymityLevel, Privacy> = { known_to_acaps: "known", pseudonymous: "nickname", anonymous: "anonymous" };
 
 const L = (lang: Lang, en: string, fr: string) => (lang === "fr" ? fr : en);
@@ -316,11 +316,11 @@ function BackBtn({ t, onClick }: { t: T; onClick: () => void }) {
   return <button onClick={onClick} className="-ml-1 flex items-center text-sm font-medium text-primary-strong"><ChevronLeft className="h-4 w-4" />{t.back}</button>;
 }
 
-function Eyebrow({ children }: { children: ReactNode }) {
+export function Eyebrow({ children }: { children: ReactNode }) {
   return <p className="font-condensed text-xs font-bold uppercase tracking-widest text-muted-foreground">{children}</p>;
 }
 
-function PrivacyPicker({ t, value, onChange }: { t: T; value: Privacy; onChange: (p: Privacy) => void }) {
+export function PrivacyPicker({ t, value, onChange }: { t: T; value: Privacy; onChange: (p: Privacy) => void }) {
   const opts = [
     { id: "known" as const, title: t.pKnown, text: t.pKnownT, Icon: UserRound },
     { id: "nickname" as const, title: t.pNick, text: t.pNickT, Icon: Lock },
@@ -365,10 +365,12 @@ function hasWebGL() {
 }
 
 function Home({ t, lang, ex, active, prefs, onOpen }: { t: T; lang: Lang; ex: Expert; active: boolean; prefs: Prefs; onOpen: (id: string, s: Screen) => void }) {
-  const [filter, setFilter] = useState<0 | 1 | 2>(0); // all, following, my questions
-  const [followError, setFollowError] = useState(false);
-  // Follows live on the server (by country name) so they survive reloads and devices.
-  const followedNames = (ex.settings?.followed ?? []).map((n) => n.toLowerCase());
+  const [filter, setFilter] = useState<0 | 1 | 2>(0); // all, my panels, my questions
+  const [panelBusy, setPanelBusy] = useState(false);
+  const [panelError, setPanelError] = useState(false);
+  // Country panels live on the server: joining one is a request that an ACAPS moderator decides.
+  const panelStatus = (ctx: ConflictContext): PanelStatus | null =>
+    ex.panels.find((p) => p.country.toLowerCase() === ctx.name.en.toLowerCase())?.status ?? null;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [resetSignal, setResetSignal] = useState(0);
   const [zoomSignal, setZoomSignal] = useState<{ n: number; dir: 1 | -1 }>({ n: 0, dir: 1 });
@@ -399,16 +401,18 @@ function Home({ t, lang, ex, active, prefs, onOpen }: { t: T; lang: Lang; ex: Ex
   const assignedIds = contexts
     .filter((c) => c.hasQuestion || ex.questions.some((q) => q.status === "open" && inCountry(q.risk.country, c)))
     .map((c) => c.id);
-  const following = contexts.filter((c) => followedNames.includes(c.name.en.toLowerCase())).map((c) => c.id);
-  const toggleFollow = async (ctx: ConflictContext) => {
-    const current = ex.settings?.followed ?? [];
-    const isOn = current.some((n) => n.toLowerCase() === ctx.name.en.toLowerCase());
-    const next = isOn ? current.filter((n) => n.toLowerCase() !== ctx.name.en.toLowerCase()) : [...current, ctx.name.en];
-    setFollowError(false);
+  // "My panels": countries the expert answers for, or has asked to.
+  const following = contexts.filter((c) => { const st = panelStatus(c); return st === "member" || st === "pending"; }).map((c) => c.id);
+  const panelAction = async (ctx: ConflictContext) => {
+    setPanelError(false);
+    setPanelBusy(true);
     try {
-      await ex.saveSettings({ followed: next });
+      if (panelStatus(ctx) === "pending") await ex.withdrawPanel(ctx.name.en);
+      else await ex.requestPanel(ctx.name.en);
     } catch {
-      setFollowError(true);
+      setPanelError(true);
+    } finally {
+      setPanelBusy(false);
     }
   };
   const rankedLabel = L(lang, "Ranked by Data Peaks pipeline", "Classé par le pipeline Data Peaks") + (rankedAt ? ` · ${fmtDate(lang, rankedAt)}` : "");
@@ -441,7 +445,7 @@ function Home({ t, lang, ex, active, prefs, onOpen }: { t: T; lang: Lang; ex: Ex
           <p className="text-sm text-muted-foreground">{L(lang, "Tap a red dot to see the risk.", "Touchez un point rouge pour voir le risque.")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Chips options={[L(lang, "All contexts", "Tous"), L(lang, "Following", "Suivis"), L(lang, "My questions", "Mes questions")]} selected={[filter]} onChange={(s) => setFilter((s[0] ?? 0) as 0 | 1 | 2)} single />
+          <Chips options={[L(lang, "All contexts", "Tous"), L(lang, "My panels", "Mes panels"), L(lang, "My questions", "Mes questions")]} selected={[filter]} onChange={(s) => setFilter((s[0] ?? 0) as 0 | 1 | 2)} single />
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setSearchOpen(!searchOpen)} aria-expanded={searchOpen} className="flex min-h-11 items-center gap-1.5 rounded-full border bg-card px-4 font-condensed text-sm"><Search className="h-4 w-4" />{L(lang, "Search", "Rechercher")}</button>
@@ -511,8 +515,8 @@ function Home({ t, lang, ex, active, prefs, onOpen }: { t: T; lang: Lang; ex: Ex
         {selected && (
           <ContextSheet lang={lang} ex={ex} ctx={selected} rankedLabel={rankedLabel}
             question={ex.questions.find((q) => q.status === "open" && inCountry(q.risk.country, selected)) ?? null} onOpen={onOpen}
-            following={following.includes(selected.id)} followError={followError} canFollow={!!ex.settings}
-            onFollow={() => void toggleFollow(selected)}
+            panel={panelStatus(selected)} panelBusy={panelBusy} panelError={panelError} canRequest={!!ex.settings}
+            onPanel={() => void panelAction(selected)}
             onClose={() => setSelectedId(null)} />
         )}
       </section>
@@ -520,8 +524,8 @@ function Home({ t, lang, ex, active, prefs, onOpen }: { t: T; lang: Lang; ex: Ex
   );
 }
 
-function ContextSheet({ lang, ex, ctx, rankedLabel, question, following, followError, canFollow, onFollow, onClose, onOpen }: {
-  lang: Lang; ex: Expert; ctx: ConflictContext; rankedLabel: string; question: Expert["questions"][number] | null; following: boolean; followError: boolean; canFollow: boolean; onFollow: () => void; onClose: () => void; onOpen: (id: string, s: Screen) => void;
+function ContextSheet({ lang, ex, ctx, rankedLabel, question, panel, panelBusy, panelError, canRequest, onPanel, onClose, onOpen }: {
+  lang: Lang; ex: Expert; ctx: ConflictContext; rankedLabel: string; question: Expert["questions"][number] | null; panel: PanelStatus | null; panelBusy: boolean; panelError: boolean; canRequest: boolean; onPanel: () => void; onClose: () => void; onOpen: (id: string, s: Screen) => void;
 }) {
   // Full details (trigger update, risk level) are only loaded for the question on screen.
   const d = question && ex.data?.question.id === question.question_id ? ex.data : null;
@@ -560,15 +564,30 @@ function ContextSheet({ lang, ex, ctx, rankedLabel, question, following, followE
           question.answered ? <Button className="h-12 w-full" onClick={() => onOpen(question.question_id, "group")}>{L(lang, "View group insight", "Voir l'avis du groupe")}</Button>
             : <Button className="h-12 w-full" onClick={() => onOpen(question.question_id, "questions")}>{L(lang, "Share your view", "Donner mon avis")}</Button>
         ) : <p className="text-sm text-muted-foreground">{L(lang, "No question assigned to you here.", "Aucune question ne vous est attribuée ici.")}</p>}
-        {canFollow && (
+        {canRequest && (
           <>
-            <Button variant="ghost" className="w-full" onClick={onFollow}>{following ? L(lang, "✓ Following", "✓ Suivi") : L(lang, "Follow", "Suivre")}</Button>
+            {panel === "member" ? (
+              <p className="flex min-h-12 items-center justify-center gap-1 font-bold text-primary-strong"><Check className="h-4 w-4" />{L(lang, "On this panel", "Membre de ce panel")}</p>
+            ) : (
+              <Button variant="ghost" className="w-full" onClick={panelBusy ? undefined : onPanel}>
+                {panelBusy ? "…"
+                  : panel === "pending" ? L(lang, "Withdraw request", "Retirer la demande")
+                  : panel === "declined" || panel === "removed" ? L(lang, "Ask again", "Redemander")
+                  : L(lang, "Ask to join this panel", "Demander à rejoindre ce panel")}
+              </Button>
+            )}
             <p className="text-center text-xs text-muted-foreground">
-              {followError
+              {panelError
                 ? L(lang, "Couldn't save. Try again.", "Échec de l'enregistrement. Réessayez.")
-                : following
-                  ? L(lang, "You'll get ACAPS questions about this country.", "Vous recevrez les questions de l'ACAPS sur ce pays.")
-                  : L(lang, "Follow to get ACAPS questions about this country.", "Suivez ce pays pour recevoir les questions de l'ACAPS.")}
+                : panel === "member"
+                  ? L(lang, "You get ACAPS questions about this country.", "Vous recevez les questions de l'ACAPS sur ce pays.")
+                  : panel === "pending"
+                    ? L(lang, "Request sent. ACAPS will review it.", "Demande envoyée. L'ACAPS va l'examiner.")
+                    : panel === "declined"
+                      ? L(lang, "ACAPS didn't approve your last request.", "L'ACAPS n'a pas approuvé votre dernière demande.")
+                      : panel === "removed"
+                        ? L(lang, "You're no longer on this panel.", "Vous ne faites plus partie de ce panel.")
+                        : L(lang, "Panel members get ACAPS questions about this country. ACAPS approves each request.", "Les membres du panel reçoivent les questions de l'ACAPS sur ce pays. L'ACAPS approuve chaque demande.")}
             </p>
           </>
         )}

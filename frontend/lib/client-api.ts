@@ -116,10 +116,43 @@ export async function updateSettings(source: DataSource, token: string, body: Ap
   return toExpertSettings(await request<ApiExpertSettings>(source, 'PATCH', `/q/${enc(token)}/settings`, body));
 }
 
-/** Moderator: invite someone to the panel. Returns the sign-up link to send them. */
-export async function createPanelInvite(source: DataSource, body: ApiPanelInviteIn): Promise<{ joinLink: string }> {
-  const r = await request<ApiPanelInviteOut>(source, 'POST', '/moderator/panel-invites', body, moderatorBaseFor(source));
-  return { joinLink: r.join_link };
+export interface InviteResult {
+  joinLink: string;
+  emailSent: boolean;
+  emailError: string | null;
+}
+const toInviteResult = (r: ApiPanelInviteOut): InviteResult => ({
+  joinLink: r.join_link,
+  emailSent: r.email_sent ?? false,
+  emailError: r.email_error ?? null,
+});
+
+/** Moderator: invite someone to the panel. The backend emails the activation link when SMTP is set up. */
+export async function createPanelInvite(source: DataSource, body: ApiPanelInviteIn): Promise<InviteResult> {
+  return toInviteResult(await request<ApiPanelInviteOut>(source, 'POST', '/moderator/panel-invites', body, moderatorBaseFor(source)));
+}
+
+/** Moderator: approve or decline a panel request, or remove a member. */
+export async function decidePanelMembership(
+  source: DataSource,
+  membershipId: number,
+  action: 'approve' | 'decline' | 'remove',
+): Promise<{ status: string; invitedToOpenQuestions: number }> {
+  const r = await request<{ status: string; invited_to_open_questions: number }>(
+    source,
+    'POST',
+    `/moderator/panel-memberships/${membershipId}/decision`,
+    { action },
+    moderatorBaseFor(source),
+  );
+  return { status: r.status, invitedToOpenQuestions: r.invited_to_open_questions };
+}
+
+/** Moderator: email an open invite again. */
+export async function resendPanelInvite(source: DataSource, token: string): Promise<InviteResult> {
+  return toInviteResult(
+    await request<ApiPanelInviteOut>(source, 'POST', `/moderator/panel-invites/${enc(token)}/resend`, undefined, moderatorBaseFor(source)),
+  );
 }
 
 /** Moderator: submit a risk decision (keep, raise, lower, update_trigger, add_trigger). */

@@ -110,6 +110,13 @@ export interface ApiSettings {
   followed: string[];
 }
 
+/** A country panel the expert is on (member) or asked to join. Moderators decide requests. */
+export type PanelStatus = "member" | "pending" | "declined" | "removed";
+export interface ApiPanel {
+  country: string;
+  status: PanelStatus;
+}
+
 export interface ApiContext {
   iso3: string;
   country: string;
@@ -136,6 +143,39 @@ export class ApiError extends Error {
 const BASE = ((import.meta.env["VITE_API_URL"] as string | undefined) || "/api").replace(/\/$/, "");
 const TOKEN_KEY = "dp-expert-token";
 const DEFAULT_TOKEN = (import.meta.env["VITE_EXPERT_TOKEN"] as string | undefined) || "demo-expert-a";
+
+let joinToken: string | null | undefined; // Kept once read, so a re-run effect still sees it
+
+/** Reads ?join= (an activation link from the invitation email) and removes it from the address bar. */
+export function takeJoinToken(): string | null {
+  if (typeof window === "undefined") return null;
+  if (joinToken !== undefined) return joinToken;
+  try {
+    const url = new URL(window.location.href);
+    joinToken = url.searchParams.get("join");
+    if (joinToken) {
+      url.searchParams.delete("join");
+      window.history.replaceState(null, "", url.toString());
+    }
+  } catch {
+    joinToken = null;
+  }
+  return joinToken;
+}
+
+/** After activation (or giving up), the app opens normally. */
+export function clearJoinToken() {
+  joinToken = null;
+}
+
+/** After activation, the expert's personal link token becomes this tab's sign-in. */
+export function setToken(token: string) {
+  try {
+    sessionStorage.setItem(TOKEN_KEY, token);
+  } catch {
+    /* storage unavailable: getToken falls back to the demo link */
+  }
+}
 
 /** Reads ?token= once, removes it from the address bar, and keeps it for this tab only. */
 export function getToken(): string {
@@ -186,6 +226,13 @@ const q = (token: string) => `/q/${encodeURIComponent(token)}`;
 const qid = (questionId: string) => `?question_id=${encodeURIComponent(questionId)}`;
 
 export const api = {
+  /** 404 = unknown link, 409 = already used. */
+  getJoin: (joinToken: string) => request<{ country: string }>(`/join/${encodeURIComponent(joinToken)}`),
+  join: (joinToken: string, body: { anonymity_level: AnonymityLevel; language: string }) =>
+    request<{ status: string; pseudonym: string; token: string; app_link: string; link_emailed?: boolean }>(`/join/${encodeURIComponent(joinToken)}`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
   getContexts: (token: string | null) =>
     request<ApiContexts>(`/public/contexts${token ? `?token=${encodeURIComponent(token)}` : ""}`),
   getQuestions: (token: string) => request<ApiQuestionSummary[]>(`${q(token)}/questions`),
@@ -203,6 +250,11 @@ export const api = {
   getGroup: (token: string, questionId: string) => request<ApiGroupView>(`${q(token)}/group${qid(questionId)}`),
   getTrackRecord: (token: string) => request<ApiTrackRecord>(`${q(token)}/track-record`),
   getSettings: (token: string) => request<ApiSettings>(`${q(token)}/settings`),
+  getPanels: (token: string) => request<ApiPanel[]>(`${q(token)}/panels`),
+  requestPanel: (token: string, country: string) =>
+    request<ApiPanel[]>(`${q(token)}/panels`, { method: "POST", body: JSON.stringify({ country }) }),
+  withdrawPanel: (token: string, country: string) =>
+    request<ApiPanel[]>(`${q(token)}/panels/${encodeURIComponent(country)}`, { method: "DELETE" }),
   updateSettings: (token: string, body: Partial<ApiSettings>) =>
     request<ApiSettings>(`${q(token)}/settings`, { method: "PATCH", body: JSON.stringify(body) }),
 };

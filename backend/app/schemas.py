@@ -44,9 +44,25 @@ class PanelInviteIn(BaseModel):
     country: str = Field(min_length=2, max_length=80)
 
 
+class PanelRequestIn(BaseModel):
+    country: str = Field(min_length=2, max_length=80)
+    note: str | None = Field(default=None, max_length=280)  # Optional: why they know this context
+
+    @field_validator("country")
+    @classmethod
+    def check_country(cls, value: str) -> str:
+        if "," in value:
+            raise ValueError("One country per request")
+        return " ".join(value.split())
+
+
+class PanelDecisionIn(BaseModel):
+    action: Literal["approve", "decline", "remove"]
+
+
 class JoinIn(BaseModel):
     anonymity_level: AnonymityLevel
-    country: str = Field(min_length=2, max_length=80)
+    country: str | None = Field(default=None, min_length=2, max_length=80)  # Defaults to the invite's country
     topics: list[str] = Field(default_factory=list, max_length=10)
     language: str = Field(default="en", min_length=2, max_length=10)
     max_open_questions: int = Field(default=3, ge=1, le=5)

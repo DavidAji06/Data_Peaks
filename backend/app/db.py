@@ -24,10 +24,16 @@ class Base(DeclarativeBase):
 
 def add_missing_columns(bind=engine):
     """create_all never alters existing tables, so columns added later are added here (SQLite)."""
+    added = {
+        "experts": {"followed": "TEXT"},
+        "panel_invites": {"email_sent": "BOOLEAN", "expert_id": "VARCHAR", "joined_at": "DATETIME"},
+    }
     with bind.begin() as conn:
-        columns = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info(experts)")}
-        if columns and "followed" not in columns:
-            conn.exec_driver_sql("ALTER TABLE experts ADD COLUMN followed TEXT")
+        for table, wanted in added.items():
+            columns = {row[1] for row in conn.exec_driver_sql(f"PRAGMA table_info({table})")}
+            for name, sql_type in wanted.items():
+                if columns and name not in columns:
+                    conn.exec_driver_sql(f"ALTER TABLE {table} ADD COLUMN {name} {sql_type}")
 
 
 def get_db():

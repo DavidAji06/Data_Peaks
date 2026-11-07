@@ -1,10 +1,9 @@
 """
-Sends a question to every expert who follows one of the risk's countries.
+Sends a question to every member of one of the risk's country panels (see services/panels.py).
 
-Experts choose what to follow on the Home map of the expert app (Expert.followed).
-An expert who never changed their follows counts as following their own country.
-A risk on "Chad, Niger, Cameroon, Nigeria" reaches everyone following any of the four.
-There is no panel cap.
+Panel membership is decided by ACAPS moderators: an expert's invite gives their first panel,
+and other countries are requests a moderator approves. Following on the map routes nothing.
+A risk on "Chad, Niger, Cameroon, Nigeria" reaches members of any of the four panels.
 
 max_open_questions is a notification preference, not a filter: experts already at their
 limit are still invited (the question is waiting in the app), they just are not pinged now.
@@ -54,12 +53,14 @@ def should_notify(db: Session, expert: Expert) -> bool:
 
 
 def route_question(db: Session, question: Question, country: str) -> list[Invite]:
-    """Invites every expert who follows one of the risk's countries. Returns the new invites."""
+    """Invites every panel member for one of the risk's countries. Returns the new invites."""
+    from .panels import member_countries  # panels imports this module
+
     countries = parse_countries(country)
     experts = [
         expert
         for expert in db.scalars(select(Expert).order_by(Expert.id)).all()
-        if countries & {name.lower() for name in followed_countries(expert)}
+        if countries & {name.lower() for name in member_countries(db, expert)}
     ]
 
     invites = []

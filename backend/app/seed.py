@@ -17,7 +17,7 @@ from pathlib import Path
 import pandas as pd
 
 from .db import Base, SessionLocal, engine
-from .models import Expert, Invite, Question, Response, Risk
+from .models import Expert, Invite, PanelMembership, Question, Response, Risk
 from .services import ml_outputs
 from .services.alert_import import import_alert_items
 
@@ -72,6 +72,7 @@ def seed():
             topics="conflict,displacement",
             link_token=f"demo-expert-{letter}",  # Fixed personal link for the demo only
         ))
+        db.add(PanelMembership(expert_id=f"expert-{letter}", country=DEMO_COUNTRY, status="member"))
     db.flush()  # Risks must exist before alerts are checked against them
 
     # Real ML alerts (ACAPS access events scored by the LLM), same validation as POST /alerts/import

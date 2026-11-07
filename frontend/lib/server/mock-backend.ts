@@ -329,7 +329,38 @@ function createPanelInvite(body: unknown) {
   if ((b.country as string).length > 80) invalid('country', 'String should have at most 80 characters', 'string_too_long');
   const invite = { token: newToken(), email: b.email as string, country: b.country as string, used: false };
   panelInvites.push(invite);
-  return { status: 'invited', join_link: `${FRONTEND_URL}/join/${invite.token}` };
+  return { status: 'invited', email_sent: false, email_error: 'Demo data: no email is sent', join_link: `${FRONTEND_URL}/join/${invite.token}` };
+}
+
+/** GET /moderator/panels (demo: every expert is a member of their own country, no requests) */
+function listPanels() {
+  const byCountry = new Map<string, { country: string; members: unknown[]; pending: number }>();
+  let anon = 0;
+  for (const e of db.experts) {
+    const entry = byCountry.get(e.country) ?? { country: e.country, members: [], pending: 0 };
+    const label = e.anonymity_level === 'anonymous' ? `Anonymous expert ${++anon}` : e.pseudonym;
+    entry.members.push({ membership_id: entry.members.length + 1, since: null, label, anonymity_level: e.anonymity_level, synthetic: true });
+    byCountry.set(e.country, entry);
+  }
+  return { target: { min: 5, max: 10 }, panels: [...byCountry.values()], requests: [] };
+}
+
+/** GET /moderator/panel-invites (demo: no email is ever sent) */
+function listPanelInvites() {
+  return {
+    email_configured: false,
+    invites: [...panelInvites].reverse().map((i) => ({
+      token: i.used ? null : i.token,
+      email: i.email,
+      country: i.country,
+      status: i.used ? 'joined' : 'pending',
+      email_sent: false,
+      invited_at: new Date().toISOString(),
+      joined_at: null,
+      expert: null,
+      anonymous: false,
+    })),
+  };
 }
 
 function getOpenPanelInvite(token: string): PanelInviteRow {
@@ -656,6 +687,8 @@ function route(method: string, path: string, body: unknown): unknown {
     if (a === 'moderator' && b === 'questions' && parts.length === 2) return listQuestions();
     if (a === 'moderator' && b === 'questions' && parts.length === 3) return questionDetail(c);
     if (a === 'moderator' && b === 'leaderboard' && parts.length === 2) return leaderboard();
+    if (a === 'moderator' && b === 'panel-invites' && parts.length === 2) return listPanelInvites();
+    if (a === 'moderator' && b === 'panels' && parts.length === 2) return listPanels();
     if (a === 'public' && b === 'questions' && parts.length === 2) return publicQuestions();
     if (a === 'join' && parts.length === 2) return { country: getOpenPanelInvite(b).country };
   }
@@ -666,6 +699,10 @@ function route(method: string, path: string, body: unknown): unknown {
     if (a === 'moderator' && b === 'questions' && d === 'resolve' && parts.length === 4) return resolveQuestion(c, body);
     if (a === 'moderator' && b === 'questions' && d === 'summarise' && parts.length === 4) return summariseQuestion(c);
     if (a === 'moderator' && b === 'panel-invites' && parts.length === 2) return createPanelInvite(body);
+    if (a === 'moderator' && b === 'panel-invites' && d === 'resend' && parts.length === 4) {
+      const invite = getOpenPanelInvite(c);
+      return { status: 'invited', email_sent: false, email_error: 'Demo data: no email is sent', join_link: `${FRONTEND_URL}/join/${invite.token}` };
+    }
     if (a === 'join' && parts.length === 2) return joinPanel(b, body);
   }
   if (method === 'PATCH') {

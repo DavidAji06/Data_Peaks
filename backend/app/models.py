@@ -52,6 +52,24 @@ class Expert(Base):
     followed: Mapped[str | None] = mapped_column(Text, default=None)
 
 
+class PanelMembership(Base):
+    """
+    Which country panels an expert answers for. Following a country is free; answering is not:
+    the expert asks, an ACAPS moderator approves, declines or later removes.
+    Statuses: pending, member, declined, removed.
+    """
+    __tablename__ = "panel_memberships"
+    __table_args__ = (UniqueConstraint("expert_id", "country"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    expert_id: Mapped[str] = mapped_column(ForeignKey("experts.id"))
+    country: Mapped[str]
+    status: Mapped[str] = mapped_column(default="pending")
+    note: Mapped[str | None] = mapped_column(Text, default=None)  # The expert's optional "why"
+    requested_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime, default=None)
+
+
 class PanelInvite(Base):
     __tablename__ = "panel_invites"
 
@@ -60,6 +78,10 @@ class PanelInvite(Base):
     country: Mapped[str]
     used: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    email_sent: Mapped[bool | None] = mapped_column(Boolean, default=None)  # None = older invite
+    # The expert created from this invite. Moderators see it only for non-anonymous experts.
+    expert_id: Mapped[str | None] = mapped_column(ForeignKey("experts.id"), default=None)
+    joined_at: Mapped[datetime | None] = mapped_column(DateTime, default=None)
 
 
 class Alert(Base):

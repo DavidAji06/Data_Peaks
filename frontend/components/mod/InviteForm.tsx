@@ -1,9 +1,10 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { buttonClass, Card, Notice } from '@/components/ui/primitives';
 import { ApiError } from '@/lib/api-error';
-import { createPanelInvite } from '@/lib/client-api';
+import { createPanelInvite, type InviteResult } from '@/lib/client-api';
 import { mod } from '@/lib/i18n/mod';
 import type { DataSource } from '@/lib/types';
 import { ACAPS_COUNTRIES } from '@/lib/countries';
@@ -12,16 +13,17 @@ const t = mod.panel;
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/; // same pattern as the backend
 
 /**
- * Invite an expert: email + country → a one-time sign-up link (POST /moderator/panel-invites,
- * key added server-side by /api/mod). The link is the invitee's credential: it is shown once,
- * here, so the moderator can send it; it isn't stored or logged by the frontend.
+ * Invite an expert: email + country → POST /moderator/panel-invites. The backend emails the
+ * activation link (expert app, ?join=…). When email is off or fails, the link is shown once here
+ * so the moderator can pass it on; it isn't stored or logged by the frontend.
  */
 export function InviteForm({ source }: { source: DataSource }) {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [country, setCountry] = useState('Chad');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [link, setLink] = useState<string | null>(null);
+  const [result, setResult] = useState<(InviteResult & { email: string }) | null>(null);
   const [copied, setCopied] = useState(false);
 
   async function send() {
@@ -31,55 +33,60 @@ export function InviteForm({ source }: { source: DataSource }) {
     setBusy(true);
     try {
       const r = await createPanelInvite(source, { email: email.trim(), country: country.trim() });
-      setLink(r.joinLink);
+      setResult({ ...r, email: email.trim() });
+      router.refresh(); // Updates the invitations list below
     } catch (e) {
-      setError(e instanceof ApiError && e.kind === 'validation' ? e.detail : mod.errorHelp);
+      setError(e instanceof ApiError && (e.kind === 'validation' || e.status === 409) ? e.detail : mod.errorHelp);
     } finally {
       setBusy(false);
     }
   }
 
   async function copy() {
-    if (!link) return;
+    if (!result) return;
     try {
-      await navigator.clipboard.writeText(link);
+      await navigator.clipboard.writeText(result.joinLink);
       setCopied(true);
     } catch {
       setCopied(false); // clipboard blocked: the link is still selectable on screen
     }
   }
 
-  // The backend builds the link for http://localhost:3000; open it on whatever host serves this page.
-  const localPath = link ? new URL(link).pathname : null;
-
-  if (link) {
+  if (result) {
+    const reset = () => {
+      setResult(null);
+      setCopied(false);
+      setEmail('');
+    };
     return (
       <Card>
-        <h2 className="text-base font-semibold text-ink">{t.createdTitle}</h2>
-        <p className="mt-1 text-sm text-ink-muted">{t.createdHelp}</p>
-        <p className="mt-3 break-all rounded-lg bg-surface-muted p-3 font-mono text-sm text-ink">{link}</p>
+        {result.emailSent ? (
+          <>
+            <h2 className="text-base font-semibold text-ink">{t.sentTitle(result.email)}</h2>
+            <p className="mt-1 text-sm text-ink-muted">{t.sentHelp}</p>
+          </>
+        ) : (
+          <>
+            <h2 className="text-base font-semibold text-ink">{t.notSentTitle}</h2>
+            <p className="mt-1 text-sm text-ink-muted">{t.notSentHelp(result.emailError ?? 'Email is off')}</p>
+            <p className="mt-3 break-all rounded-lg bg-surface-muted p-3 font-mono text-sm text-ink">{result.joinLink}</p>
+          </>
+        )}
         <div className="mt-3 flex flex-wrap gap-3">
-          <button type="button" className={buttonClass.primary} onClick={() => void copy()}>
-            {copied ? t.copied : t.copy}
-          </button>
-          {localPath && (
-            <a href={localPath} target="_blank" rel="noopener noreferrer" className={buttonClass.secondary}>
-              {t.open} <span className="sr-only">(opens in a new tab)</span>
-            </a>
+          {!result.emailSent && (
+            <>
+              <button type="button" className={buttonClass.primary} onClick={() => void copy()}>
+                {copied ? t.copied : t.copy}
+              </button>
+              <a href={result.joinLink} target="_blank" rel="noopener noreferrer" className={buttonClass.secondary}>
+                {t.open} <span className="sr-only">(opens in a new tab)</span>
+              </a>
+            </>
           )}
-          <button
-            type="button"
-            className={buttonClass.link}
-            onClick={() => {
-              setLink(null);
-              setCopied(false);
-              setEmail('');
-            }}
-          >
+          <button type="button" className={result.emailSent ? buttonClass.primary : buttonClass.link} onClick={reset}>
             {t.another}
           </button>
         </div>
-        <p className="mt-3 text-xs text-ink-muted">{t.notifyNote}</p>
       </Card>
     );
   }
@@ -123,7 +130,6 @@ export function InviteForm({ source }: { source: DataSource }) {
             ))}
           </datalist>
         </label>
-        <p className="text-sm text-ink-muted">{t.demoNote}</p>
         {error && <Notice tone="warning">{error}</Notice>}
         <div>
           <button type="submit" className={buttonClass.primary} disabled={busy}>

@@ -8,13 +8,15 @@ import 'server-only';
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
 const MODERATOR_KEY = process.env.MODERATOR_KEY ?? '';
-const TIMEOUT_MS = 5000;
+const TIMEOUT_MS = 20000; // Invites wait for the SMTP send
 
 const ALLOWED = [
   /^alerts\/[^/]+\/decision$/,
   /^moderator\/questions\/[^/]+\/resolve$/,
   /^moderator\/questions\/[^/]+\/summarise$/,
   /^moderator\/panel-invites$/,
+  /^moderator\/panel-invites\/[^/]+\/resend$/,
+  /^moderator\/panel-memberships\/\d+\/decision$/,
 ];
 
 export async function POST(request: Request, ctx: RouteContext<'/api/mod/[...path]'>) {

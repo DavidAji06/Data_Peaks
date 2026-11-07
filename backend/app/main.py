@@ -5,9 +5,11 @@ Never includes expert IDs
 """
 
 import json
+import os
 import secrets
 import statistics
 import threading
+from datetime import datetime, timezone
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,7 +18,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .db import Base, SessionLocal, add_missing_columns, engine, get_db
-from .models import Alert, Expert, Invite, PanelInvite, Question, Response, Risk, RiskDecision
+from .models import Alert, Expert, Invite, PanelInvite, PanelMembership, Question, Response, Risk, RiskDecision
 from .routers.moderator import router as moderator_router
 from .routers.public import router as public_router
 from .schemas import (
@@ -24,10 +26,11 @@ from .schemas import (
     AnswerIn,
     JoinIn,
     PanelInviteIn,
+    PanelRequestIn,
     RiskDecisionIn,
     SettingsUpdate,
 )
-from .services import ml_outputs
+from .services import mailer, ml_outputs, panels
 from .services.alert_import import import_alert_items
 from .services.auth import require_moderator
 from .services.links import expert_invites, require_invite, resolve_link
@@ -35,12 +38,14 @@ from .services.routing import clean_followed, followed_countries, route_question
 from .services.scoring import expert_scores, latest_answers
 
 FRONTEND_URL = "http://localhost:3000"  # Moderator dashboard (and its CORS origin)
-EXPERT_APP_URL = "http://localhost:8080"  # Expert app (Lovable)
+EXPERT_APP_URL = os.getenv("EXPERT_APP_URL", "http://localhost:8080")  # Expert app; links in emails point here
 MODERATOR_ONLY = [Depends(require_moderator)]
 MIN_GROUP_SIZE = 5  # Below this, group figures could reveal individual answers
 
 Base.metadata.create_all(engine)
 add_missing_columns(engine)
+with SessionLocal() as _db:
+    panels.backfill(_db)  # Follows become panels + pending requests, once per expert
 
 app = FastAPI(title="Data Peaks API")
 app.state.session_factory = SessionLocal  # Background jobs open their own session; tests swap this
@@ -203,19 +208,73 @@ def health():
 
 # Moderator: panel invitations
 
+def join_link_for(invite: PanelInvite) -> str:
+    """The activation page lives in the expert app, the only app experts ever use."""
+    return f"{EXPERT_APP_URL}/?join={invite.token}"
+
+
+def email_invite(db: Session, invite: PanelInvite) -> dict:
+    link = join_link_for(invite)
+    sent, error = mailer.send_invite(invite.email, link, invite.country)
+    invite.email_sent = sent
+    db.commit()
+    # The link is always returned so the moderator can pass it on when email is off or fails
+    return {"status": "invited", "email_sent": sent, "email_error": error, "join_link": link}
+
+
+def invite_expert(db: Session, invite: PanelInvite) -> Expert | None:
+    if invite.expert_id:
+        return db.get(Expert, invite.expert_id)
+    if invite.used:  # Joined before invites recorded the expert: match on the stored email
+        return db.scalar(select(Expert).where(func.lower(Expert.email) == invite.email.lower()))
+    return None
+
+
 @app.post("/moderator/panel-invites", dependencies=MODERATOR_ONLY, tags=["moderator"])
 def create_panel_invite(body: PanelInviteIn, db: Session = Depends(get_db)):
-    invite = PanelInvite(
-        token=secrets.token_urlsafe(16),
-        email=body.email,
-        country=body.country,
-    )
-    db.add(invite)
-    db.commit()
+    email = body.email.strip()
+    if db.scalar(select(Expert).where(func.lower(Expert.email) == email.lower())):
+        raise HTTPException(status_code=409, detail="This person is already on the panel")
 
-    join_link = f"{FRONTEND_URL}/join/{invite.token}"
-    print(f"[notify] Invitation for {body.email}: {join_link}")  # Stand-in for an email
-    return {"status": "invited", "join_link": join_link}
+    # Inviting the same address again re-sends the open invite instead of making a second one
+    invite = db.scalar(
+        select(PanelInvite).where(func.lower(PanelInvite.email) == email.lower(), PanelInvite.used.is_(False))
+    )
+    if invite is None:
+        invite = PanelInvite(token=secrets.token_urlsafe(16), email=email, country=body.country)
+        db.add(invite)
+    else:
+        invite.country = body.country
+    db.commit()
+    return email_invite(db, invite)
+
+
+@app.post("/moderator/panel-invites/{token}/resend", dependencies=MODERATOR_ONLY, tags=["moderator"])
+def resend_panel_invite(token: str, db: Session = Depends(get_db)):
+    invite = get_open_panel_invite(db, token)
+    return email_invite(db, invite)
+
+
+@app.get("/moderator/panel-invites", dependencies=MODERATOR_ONLY, tags=["moderator"])
+def list_panel_invites(db: Session = Depends(get_db)):
+    """Who was invited and whether they joined. Never links an email to an anonymous expert."""
+    invites = db.scalars(select(PanelInvite).order_by(PanelInvite.created_at.desc())).all()
+    rows = []
+    for invite in invites:
+        expert = invite_expert(db, invite)
+        anonymous = expert is not None and expert.anonymity_level == "anonymous"
+        rows.append({
+            "token": None if invite.used else invite.token,  # Only open invites can be re-sent
+            "email": invite.email,
+            "country": invite.country,
+            "status": "joined" if invite.used else "pending",
+            "email_sent": invite.email_sent,
+            "invited_at": invite.created_at,
+            "joined_at": invite.joined_at,
+            "expert": None if expert is None or anonymous else expert.pseudonym,
+            "anonymous": anonymous,
+        })
+    return {"email_configured": mailer.is_configured(), "invites": rows}
 
 
 # Moderator: alerts
@@ -324,26 +383,36 @@ def join_info(token: str, db: Session = Depends(get_db)):
 @app.post("/join/{token}")
 def join_panel(token: str, body: JoinIn, db: Session = Depends(get_db)):
     invite = get_open_panel_invite(db, token)
+    country = body.country or invite.country
     expert = Expert(
         id=f"expert-{secrets.token_hex(4)}",
         pseudonym=new_pseudonym(db),
         anonymity_level=body.anonymity_level,
-        country=body.country,
+        country=country,
         topics=clean_topics(body.topics),
         language=body.language,
         max_open_questions=body.max_open_questions,
         email=invite.email,
         link_token=secrets.token_urlsafe(16),
-        followed=clean_followed([body.country]),  # Starts by following the country they joined for
+        followed=clean_followed([country]),  # Starts by following the country they joined for
     )
     db.add(expert)
+    db.flush()
+    # The invite's country is their first panel: no approval needed, ACAPS chose them for it
+    db.add(PanelMembership(expert_id=expert.id, country=country, status="member", decided_at=panels.now()))
     invite.used = True
+    invite.expert_id = expert.id
+    invite.joined_at = datetime.now(timezone.utc)
     db.commit()
-    print(f"[notify] {expert.id} joined: {EXPERT_APP_URL}/?token={expert.link_token}")  # Stand-in for an email
+    app_link = f"{EXPERT_APP_URL}/?token={expert.link_token}"  # The expert's personal link
+    print(f"[notify] {expert.id} joined: {app_link}")
+    emailed, _ = mailer.send_welcome(invite.email, app_link, expert.pseudonym, expert.anonymity_level == "anonymous")
     return {
         "status": "joined",
         "pseudonym": expert.pseudonym,
-        "app_link": f"{EXPERT_APP_URL}/?token={expert.link_token}",  # The expert's personal link
+        "token": expert.link_token,  # Lets the expert app sign straight in after activation
+        "app_link": app_link,
+        "link_emailed": emailed,  # False: the app shows the link so the expert can save it
     }
 
 
@@ -509,6 +578,38 @@ def track_record(token: str, db: Session = Depends(get_db)):
             for s in scores
         ],
     }
+
+
+@app.get("/q/{token}/panels")
+def my_panels(token: str, db: Session = Depends(get_db)):
+    """Country panels the expert is on or has asked to join."""
+    expert, _ = resolve_link(db, token)
+    return panels.panel_list(db, expert)
+
+
+@app.post("/q/{token}/panels")
+def request_panel(token: str, body: PanelRequestIn, db: Session = Depends(get_db)):
+    """Ask to answer for another country. A moderator approves or declines."""
+    expert, _ = resolve_link(db, token)
+    panels.ensure_rows(db, expert)
+    existing = panels.find(db, expert.id, body.country)
+    if existing is not None and existing.status == "member":
+        raise HTTPException(status_code=409, detail="You're already on this panel")
+    panels.request(db, expert, body.country, body.note)
+    db.commit()
+    return panels.panel_list(db, expert)
+
+
+@app.delete("/q/{token}/panels/{country}")
+def withdraw_panel_request(token: str, country: str, db: Session = Depends(get_db)):
+    """Withdraw a request that is still pending."""
+    expert, _ = resolve_link(db, token)
+    row = panels.find(db, expert.id, country)
+    if row is None or row.status != "pending":
+        raise HTTPException(status_code=409, detail="No pending request for this country")
+    db.delete(row)
+    db.commit()
+    return panels.panel_list(db, expert)
 
 
 @app.get("/q/{token}/settings")

@@ -14,6 +14,10 @@ import type {
   ApiExpertSettings,
   ApiGroupView,
   ApiLeaderboard,
+  ApiPanelInvites,
+  ApiPanelPerson,
+  ApiPanels,
+  ApiParticipation,
   ApiModeratorResponse,
   ApiPublicQuestion,
   ApiQuestionDetail,
@@ -30,6 +34,10 @@ import type {
   ExpertSettings,
   GroupView,
   Leaderboard,
+  PanelInvites,
+  PanelPerson,
+  Panels,
+  Participation,
   ModeratorResponse,
   ParsedTrigger,
   PublicOutcome,
@@ -222,6 +230,15 @@ export const toResolveResult = (r: ApiResolveOut): ResolveResult => ({
   baselineBrier: r.baseline_brier ?? null,
 });
 
+const toParticipation = (p: ApiParticipation): Participation => ({
+  country: p.country ?? null,
+  synthetic: p.synthetic ?? false,
+  invited: p.invited ?? 0,
+  answered: p.answered ?? 0,
+  revised: p.revised ?? 0,
+  openUnanswered: p.open_unanswered ?? 0,
+});
+
 export const toLeaderboard = (l: ApiLeaderboard): Leaderboard => ({
   baselineBrier: l.baseline_brier,
   minResolved: l.min_resolved,
@@ -232,8 +249,38 @@ export const toLeaderboard = (l: ApiLeaderboard): Leaderboard => ({
     resolved: e.resolved,
     meanBrier: e.mean_brier,
     beatsBaseline: e.beats_baseline,
+    ...toParticipation(e),
+  })),
+  unranked: (l.unranked ?? []).map((e) => ({
+    label: e.label,
+    anonymityLevel: e.anonymity_level,
+    resolved: e.resolved,
+    meanBrier: e.mean_brier,
+    needed: e.needed,
+    ...toParticipation(e),
+  })),
+  anonymous: (l.anonymous ?? []).map((e) => ({
+    label: e.label,
+    resolved: e.resolved,
+    beatsBaseline: e.beats_baseline,
+    ...toParticipation(e),
   })),
   note: l.note,
+});
+
+export const toPanelInvites = (p: ApiPanelInvites): PanelInvites => ({
+  emailConfigured: p.email_configured,
+  invites: p.invites.map((i) => ({
+    token: i.token,
+    email: i.email,
+    country: i.country,
+    status: i.status,
+    emailSent: i.email_sent,
+    invitedAt: i.invited_at,
+    joinedAt: i.joined_at,
+    expert: i.expert,
+    anonymous: i.anonymous,
+  })),
 });
 
 export const toRankedRisk = (r: ApiRankedRisk): RankedRisk => ({
@@ -346,4 +393,27 @@ export const toExpertSettings = (x: ApiExpertSettings): ExpertSettings => ({
   country: x.country,
   topics: x.topics,
   maxOpenQuestions: x.max_open_questions,
+});
+
+const toPanelPerson = (p: ApiPanelPerson): PanelPerson => ({
+  label: p.label,
+  anonymityLevel: p.anonymity_level,
+  synthetic: p.synthetic,
+});
+
+export const toPanels = (p: ApiPanels): Panels => ({
+  target: p.target,
+  panels: p.panels.map((c) => ({
+    country: c.country,
+    pending: c.pending,
+    members: c.members.map((m) => ({ ...toPanelPerson(m), membershipId: m.membership_id, since: m.since })),
+  })),
+  requests: p.requests.map((r) => ({
+    ...toPanelPerson(r),
+    membershipId: r.membership_id,
+    country: r.country,
+    note: r.note,
+    requestedAt: r.requested_at,
+    memberOf: r.member_of,
+  })),
 });

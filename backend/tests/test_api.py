@@ -14,7 +14,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.db import Base, get_db
 from app.main import app
-from app.models import Expert, Invite, PanelInvite, Question, Response, Risk
+from app.models import Expert, Invite, PanelInvite, PanelMembership, Question, Response, Risk
 from app.services.auth import MODERATOR_KEY
 from app.models import Alert
 from app.services import ml_outputs
@@ -24,6 +24,12 @@ from app.demo_answers import DemoError, add_demo_answers
 
 MOD = {"X-Moderator-Key": MODERATOR_KEY}
 ANSWER = {"probability": 0.6, "reason": "Test reason"}
+
+
+@pytest.fixture(autouse=True)
+def never_email(monkeypatch):
+    """Tests must never send real email, even when backend/.env has SMTP settings."""
+    monkeypatch.setattr("app.services.mailer._send", lambda message: (False, "test"))
 
 
 @pytest.fixture
@@ -516,16 +522,16 @@ def test_follows_default_to_own_country_and_persist(client):
     assert client.patch("/q/tok-a/settings", json={"followed": ["Chad, Niger"]}).status_code == 422
 
 
-def test_questions_route_by_follows(client):
-    client.patch("/q/tok-a/settings", json={"followed": ["Sudan"]})  # Unfollows Chad
+def test_questions_route_by_panels_not_follows(client):
+    client.patch("/q/tok-a/settings", json={"followed": ["Sudan"]})  # Following alone routes nothing
     db = app.state.session_factory()
     db.add(Risk(id="R3", title="Sudan risk", country="Sudan", iso="SDN"))
     db.add(Alert(id="A12", risk_id="R3", report_title="Test report"))
     db.add(Alert(id="A13", risk_id="R1", report_title="Test report"))
     db.commit()
     db.close()
-    assert approve(client, "A12")["experts_invited"] == 1  # Only expert-a follows Sudan
-    assert approve(client, "A13")["experts_invited"] == 2  # expert-a no longer gets Chad
+    assert approve(client, "A12")["experts_invited"] == 0  # Nobody is on the Sudan panel
+    assert approve(client, "A13")["experts_invited"] == 3  # Everyone is on their own Chad panel
 
 
 def test_joined_expert_follows_join_country(client):
@@ -533,6 +539,7 @@ def test_joined_expert_follows_join_country(client):
     link = client.post("/join/join-1", json=body).json()["app_link"]
     token = link.split("token=")[1]
     assert client.get(f"/q/{token}/settings").json()["followed"] == ["Chad"]
+    assert client.get(f"/q/{token}/panels").json() == [{"country": "Chad", "status": "member"}]
 
 
 # ---------------------------------------------------------------- several questions per expert
@@ -541,7 +548,8 @@ def personal_link_with_two_questions(client):
     """expert-a gets a personal link and a second, newer question on another risk."""
     db = app.state.session_factory()
     db.get(Expert, "expert-a").link_token = "me-a"
-    db.get(Expert, "expert-a").followed = "Chad,Sudan"
+    for country in ("Chad", "Sudan"):
+        db.add(PanelMembership(expert_id="expert-a", country=country, status="member"))
     db.add(Risk(id="R3", title="Sudan risk", country="Sudan", iso="SDN"))
     db.add(Alert(id="A20", risk_id="R3", report_title="Test report"))
     db.commit()
@@ -570,3 +578,137 @@ def test_cannot_open_a_question_you_were_not_invited_to(client):
     newer = client.get("/q/me-a/questions").json()[0]["question_id"]
     assert client.get("/q/tok-b", params={"question_id": newer}).status_code == 404
     assert client.post("/q/tok-b/responses", params={"question_id": newer}, json=ANSWER).status_code == 404
+
+
+# ---------------------------------------------------------------- Panel invites and the whole-panel calibration view
+
+@pytest.fixture
+def no_smtp(monkeypatch):
+    sent = []
+    monkeypatch.setattr("app.services.mailer.send_invite", lambda to, link, country: (sent.append((to, link)) or (True, None)))
+    return sent
+
+
+def test_invite_emails_a_join_link_to_the_expert_app(client, no_smtp):
+    r = client.post("/moderator/panel-invites", headers=MOD, json={"email": "x@example.org", "country": "Mali"})
+    body = r.json()
+    assert body["email_sent"] is True
+    assert "/?join=" in body["join_link"]
+    assert no_smtp == [("x@example.org", body["join_link"])]
+
+
+def test_inviting_twice_resends_the_same_invite(client, no_smtp):
+    first = client.post("/moderator/panel-invites", headers=MOD, json={"email": "x@example.org", "country": "Mali"}).json()
+    again = client.post("/moderator/panel-invites", headers=MOD, json={"email": "X@example.org", "country": "Chad"}).json()
+    assert first["join_link"] == again["join_link"]
+    invites = client.get("/moderator/panel-invites", headers=MOD).json()["invites"]
+    assert [i["country"] for i in invites if i["email"] == "x@example.org"] == ["Chad"]
+
+
+def test_cannot_invite_someone_already_on_the_panel(client, no_smtp):
+    r = client.post("/moderator/panel-invites", headers=MOD, json={"email": "a@example.org", "country": "Chad"})
+    assert r.status_code == 409
+
+
+def test_join_needs_only_a_privacy_choice_and_links_the_invite(client):
+    joined = client.post("/join/join-1", json={"anonymity_level": "pseudonymous"}).json()
+    assert joined["token"]
+    assert client.get(f"/q/{joined['token']}/settings").json()["country"] == "Chad"  # From the invite
+    invite = client.get("/moderator/panel-invites", headers=MOD).json()["invites"][0]
+    assert invite["status"] == "joined" and invite["expert"] == joined["pseudonym"]
+    assert invite["token"] is None  # A used invite can't be re-sent
+
+
+def test_invite_list_never_names_an_anonymous_expert(client):
+    client.post("/join/join-1", json={"anonymity_level": "anonymous"})
+    invite = client.get("/moderator/panel-invites", headers=MOD).json()["invites"][0]
+    assert invite["anonymous"] is True and invite["expert"] is None
+
+
+def test_calibration_lists_the_whole_panel(client):
+    board = client.get("/moderator/leaderboard", headers=MOD).json()
+    # No resolved questions yet: nobody ranked, but nobody missing either
+    assert board["experts"] == []
+    assert {row["label"] for row in board["unranked"]} == {"Analyst A", "Analyst C"}
+    assert all(row["needed"] == 3 for row in board["unranked"])
+    c = next(row for row in board["unranked"] if row["label"] == "Analyst C")
+    assert (c["invited"], c["answered"], c["open_unanswered"]) == (1, 1, 0)
+
+    [anon] = board["anonymous"]
+    assert anon["label"] == "Anonymous expert 1"
+    assert "mean_brier" not in anon and "Analyst B" not in str(anon)
+    assert anon["answered"] == 1
+
+
+
+# ---------------------------------------------------------------- country panels: requests and decisions
+
+def sudan_question(client, alert_id="A30"):
+    db = app.state.session_factory()
+    if db.get(Risk, "R3") is None:
+        db.add(Risk(id="R3", title="Sudan risk", country="Sudan", iso="SDN"))
+    db.add(Alert(id=alert_id, risk_id="R3", report_title="Test report"))
+    db.commit()
+    db.close()
+    return approve(client, alert_id, "Sudan question?")
+
+
+def request_id(client, country="Sudan"):
+    return next(r["membership_id"] for r in client.get("/moderator/panels", headers=MOD).json()["requests"]
+                if r["country"] == country)
+
+
+def test_requesting_a_panel_needs_approval_before_questions_arrive(client):
+    assert client.post("/q/tok-a/panels", json={"country": "Sudan", "note": "Worked in Darfur"}).status_code == 200
+    assert {"country": "Sudan", "status": "pending"} in client.get("/q/tok-a/panels").json()
+    assert sudan_question(client)["experts_invited"] == 0  # Pending is not a member
+
+
+def test_approving_adds_the_open_questions_of_that_country(client):
+    question_id = sudan_question(client)["question_id"]
+    client.post("/q/tok-a/panels", json={"country": "Sudan"})
+    r = client.post(f"/moderator/panel-memberships/{request_id(client)}/decision", headers=MOD, json={"action": "approve"})
+    assert r.json() == {"membership_id": r.json()["membership_id"], "status": "member", "invited_to_open_questions": 1}
+    assert question_id in [q["question_id"] for q in client.get("/q/tok-a/questions").json()]
+    assert sudan_question(client, "A31")["experts_invited"] == 1  # And new ones from now on
+
+
+def test_declined_request_can_be_asked_again_and_withdrawn(client):
+    client.post("/q/tok-a/panels", json={"country": "Sudan"})
+    client.post(f"/moderator/panel-memberships/{request_id(client)}/decision", headers=MOD, json={"action": "decline"})
+    assert {"country": "Sudan", "status": "declined"} in client.get("/q/tok-a/panels").json()
+    client.post("/q/tok-a/panels", json={"country": "Sudan"})
+    assert client.delete("/q/tok-a/panels/Sudan").status_code == 200
+    assert client.get("/q/tok-a/panels").json() == [{"country": "Chad", "status": "member"}]
+    assert client.delete("/q/tok-a/panels/Chad").status_code == 409  # Only pending requests
+
+
+def test_removed_member_gets_no_new_questions(client):
+    panels = client.get("/moderator/panels", headers=MOD).json()["panels"]
+    chad = next(p for p in panels if p["country"] == "Chad")
+    assert len(chad["members"]) == 3
+    a = next(m for m in chad["members"] if m["label"] == "Analyst A")
+    client.post(f"/moderator/panel-memberships/{a['membership_id']}/decision", headers=MOD, json={"action": "remove"})
+    db = app.state.session_factory()
+    db.add(Alert(id="A32", risk_id="R1", report_title="Test report"))
+    db.commit()
+    db.close()
+    assert approve(client, "A32")["experts_invited"] == 2
+
+
+def test_cannot_request_a_panel_you_are_on(client):
+    assert client.post("/q/tok-a/panels", json={"country": "chad"}).status_code == 409
+
+
+def test_panels_never_name_an_anonymous_expert(client):
+    client.post("/q/tok-b/panels", json={"country": "Sudan"})  # expert-b is anonymous
+    data = client.get("/moderator/panels", headers=MOD).json()
+    assert "Analyst B" not in str(data)
+    [req] = data["requests"]
+    assert req["label"].startswith("Anonymous expert") and req["member_of"] == ["Chad"]
+
+
+def test_wrong_decision_for_the_state_is_refused(client):
+    client.post("/q/tok-a/panels", json={"country": "Sudan"})
+    rid = request_id(client)
+    assert client.post(f"/moderator/panel-memberships/{rid}/decision", headers=MOD, json={"action": "remove"}).status_code == 409

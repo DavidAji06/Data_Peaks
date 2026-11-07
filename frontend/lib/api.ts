@@ -22,6 +22,8 @@ import {
   toExpertSettings,
   toPublicOutcome,
   toLeaderboard,
+  toPanelInvites,
+  toPanels,
   toQuestionDetail,
   toQuestionListItem,
   toRankedRisk,
@@ -39,6 +41,8 @@ import type {
   ApiJoinInfo,
   ApiPublicQuestion,
   ApiLeaderboard,
+  ApiPanelInvites,
+  ApiPanels,
   ApiQuestionDetail,
   ApiQuestionListItem,
   ApiRankedRisk,
@@ -48,6 +52,8 @@ import type {
   ExpertQuestion,
   ExpertSettings,
   Leaderboard,
+  PanelInvites,
+  Panels,
   Loaded,
   PublicOutcome,
   QuestionDetail,
@@ -244,6 +250,14 @@ export function getQuestionDetail(id: string): Promise<Loaded<QuestionDetail>> {
 
 export function getLeaderboard(): Promise<Loaded<Leaderboard>> {
   return load(async (call) => toLeaderboard(await call<ApiLeaderboard>('GET', '/moderator/leaderboard')), 'moderator');
+}
+
+export function getPanels(): Promise<Loaded<Panels>> {
+  return load(async (call) => toPanels(await call<ApiPanels>('GET', '/moderator/panels')), 'moderator');
+}
+
+export function getPanelInvites(): Promise<Loaded<PanelInvites>> {
+  return load(async (call) => toPanelInvites(await call<ApiPanelInvites>('GET', '/moderator/panel-invites')), 'moderator');
 }
 
 export function getRisk(id: string): Promise<Loaded<RiskDetail>> {

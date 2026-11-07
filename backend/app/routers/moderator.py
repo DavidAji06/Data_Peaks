@@ -14,11 +14,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from ..services import ml_outputs
+from ..services import ml_outputs, panels
 from ..services.auth import require_moderator
 from ..db import get_db
-from ..models import Expert, Invite, Question, Response, Risk
-from ..schemas import ResolveIn
+from ..models import Expert, Invite, PanelMembership, Question, Response, Risk
+from ..schemas import PanelDecisionIn, ResolveIn
 from ..services.anonymity import moderator_label, stricter
 from ..services.scoring import (
     BASELINE_BRIER,
@@ -244,31 +244,85 @@ def resolve_question(question_id: str, body: ResolveIn, db: Session = Depends(ge
     }
 
 
+def participation(db: Session, expert_id: str) -> dict:
+    """How much an expert takes part: invited, answered, revised and still waiting on them."""
+    invited = db.execute(
+        select(Question.id, Question.status)
+        .join(Invite, Invite.question_id == Question.id)
+        .where(Invite.expert_id == expert_id)
+    ).all()
+    rounds: dict[str, set[int]] = {}
+    for question_id, round_ in db.execute(
+        select(Response.question_id, Response.round).where(Response.expert_id == expert_id)
+    ).all():
+        rounds.setdefault(question_id, set()).add(round_)
+    return {
+        "invited": len(invited),
+        "answered": len(rounds),
+        "revised": sum(1 for r in rounds.values() if 2 in r),
+        "open_unanswered": sum(1 for qid, status in invited if status == "open" and qid not in rounds),
+    }
+
+
+def is_synthetic(expert: Expert) -> bool:
+    """Seeded demo experts (fake people with simulated practice answers)."""
+    return (expert.link_token or "").startswith("demo-expert-")
+
+
 @router.get("/leaderboard")
 def leaderboard(db: Session = Depends(get_db)):
-    rows = []
-    for expert in db.scalars(select(Expert)).all():
-        # Ranking anonymous experts would link their answers across questions
+    """
+    The whole panel, in three groups:
+    - experts: named experts with enough resolved questions, ranked by mean Brier
+    - unranked: named experts still building a track record
+    - anonymous: experts who chose full anonymity. No name, no rank and no exact score,
+      since those would link their answers across questions; participation and a
+      better-than-50% flag are shown so ACAPS can still see the panel is healthy.
+    """
+    ranked, unranked, anonymous = [], [], []
+    for expert in db.scalars(select(Expert).order_by(Expert.id)).all():
+        base = {
+            # The panels they answer for (falls back to the profile country when they have none)
+            "country": ", ".join(panels.member_countries(db, expert)) or expert.country,
+            "synthetic": is_synthetic(expert),
+            **participation(db, expert.id),
+        }
         if expert.anonymity_level == "anonymous":
+            summary = summarise_scores(expert_scores(db, expert.id))
+            anonymous.append({
+                **base,
+                "resolved": summary["resolved"],
+                # Only once there's enough history for the flag to mean something
+                "beats_baseline": summary["beats_baseline"] if summary["resolved"] >= MIN_RESOLVED_FOR_RANKING else None,
+            })
             continue
-        summary = summarise_scores(expert_scores(db, expert.id, exclude_anonymous=True))
-        if summary["resolved"] < MIN_RESOLVED_FOR_RANKING:
-            continue
-        rows.append({
-            "label": expert.pseudonym,
-            "anonymity_level": expert.anonymity_level,
-            **summary,
-        })
 
-    rows.sort(key=lambda row: row["mean_brier"])
-    for rank, row in enumerate(rows, start=1):
+        # Answers given while anonymous never count towards a named identity
+        summary = summarise_scores(expert_scores(db, expert.id, exclude_anonymous=True))
+        row = {"label": expert.pseudonym, "anonymity_level": expert.anonymity_level, **base, **summary}
+        if summary["resolved"] >= MIN_RESOLVED_FOR_RANKING:
+            ranked.append(row)
+        else:
+            row["needed"] = MIN_RESOLVED_FOR_RANKING - summary["resolved"]
+            unranked.append(row)
+
+    ranked.sort(key=lambda row: row["mean_brier"])
+    for rank, row in enumerate(ranked, start=1):
         row["rank"] = rank
+    unranked.sort(key=lambda row: (-row["resolved"], -row["answered"], row["label"].lower()))
+
+    # Numbered by country then activity, never by a stored id, so the label can't follow a person over time
+    anonymous.sort(key=lambda row: (row["country"], -row["answered"], -row["invited"]))
+    for n, row in enumerate(anonymous, start=1):
+        row["label"] = f"Anonymous expert {n}"
 
     return {
         "baseline_brier": BASELINE_BRIER,
         "min_resolved": MIN_RESOLVED_FOR_RANKING,
-        "experts": rows,
-        "note": "Anonymous experts are scored privately and not ranked.",
+        "experts": ranked,
+        "unranked": unranked,
+        "anonymous": anonymous,
+        "note": "Anonymous experts are scored privately: their answers are weighted, but never named or ranked.",
     }
 
 @router.post("/questions/{question_id}/summarise")
@@ -288,3 +342,81 @@ def summarise_question(question_id: str, db: Session = Depends(get_db)):
     question.themes = json.dumps(themes)
     db.commit()
     return {"question_id": question_id, "reason_count": len(reasons), "themes": themes}
+
+
+# Country panels: membership requests and removals
+
+def anonymous_labels(experts: list[Expert], panel_rows: dict[str, list[PanelMembership]]) -> dict[str, str]:
+    """
+    "Anonymous expert N", numbered by first panel then id order of this response only.
+    The same numbering is used across this page so a request and a member row match,
+    but it is never stored, so it can't follow a person into the calibration or question views.
+    """
+    anonymous = [e for e in experts if e.anonymity_level == "anonymous"]
+    anonymous.sort(key=lambda e: ([r.country for r in panel_rows[e.id] if r.status == "member"] or [""])[0])
+    return {e.id: f"Anonymous expert {n}" for n, e in enumerate(anonymous, start=1)}
+
+
+@router.get("/panels")
+def list_panels(db: Session = Depends(get_db)):
+    """Every country panel with its members, plus the requests waiting for a decision."""
+    experts = db.scalars(select(Expert).order_by(Expert.id)).all()
+    for expert in experts:
+        panels.ensure_rows(db, expert)  # Implicit own-country panels become rows that can be removed
+    db.commit()
+
+    panel_rows = {e.id: panels.rows(db, e.id) for e in experts}
+    anon = anonymous_labels(experts, panel_rows)
+
+    def who(expert: Expert) -> dict:
+        return {
+            "label": anon.get(expert.id, expert.pseudonym),
+            "anonymity_level": expert.anonymity_level,
+            "synthetic": is_synthetic(expert),
+        }
+
+    countries: dict[str, dict] = {}
+    requests = []
+    for expert in experts:
+        member_of = [r.country for r in panel_rows[expert.id] if r.status == "member"]
+        for row in panel_rows[expert.id]:
+            if row.status == "member":
+                entry = countries.setdefault(row.country.lower(), {"country": row.country, "members": [], "pending": 0})
+                entry["members"].append({"membership_id": row.id, "since": row.decided_at, **who(expert)})
+            elif row.status == "pending":
+                countries.setdefault(row.country.lower(), {"country": row.country, "members": [], "pending": 0})["pending"] += 1
+                requests.append({
+                    "membership_id": row.id,
+                    "country": row.country,
+                    "note": row.note,
+                    "requested_at": row.requested_at,
+                    "member_of": member_of,
+                    **who(expert),
+                })
+
+    panel_list = sorted(countries.values(), key=lambda c: (-len(c["members"]), c["country"].lower()))
+    for entry in panel_list:
+        entry["members"].sort(key=lambda m: m["label"].lower())
+    requests.sort(key=lambda r: r["requested_at"])
+    return {
+        "target": {"min": panels.PANEL_TARGET[0], "max": panels.PANEL_TARGET[1]},
+        "panels": panel_list,
+        "requests": requests,
+    }
+
+
+@router.post("/panel-memberships/{membership_id}/decision")
+def decide_membership(membership_id: int, body: PanelDecisionIn, db: Session = Depends(get_db)):
+    row = db.get(PanelMembership, membership_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Membership not found")
+    allowed = {"approve": "pending", "decline": "pending", "remove": "member"}
+    if row.status != allowed[body.action]:
+        raise HTTPException(status_code=409, detail=f"Can't {body.action}: this is {row.status}")
+
+    row.status = {"approve": "member", "decline": "declined", "remove": "removed"}[body.action]
+    row.decided_at = panels.now()
+    invited = panels.invite_to_open_questions(db, row.expert_id, row.country) if body.action == "approve" else 0
+    db.commit()
+    # Removing keeps past answers and open invites: only new questions stop
+    return {"membership_id": row.id, "status": row.status, "invited_to_open_questions": invited}

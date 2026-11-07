@@ -5,6 +5,7 @@ import {
   getToken,
   type ApiExpertQuestion,
   type ApiGroupView,
+  type ApiPanel,
   type ApiQuestionSummary,
   type ApiSettings,
   type ApiTrackRecord,
@@ -66,6 +67,8 @@ export function useExpert() {
   const [groupLocked, setGroupLocked] = useState(true);
   const [settings, setSettings] = useState<ApiSettings | null>(null);
   const [track, setTrack] = useState<ApiTrackRecord | null>(null);
+  /** Country panels the expert is on or asked to join (an older backend without panels gives []). */
+  const [panels, setPanels] = useState<ApiPanel[]>([]);
   const [own, setOwn] = useState<OwnAnswer>({ first: null, latest: null, firstReason: "" });
 
   // Token is read on the client only (SSR has no window).
@@ -90,12 +93,14 @@ export function useExpert() {
     if (!token) return;
     try {
       // Settings first: a 404 here means the link itself is unknown ("invalid").
-      const [s, list, t] = await Promise.all([
+      const [s, list, t, p] = await Promise.all([
         api.getSettings(token),
         api.getQuestions(token),
         api.getTrackRecord(token).catch(() => null),
+        api.getPanels(token).catch(() => [] as ApiPanel[]),
       ]);
       setSettings(s);
+      setPanels(p);
       setQuestions(list);
       setTrack(t);
       const id = pickQuestion(list, selectedId);
@@ -188,9 +193,25 @@ export function useExpert() {
     [token],
   );
 
+  /** Ask to join a country panel, or withdraw a pending request. A moderator decides. */
+  const requestPanel = useCallback(
+    async (country: string) => {
+      if (!token) return;
+      setPanels(await api.requestPanel(token, country));
+    },
+    [token],
+  );
+  const withdrawPanel = useCallback(
+    async (country: string) => {
+      if (!token) return;
+      setPanels(await api.withdrawPanel(token, country));
+    },
+    [token],
+  );
+
   return useMemo(
-    () => ({ token, state, data, questions, group, groupLocked, settings, track, own, refresh, selectQuestion, submitAnswer, submitRevision, saveSettings }),
-    [token, state, data, questions, group, groupLocked, settings, track, own, refresh, selectQuestion, submitAnswer, submitRevision, saveSettings],
+    () => ({ token, state, data, questions, group, groupLocked, settings, track, own, panels, refresh, selectQuestion, submitAnswer, submitRevision, saveSettings, requestPanel, withdrawPanel }),
+    [token, state, data, questions, group, groupLocked, settings, track, own, panels, refresh, selectQuestion, submitAnswer, submitRevision, saveSettings, requestPanel, withdrawPanel],
   );
 }
 

@@ -230,7 +230,48 @@ export interface ApiPanelInviteIn {
 }
 export interface ApiPanelInviteOut {
   status: 'invited';
-  join_link: string; // http://localhost:3000/join/{token}: the invitee's credential, shown once to the moderator
+  join_link: string; // Expert app activation link (?join=…): the invitee's credential
+  email_sent?: boolean; // false: SMTP off or failed, so the moderator passes the link on
+  email_error?: string | null;
+}
+
+/** GET /moderator/panel-invites. An anonymous expert's pseudonym is never linked to the email. */
+export interface ApiPanelInviteRow {
+  token: string | null; // Only open invites have one (for re-sending)
+  email: string;
+  country: string;
+  status: 'pending' | 'joined';
+  email_sent: boolean | null;
+  invited_at: string;
+  joined_at: string | null;
+  expert: string | null;
+  anonymous: boolean;
+}
+/** GET /moderator/panels: country panels and requests. Anonymous experts are labelled, never named. */
+export interface ApiPanelPerson {
+  label: string;
+  anonymity_level: AnonymityLevel;
+  synthetic: boolean;
+}
+export interface ApiPanels {
+  target: { min: number; max: number };
+  panels: {
+    country: string;
+    members: (ApiPanelPerson & { membership_id: number; since: string | null })[];
+    pending: number;
+  }[];
+  requests: (ApiPanelPerson & {
+    membership_id: number;
+    country: string;
+    note: string | null;
+    requested_at: string;
+    member_of: string[];
+  })[];
+}
+
+export interface ApiPanelInvites {
+  email_configured: boolean;
+  invites: ApiPanelInviteRow[];
 }
 
 /** GET /join/{token}: 404 unknown invite, 409 already used. */
@@ -290,18 +331,41 @@ export interface ApiResolveOut {
   baseline_brier?: number;
 }
 
-/** GET /moderator/leaderboard. Anonymous experts are never ranked. */
+/** Participation counts the backend adds to every panel row. */
+export interface ApiParticipation {
+  country?: string;
+  synthetic?: boolean; // Seeded demo expert with simulated practice answers
+  invited?: number;
+  answered?: number;
+  revised?: number;
+  open_unanswered?: number;
+}
+
+/** GET /moderator/leaderboard: the whole panel. Anonymous experts are never ranked or named. */
 export interface ApiLeaderboard {
   baseline_brier: number;
   min_resolved: number;
-  experts: {
+  experts: ({
     label: string;
     anonymity_level: AnonymityLevel;
     resolved: number;
     mean_brier: number;
     beats_baseline: boolean;
     rank: number;
-  }[];
+  } & ApiParticipation)[];
+  unranked?: ({
+    label: string;
+    anonymity_level: AnonymityLevel;
+    resolved: number;
+    mean_brier: number | null;
+    beats_baseline: boolean | null;
+    needed: number;
+  } & ApiParticipation)[];
+  anonymous?: ({
+    label: string;
+    resolved: number;
+    beats_baseline: boolean | null;
+  } & ApiParticipation)[];
   note: string;
 }
 
@@ -480,18 +544,68 @@ export interface ResolveResult {
   baselineBrier: number | null;
 }
 
+export interface Participation {
+  country: string | null;
+  synthetic: boolean;
+  invited: number;
+  answered: number;
+  revised: number;
+  openUnanswered: number;
+}
+
 export interface Leaderboard {
   baselineBrier: number;
   minResolved: number;
-  experts: {
+  experts: ({
     rank: number;
     label: string;
     anonymityLevel: AnonymityLevel;
     resolved: number;
     meanBrier: number;
     beatsBaseline: boolean;
-  }[];
+  } & Participation)[];
+  /** Named experts still building a track record. */
+  unranked: ({
+    label: string;
+    anonymityLevel: AnonymityLevel;
+    resolved: number;
+    meanBrier: number | null;
+    needed: number;
+  } & Participation)[];
+  /** Fully anonymous experts: no name, no rank, no exact score. */
+  anonymous: ({
+    label: string;
+    resolved: number;
+    beatsBaseline: boolean | null;
+  } & Participation)[];
   note: string;
+}
+
+export interface PanelInvite {
+  token: string | null;
+  email: string;
+  country: string;
+  status: 'pending' | 'joined';
+  emailSent: boolean | null;
+  invitedAt: string;
+  joinedAt: string | null;
+  expert: string | null;
+  anonymous: boolean;
+}
+export interface PanelPerson {
+  label: string;
+  anonymityLevel: AnonymityLevel;
+  synthetic: boolean;
+}
+export interface Panels {
+  target: { min: number; max: number };
+  panels: { country: string; members: (PanelPerson & { membershipId: number; since: string | null })[]; pending: number }[];
+  requests: (PanelPerson & { membershipId: number; country: string; note: string | null; requestedAt: string; memberOf: string[] })[];
+}
+
+export interface PanelInvites {
+  emailConfigured: boolean;
+  invites: PanelInvite[];
 }
 
 export interface ParsedTrigger {
