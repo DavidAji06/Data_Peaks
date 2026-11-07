@@ -29,18 +29,18 @@ export function AlertCard({ alert: a, status, source, today, minDeadline, trigge
 
   return (
     <li key={a.id}>
-      <div className="group rounded-xl border border-line bg-surface p-4 transition-all duration-200 hover:border-accent hover:shadow-md hover:shadow-accent/10">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="group rounded-2xl border border-primary-100/20 bg-gradient-to-br from-surface-card to-surface-white/5 p-5 transition-all duration-300 hover:border-primary-600/50 hover:shadow-2xl hover:shadow-primary-500/20 backdrop-blur-md">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <Link
             href={`/mod/alerts/${encodeURIComponent(a.id)}`}
             className="flex-1 block"
           >
-            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-ink-muted">
-              <span className="font-semibold text-ink">{a.id}</span>
-              <span className="text-line">·</span>
-              <span className="font-medium">{a.riskId}</span>
-              <span className="text-line">·</span>
-              <span>{mod.alerts.trigger(a.triggerId)}</span>
+            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-ink-500">
+              <span className="font-bold text-primary-600">{a.id}</span>
+              <span className="text-ink-700">·</span>
+              <span className="font-semibold text-ink-400">{a.riskId}</span>
+              <span className="text-ink-700">·</span>
+              <span className="text-ink-500">{mod.alerts.trigger(a.triggerId)}</span>
               {a.strengthWord && a.strength !== null && (
                 <StatusTag tone={a.strengthWord === 'strong' ? 'accent' : 'muted'}>
                   {mod.alerts.strength(mod.strengthWords[a.strengthWord], a.strength)}
@@ -48,15 +48,15 @@ export function AlertCard({ alert: a, status, source, today, minDeadline, trigge
               )}
               {a.direction && <StatusTag>{mod.direction[a.direction] ?? a.direction}</StatusTag>}
             </div>
-            <p className="mt-2.5 font-semibold text-ink text-base group-hover:text-accent transition-colors">{a.report.title}</p>
-            <p className="mt-1.5 text-xs sm:text-sm text-ink-muted">
+            <p className="mt-3 font-bold text-ink text-lg group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-primary-600 group-hover:to-primary-500 group-hover:bg-clip-text transition-all duration-300">{a.report.title}</p>
+            <p className="mt-2 text-xs sm:text-sm text-ink-500">
               {[a.report.source, a.report.publishedAt ? fmtDate(a.report.publishedAt) : mod.alerts.noDate]
                 .filter(Boolean)
                 .join(' · ')}
             </p>
             {status === 'pending' && (
-              <span className="mt-2 inline-block text-xs sm:text-sm font-semibold text-accent">
-                → {mod.alerts.open}
+              <span className="mt-3 inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-primary-600 group-hover:translate-x-1 transition-transform">
+                ✦ {mod.alerts.open}
               </span>
             )}
           </Link>
@@ -74,7 +74,7 @@ export function AlertCard({ alert: a, status, source, today, minDeadline, trigge
               />
               <Link
                 href={`/mod/alerts/${encodeURIComponent(a.id)}`}
-                className="inline-flex items-center px-3 py-2 text-xs sm:text-sm font-medium rounded-lg border border-line-strong text-ink hover:border-accent hover:bg-accent hover:text-ink transition-colors duration-150"
+                className="inline-flex items-center px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl border border-primary-100/30 text-primary-600 hover:border-primary-600 hover:bg-gradient-to-r hover:from-primary-600/10 hover:to-primary-500/5 transition-all duration-200 hover:shadow-lg hover:shadow-primary-500/10"
               >
                 Review
               </Link>

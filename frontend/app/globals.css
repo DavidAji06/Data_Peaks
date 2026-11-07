@@ -8,48 +8,48 @@
  * Tap targets: use min-h-11 (44px) on anything tappable.
  */
 @theme {
-  /* Primary accent (teal) — buttons, active states, links, progress, expert's own mark */
-  --color-primary-700: #0e6b65;     /* hover and active text */
-  --color-primary-600: #14776e;     /* buttons, active states */
-  --color-primary-500: #16827b;     /* accents, progress marks */
-  --color-primary-100: #e6f2f0;     /* teal chip background */
-  --color-primary-50: #e6f4f1;      /* active nav background */
+  /* Futuristic Primary accent (Cyan/Neon) — buttons, active states, links */
+  --color-primary-700: #00d9ff;     /* hover and active text */
+  --color-primary-600: #00c7e8;     /* buttons, active states */
+  --color-primary-500: #00b8d4;     /* accents, progress marks */
+  --color-primary-100: #0a2a33;     /* cyan chip background */
+  --color-primary-50: #061820;      /* active nav background */
 
-  /* Neutrals — text, borders, surfaces */
-  --color-ink-900: #173247;         /* headings and main text */
-  --color-ink-700: #23455a;         /* secondary buttons, tab text */
-  --color-ink-500: #5d7280;         /* muted copy, secondary text */
-  --color-ink-400: #728692;         /* footer, fine print */
+  /* Dark Neutrals — text, borders, surfaces */
+  --color-ink-900: #e8eaed;         /* headings and main text (bright) */
+  --color-ink-700: #b8bcc1;         /* secondary buttons, tab text */
+  --color-ink-500: #808a92;         /* muted copy, secondary text */
+  --color-ink-400: #6b7177;         /* footer, fine print */
 
-  --color-surface-page: #edf2f4;    /* page background */
-  --color-surface-card: #f5f8f9;    /* cards */
-  --color-surface-white: #ffffff;   /* sheets, inputs, whitecards */
+  --color-surface-page: #0d1117;    /* page background (deep dark) */
+  --color-surface-card: #161b22;    /* cards (slightly lighter) */
+  --color-surface-white: #21262d;   /* sheets, inputs (light dark) */
 
-  --color-border-subtle: #dce7ea;   /* card borders */
-  --color-border-default: #c9d9df;  /* form field borders */
-  --color-line: #e2eaed;            /* decorative dividers */
+  --color-border-subtle: #30363d;   /* card borders (subtle glow) */
+  --color-border-default: #444c56;  /* form field borders */
+  --color-line: #21262d;            /* decorative dividers */
 
-  /* Warning/gold — "High" risk chips, caution notices */
-  --color-gold-700: #866017;        /* gold chip text */
-  --color-gold-50: #fbf1dc;         /* gold chip background */
+  /* Neon accents */
+  --color-gold-700: #ffd700;        /* neon gold */
+  --color-gold-50: #1a1410;         /* gold background */
 
-  /* Signal/grey — neutral chips, secondary badges */
-  --color-grey-chip-700: #496271;   /* grey chip text */
-  --color-grey-chip-50: #e9eff1;    /* grey chip background */
+  /* Neon purple — neutral chips, secondary badges */
+  --color-grey-chip-700: #b8a8ff;   /* neon purple */
+  --color-grey-chip-50: #1a0f2e;    /* purple background */
 
-  /* Risk levels (ACAPS): never colour alone, always pair with a label */
-  --color-risk-low: #166534;
-  --color-risk-low-soft: #f0fdf4;
-  --color-risk-low-solid: #15803d;
-  --color-risk-medium: #92400e;
-  --color-risk-medium-soft: #fffbeb;
-  --color-risk-medium-solid: #b45309;
-  --color-risk-high: #991b1b;
-  --color-risk-high-soft: #fef2f2;
-  --color-risk-high-solid: #b91c1c;
+  /* Risk levels (ACAPS): vibrant neons */
+  --color-risk-low: #00ff00;        /* neon green */
+  --color-risk-low-soft: #0a1f0a;
+  --color-risk-low-solid: #00d000;
+  --color-risk-medium: #ffaa00;     /* neon orange */
+  --color-risk-medium-soft: #1a0f00;
+  --color-risk-medium-solid: #ff9500;
+  --color-risk-high: #ff3333;       /* neon red */
+  --color-risk-high-soft: #1a0505;
+  --color-risk-high-solid: #ff1111;
 
-  /* ACAPS's probability band, shaded on the 0–100 axis (always labelled too) */
-  --color-band: #dbeafe;
+  /* Probability band gradient */
+  --color-band: #0a3a50;
 
   /* Semantic aliases for existing component names (for gradual migration) */
   --color-canvas: var(--color-surface-page);
@@ -71,32 +71,39 @@
 
 @layer base {
   html {
-    color-scheme: light;
+    color-scheme: dark;
   }
 
   body {
-    background: var(--color-surface-page);
+    background: linear-gradient(135deg, #0d1117 0%, #0a0e1a 50%, #0d1117 100%);
     color: var(--color-ink-900);
     font-family: var(--font-sans);
     font-size: 15px;
     line-height: 1.6;
+    min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-weight: 800;
     color: var(--color-ink-900);
+    background: linear-gradient(135deg, #00d9ff 0%, #00b8d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   h1 {
-    font-size: 25px;
-    line-height: 1.18;
-    letter-spacing: -0.7px;
+    font-size: 28px;
+    line-height: 1.2;
+    letter-spacing: -1px;
+    font-weight: 900;
   }
 
   h2 {
-    font-size: 20px;
+    font-size: 22px;
     line-height: 1.3;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.6px;
+    font-weight: 850;
   }
 
   h3 {
@@ -168,7 +175,7 @@
     color: var(--color-ink-400);
   }
 
-  /* Form field base styles */
+  /* Form field base styles - glass-morphism */
   .field-base {
     display: block;
     width: 100%;
@@ -176,10 +183,13 @@
     padding: 13px;
     font-size: 15px;
     border: 1px solid var(--color-border-default);
-    border-radius: 11px;
-    background: var(--color-surface-white);
+    border-radius: 12px;
+    background: rgba(33, 38, 45, 0.5);
+    backdrop-filter: blur(10px);
     color: var(--color-ink-900);
     font-family: var(--font-sans);
+    transition: all 250ms ease;
+    box-shadow: inset 0 0 0 1px rgba(0, 217, 255, 0.1);
   }
 
   .field-base::placeholder {
@@ -189,14 +199,15 @@
   .field-base:focus {
     outline: none;
     border-color: var(--color-primary-600);
-    box-shadow: 0 0 0 3px rgba(20, 119, 110, 0.1);
+    background: rgba(33, 38, 45, 0.8);
+    box-shadow: inset 0 0 0 1px var(--color-primary-600), 0 0 20px rgba(0, 217, 255, 0.2);
   }
 }
 
 /*
  * Probability slider: a 44px-tall touch target with our own track, so nothing is filled until the expert
  * sets a value (no visual anchor at 50). --fill is set inline to the chosen percent.
- * Uses teal primary color (#14776e) for the filled portion.
+ * Uses cyan neon primary color (#00c7e8) for the filled portion with glow effect.
  */
 .probability-range {
   -webkit-appearance: none;
@@ -204,23 +215,23 @@
   height: 2.75rem;
   background: transparent;
   cursor: pointer;
-  --track: linear-gradient(to right, #14776e var(--fill, 0%), #e2eaed var(--fill, 0%));
+  --track: linear-gradient(to right, #00c7e8 var(--fill, 0%), #444c56 var(--fill, 0%));
   width: 100%;
 }
 .probability-range.is-unset {
-  --track: #e2eaed;
+  --track: #444c56;
 }
 .probability-range::-webkit-slider-runnable-track {
   height: 0.5rem;
   border-radius: 9999px;
   background: var(--track);
-  box-shadow: inset 0 0 0 1px #c9d9df;
+  box-shadow: inset 0 0 0 1px rgba(0, 217, 255, 0.2);
 }
 .probability-range::-moz-range-track {
   height: 0.5rem;
   border-radius: 9999px;
   background: var(--track);
-  box-shadow: inset 0 0 0 1px #c9d9df;
+  box-shadow: inset 0 0 0 1px rgba(0, 217, 255, 0.2);
   border: none;
 }
 .probability-range::-webkit-slider-thumb {
@@ -229,19 +240,33 @@
   height: 1.75rem;
   margin-top: -0.625rem;
   border-radius: 9999px;
-  border: 3px solid #ffffff;
-  background: #14776e;
-  box-shadow: 0 0 0 1px #14776e;
+  border: 3px solid #21262d;
+  background: #00c7e8;
+  box-shadow: 0 0 0 1px #00c7e8, 0 0 12px rgba(0, 217, 255, 0.5);
   cursor: pointer;
+  transition: all 200ms ease;
+}
+.probability-range::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 0 1px #00d9ff, 0 0 20px rgba(0, 217, 255, 0.8);
+}
+.probability-range::-webkit-slider-thumb:active {
+  box-shadow: 0 0 0 1px #00d9ff, 0 0 24px rgba(0, 217, 255, 1);
 }
 .probability-range::-moz-range-thumb {
   width: 1.75rem;
   height: 1.75rem;
   border-radius: 9999px;
-  border: 3px solid #ffffff;
-  background: #14776e;
-  box-shadow: 0 0 0 1px #14776e;
+  border: 3px solid #21262d;
+  background: #00c7e8;
+  box-shadow: 0 0 0 1px #00c7e8, 0 0 12px rgba(0, 217, 255, 0.5);
   cursor: pointer;
+  transition: all 200ms ease;
+}
+.probability-range::-moz-range-thumb:hover {
+  box-shadow: 0 0 0 1px #00d9ff, 0 0 20px rgba(0, 217, 255, 0.8);
+}
+.probability-range::-moz-range-thumb:active {
+  box-shadow: 0 0 0 1px #00d9ff, 0 0 24px rgba(0, 217, 255, 1);
 }
 .probability-range.is-unset::-webkit-slider-thumb {
   opacity: 0;
