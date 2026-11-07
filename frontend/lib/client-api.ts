@@ -7,18 +7,25 @@
  * fails with a NetworkError and the screen keeps the input and offers a retry.
  * No mock data is imported here, so nothing private is bundled for the browser.
  */
-import { toDecisionResult, toGroupView, toResolveResult, toThemes } from './adapters';
+import { toDecisionResult, toExpertSettings, toGroupView, toResolveResult, toThemes } from './adapters';
 import { ApiError, NetworkError } from './api-error';
 import type {
   ApiAnswerIn,
   ApiDecisionIn,
   ApiDecisionOut,
   ApiExpertQuestion,
+  ApiExpertSettings,
+  ApiJoinIn,
+  ApiJoinOut,
+  ApiPanelInviteIn,
+  ApiPanelInviteOut,
+  ApiSettingsUpdate,
   ApiGroupView,
   ApiResolveOut,
   ApiSummariseOut,
   DataSource,
   DecisionResult,
+  ExpertSettings,
   GroupView,
   ResolveResult,
   Themes,
@@ -33,7 +40,7 @@ const moderatorBaseFor = (source: DataSource): string => (source === 'api' ? '/a
 
 async function request<T>(
   source: DataSource,
-  method: 'GET' | 'POST',
+  method: 'GET' | 'POST' | 'PATCH',
   path: string,
   body?: unknown,
   base: string = baseFor(source),
@@ -95,4 +102,21 @@ export async function resolveQuestion(source: DataSource, questionId: string, ou
 export async function summariseQuestion(source: DataSource, questionId: string): Promise<{ reasonCount: number; themes: Themes }> {
   const r = await request<ApiSummariseOut>(source, 'POST', `/moderator/questions/${enc(questionId)}/summarise`, undefined, moderatorBaseFor(source));
   return { reasonCount: r.reason_count, themes: toThemes(r.themes) };
+}
+
+/** Join the panel from an invite link. 404 unknown invite, 409 already used, 422 invalid. */
+export async function joinPanel(source: DataSource, token: string, body: ApiJoinIn): Promise<{ pseudonym: string }> {
+  const r = await request<ApiJoinOut>(source, 'POST', `/join/${enc(token)}`, body);
+  return { pseudonym: r.pseudonym };
+}
+
+/** Change privacy settings. Only the fields sent change. */
+export async function updateSettings(source: DataSource, token: string, body: ApiSettingsUpdate): Promise<ExpertSettings> {
+  return toExpertSettings(await request<ApiExpertSettings>(source, 'PATCH', `/q/${enc(token)}/settings`, body));
+}
+
+/** Moderator: invite someone to the panel. Returns the sign-up link to send them. */
+export async function createPanelInvite(source: DataSource, body: ApiPanelInviteIn): Promise<{ joinLink: string }> {
+  const r = await request<ApiPanelInviteOut>(source, 'POST', '/moderator/panel-invites', body, moderatorBaseFor(source));
+  return { joinLink: r.join_link };
 }

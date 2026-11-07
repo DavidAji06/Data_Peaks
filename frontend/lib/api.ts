@@ -19,6 +19,7 @@ import {
   isPlaceholderSimilar,
   toAlert,
   toExpertQuestion,
+  toExpertSettings,
   toPublicOutcome,
   toLeaderboard,
   toQuestionDetail,
@@ -35,6 +36,7 @@ import type {
   ApiAlert,
   ApiExpertQuestion,
   ApiExpertSettings,
+  ApiJoinInfo,
   ApiPublicQuestion,
   ApiLeaderboard,
   ApiQuestionDetail,
@@ -44,6 +46,7 @@ import type {
   ApiSimilarRisk,
   ApiTrackRecord,
   ExpertQuestion,
+  ExpertSettings,
   Leaderboard,
   Loaded,
   PublicOutcome,
@@ -137,6 +140,42 @@ export function getExpertQuestion(token: string): Promise<Loaded<ExpertQuestion>
 
 export function getTrackRecord(token: string): Promise<Loaded<TrackRecord>> {
   return load(async (call) => toTrackRecord(await call<ApiTrackRecord>('GET', `/q/${enc(token)}/track-record`)));
+}
+
+export interface SettingsPage {
+  /** null = this backend has no settings endpoint yet */
+  settings: ExpertSettings | null;
+  questionId: string;
+}
+
+/** Privacy settings, reached through the expert's question link. 404 on the link itself = invalid link. */
+export function getSettingsPage(token: string): Promise<Loaded<SettingsPage>> {
+  return load(async (call) => {
+    const q = await call<ApiExpertQuestion>('GET', `/q/${enc(token)}`);
+    let settings: ExpertSettings | null = null;
+    try {
+      settings = toExpertSettings(await call<ApiExpertSettings>('GET', `/q/${enc(token)}/settings`));
+    } catch (e) {
+      if (!(e instanceof ApiError && (e.status === 404 || e.status === 405))) throw e;
+    }
+    return { settings, questionId: q.question.id };
+  });
+}
+
+/** Which backend a page with no data of its own should send actions to (GET /health). */
+export function getSource(): Promise<Loaded<null>> {
+  return load(async (call) => {
+    await call<{ status: string }>('GET', '/health');
+    return null;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Joining the panel (sign-up link from a moderator invite; no key). 404 unknown, 409 already used.
+// ---------------------------------------------------------------------------
+
+export function getJoinInfo(token: string): Promise<Loaded<{ country: string }>> {
+  return load(async (call) => ({ country: (await call<ApiJoinInfo>('GET', `/join/${enc(token)}`)).country }));
 }
 
 // ---------------------------------------------------------------------------

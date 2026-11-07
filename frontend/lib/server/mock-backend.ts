@@ -10,6 +10,8 @@
  */
 import 'server-only';
 
+import { randomBytes } from 'node:crypto';
+
 import dbFile from '@/mock/db.json';
 import { BASELINE_BRIER, brier, median, roundLikePython } from '@/lib/probability';
 import type {
@@ -43,6 +45,15 @@ interface ExpertRow {
   anonymity_level: AnonymityLevel;
   country: string;
   topics: string;
+  language?: string; // backend default "en"
+  max_open_questions?: number; // backend default 3
+  email?: string | null; // synthetic only; never returned
+}
+interface PanelInviteRow {
+  token: string;
+  email: string;
+  country: string;
+  used: boolean;
 }
 interface QuestionRow {
   id: string;
@@ -92,7 +103,20 @@ interface MockDb {
   contract_samples: { similar_risk: ApiSimilarRisk; ranked_risk: ApiRankedRisk };
 }
 
-const db = structuredClone(dbFile) as unknown as MockDb;
+/**
+ * Demo state lives on globalThis: Next bundles route handlers (/api/demo) and server components
+ * separately, so a plain module-level variable would give each its own copy, and an action taken
+ * through /api/demo would not show up when the page reloads. One process, one demo state.
+ */
+const store = globalThis as typeof globalThis & {
+  __groundTruthDemo?: { db: MockDb; panelInvites: PanelInviteRow[] };
+};
+store.__groundTruthDemo ??= { db: structuredClone(dbFile) as unknown as MockDb, panelInvites: [] };
+const db = store.__groundTruthDemo.db;
+/** Panel invites made in this session (the seed has none). */
+const panelInvites = store.__groundTruthDemo.panelInvites;
+const FRONTEND_URL = 'http://localhost:3000';
+const newToken = () => randomBytes(16).toString('base64url'); // like secrets.token_urlsafe(16)
 
 export interface MockResult {
   status: number;
@@ -121,7 +145,6 @@ const invalid = (field: string, msg: string, type = 'value_error'): never => {
 const r2 = (x: number) => roundLikePython(x, 2); // Python's round(x, 2)
 const r4 = (x: number) => roundLikePython(x, 4);
 const MIN_GROUP_SIZE = 5;
-const MAX_OPEN_INVITES = 3;
 const MAX_PANEL_SIZE = 10;
 const MIN_RESOLVED_FOR_RANKING = 3;
 
@@ -237,9 +260,101 @@ function expertSettings(token: string): ApiExpertSettings {
     anonymity_level: e.anonymity_level,
     country: e.country,
     topics: e.topics.split(',').filter(Boolean),
-    language: 'en',
-    max_open_questions: 3,
+    language: e.language ?? 'en',
+    max_open_questions: e.max_open_questions ?? 3,
   };
+}
+
+const LEVELS = ['known_to_acaps', 'pseudonymous', 'anonymous'] as const;
+const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+/** Pydantic-style checks for the sign-up and settings bodies. `partial` = PATCH (missing fields allowed). */
+function checkProfile(body: unknown, partial: boolean) {
+  const b = (body ?? {}) as Record<string, unknown>;
+  const has = (k: string) => b[k] !== undefined && b[k] !== null;
+  if (!partial || has('anonymity_level')) {
+    if (!LEVELS.includes(b.anonymity_level as (typeof LEVELS)[number]))
+      invalid('anonymity_level', "Input should be 'known_to_acaps', 'pseudonymous' or 'anonymous'", 'literal_error');
+  }
+  if (!partial || has('country')) {
+    if (typeof b.country !== 'string') invalid('country', 'Input should be a valid string', 'string_type');
+    const c = b.country as string;
+    if (c.length < 2) invalid('country', 'String should have at least 2 characters', 'string_too_short');
+    if (c.length > 80) invalid('country', 'String should have at most 80 characters', 'string_too_long');
+  }
+  if (has('topics')) {
+    if (!Array.isArray(b.topics) || b.topics.some((t) => typeof t !== 'string')) invalid('topics', 'Input should be a valid list', 'list_type');
+    if ((b.topics as string[]).length > 10) invalid('topics', 'List should have at most 10 items after validation', 'too_long');
+  }
+  if (has('max_open_questions')) {
+    const n = b.max_open_questions;
+    if (typeof n !== 'number' || !Number.isInteger(n)) invalid('max_open_questions', 'Input should be a valid integer', 'int_type');
+    if ((n as number) < 1) invalid('max_open_questions', 'Input should be greater than or equal to 1', 'greater_than_equal');
+    if ((n as number) > 5) invalid('max_open_questions', 'Input should be less than or equal to 5', 'less_than_equal');
+  }
+  return b as {
+    anonymity_level?: AnonymityLevel;
+    country?: string;
+    topics?: string[];
+    language?: string;
+    max_open_questions?: number;
+  };
+}
+
+/** clean_topics: trimmed, lower-case, no duplicates, comma-separated. */
+const cleanTopics = (topics: string[]) => [...new Set(topics.map((t) => t.trim().toLowerCase()).filter(Boolean))].join(',');
+
+/** PATCH /q/{token}/settings: only the fields sent change. */
+function updateSettings(token: string, body: unknown): ApiExpertSettings {
+  const u = checkProfile(body, true);
+  const invite = getInvite(token);
+  const e = db.experts.find((x) => x.id === invite.expert_id)!;
+  if (u.anonymity_level) e.anonymity_level = u.anonymity_level;
+  if (u.country) e.country = u.country;
+  if (u.topics) e.topics = cleanTopics(u.topics);
+  if (u.max_open_questions) e.max_open_questions = u.max_open_questions;
+  return expertSettings(token);
+}
+
+/** POST /moderator/panel-invites */
+function createPanelInvite(body: unknown) {
+  const b = (body ?? {}) as Record<string, unknown>;
+  if (typeof b.email !== 'string') invalid('email', 'Input should be a valid string', 'string_type');
+  if (!EMAIL.test(b.email as string)) invalid('email', "String should match pattern '^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$'", 'string_pattern_mismatch');
+  if ((b.email as string).length > 254) invalid('email', 'String should have at most 254 characters', 'string_too_long');
+  if (typeof b.country !== 'string') invalid('country', 'Input should be a valid string', 'string_type');
+  if ((b.country as string).length < 2) invalid('country', 'String should have at least 2 characters', 'string_too_short');
+  if ((b.country as string).length > 80) invalid('country', 'String should have at most 80 characters', 'string_too_long');
+  const invite = { token: newToken(), email: b.email as string, country: b.country as string, used: false };
+  panelInvites.push(invite);
+  return { status: 'invited', join_link: `${FRONTEND_URL}/join/${invite.token}` };
+}
+
+function getOpenPanelInvite(token: string): PanelInviteRow {
+  const invite = panelInvites.find((i) => i.token === token) ?? fail(404, 'Invite not found');
+  if (invite.used) fail(409, 'Invite already used');
+  return invite;
+}
+
+/** POST /join/{token}: creates the expert with a fresh pseudonym and marks the invite used. */
+function joinPanel(token: string, body: unknown): { status: 'joined'; pseudonym: string } {
+  const b = checkProfile(body, false);
+  const invite = getOpenPanelInvite(token);
+  let pseudonym: string;
+  do pseudonym = `Analyst ${randomBytes(2).toString('hex').toUpperCase()}`;
+  while (db.experts.some((e) => e.pseudonym === pseudonym));
+  db.experts.push({
+    id: `expert-${randomBytes(4).toString('hex')}`,
+    pseudonym,
+    anonymity_level: b.anonymity_level!,
+    country: b.country!,
+    topics: cleanTopics(b.topics ?? []),
+    language: b.language ?? 'en',
+    max_open_questions: b.max_open_questions ?? 3,
+    email: invite.email,
+  });
+  invite.used = true;
+  return { status: 'joined', pseudonym };
 }
 
 function expertQuestion(token: string): ApiExpertQuestion {
@@ -331,7 +446,7 @@ function routeQuestion(questionId: string, country: string): InviteRow[] {
   const candidates = db.experts
     .filter((e) => countries.has(e.country.toLowerCase()))
     .map((e) => ({ e, count: openInviteCount(e.id) }))
-    .filter((c) => c.count < MAX_OPEN_INVITES)
+    .filter((c) => c.count < (c.e.max_open_questions ?? 3))
     .sort((a, b) => a.count - b.count)
     .slice(0, MAX_PANEL_SIZE);
   const invites = candidates.map(({ e }) => ({
@@ -535,6 +650,7 @@ function route(method: string, path: string, body: unknown): unknown {
     if (a === 'moderator' && b === 'questions' && parts.length === 3) return questionDetail(c);
     if (a === 'moderator' && b === 'leaderboard' && parts.length === 2) return leaderboard();
     if (a === 'public' && b === 'questions' && parts.length === 2) return publicQuestions();
+    if (a === 'join' && parts.length === 2) return { country: getOpenPanelInvite(b).country };
   }
   if (method === 'POST') {
     if (a === 'alerts' && c === 'decision' && parts.length === 3) return decideAlert(b, body);
@@ -542,6 +658,11 @@ function route(method: string, path: string, body: unknown): unknown {
     if (a === 'q' && c === 'revision' && parts.length === 3) return submitRevision(b, body);
     if (a === 'moderator' && b === 'questions' && d === 'resolve' && parts.length === 4) return resolveQuestion(c, body);
     if (a === 'moderator' && b === 'questions' && d === 'summarise' && parts.length === 4) return summariseQuestion(c);
+    if (a === 'moderator' && b === 'panel-invites' && parts.length === 2) return createPanelInvite(body);
+    if (a === 'join' && parts.length === 2) return joinPanel(b, body);
+  }
+  if (method === 'PATCH') {
+    if (a === 'q' && c === 'settings' && parts.length === 3) return updateSettings(b, body);
   }
   return fail(404, 'Not Found');
 }

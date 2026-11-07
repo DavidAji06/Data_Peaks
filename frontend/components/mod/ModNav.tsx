@@ -9,6 +9,7 @@ const ITEMS = [
   { href: '/mod/questions', label: mod.nav.questions, match: (p: string) => p.startsWith('/mod/questions') },
   { href: '/mod/risks', label: mod.nav.risks, match: (p: string) => p.startsWith('/mod/risks') },
   { href: '/mod/leaderboard', label: mod.nav.leaderboard, match: (p: string) => p.startsWith('/mod/leaderboard') },
+  { href: '/mod/panel', label: mod.nav.panel, match: (p: string) => p.startsWith('/mod/panel') },
 ];
 
 /** Highlights the current section. Must sit inside <Suspense> (the path is request data). */

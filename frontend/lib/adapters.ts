@@ -11,6 +11,7 @@ import type {
   ApiAlert,
   ApiDecisionOut,
   ApiExpertQuestion,
+  ApiExpertSettings,
   ApiGroupView,
   ApiLeaderboard,
   ApiModeratorResponse,
@@ -26,6 +27,7 @@ import type {
   ApiTrackRecord,
   DecisionResult,
   ExpertQuestion,
+  ExpertSettings,
   GroupView,
   Leaderboard,
   ModeratorResponse,
@@ -312,4 +314,12 @@ export const toPublicOutcome = (q: ApiPublicQuestion): PublicOutcome => ({
     q.group_median !== null && canShowAggregate(q.expert_count)
       ? { expertCount: q.expert_count as number, median: q.group_median, medianBrier: q.group_median_brier }
       : null,
+});
+
+export const toExpertSettings = (x: ApiExpertSettings): ExpertSettings => ({
+  pseudonym: x.pseudonym,
+  anonymityLevel: x.anonymity_level,
+  country: x.country,
+  topics: x.topics,
+  maxOpenQuestions: x.max_open_questions,
 });

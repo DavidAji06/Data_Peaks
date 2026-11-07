@@ -1,7 +1,7 @@
 /**
- * Moderator actions from the browser (approve/reject an alert, resolve a question, AI summary) go through here,
+ * Moderator actions from the browser (approve/reject an alert, resolve a question, AI summary, panel invite) go through here,
  * so the moderator key stays on the server: it is read from MODERATOR_KEY (no NEXT_PUBLIC_ prefix) and
- * added as X-Moderator-Key. Only these three action paths are forwarded; this is not a general proxy.
+ * added as X-Moderator-Key. Only these four action paths are forwarded; this is not a general proxy.
  * Note: this route itself has no sign-in yet, like the rest of /mod (see HANDOFF.md).
  */
 import 'server-only';
@@ -14,6 +14,7 @@ const ALLOWED = [
   /^alerts\/[^/]+\/decision$/,
   /^moderator\/questions\/[^/]+\/resolve$/,
   /^moderator\/questions\/[^/]+\/summarise$/,
+  /^moderator\/panel-invites$/,
 ];
 
 export async function POST(request: Request, ctx: RouteContext<'/api/mod/[...path]'>) {

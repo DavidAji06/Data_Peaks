@@ -21,6 +21,11 @@ const ENTRIES = [
     body: 'Approve or reject pipeline alerts, follow participation, resolve questions, record decisions on risks.',
   },
   {
+    href: '/mod/panel',
+    title: 'Invite an expert',
+    body: 'Create a one-time sign-up link. The new expert picks their own anonymity level, country and how many questions they want.',
+  },
+  {
     href: '/mod/leaderboard',
     title: 'Calibration',
     body: 'Whose forecasts hold up, by Brier score. Anonymous experts are never ranked.',

@@ -172,9 +172,16 @@ export function ExpertFlow({ token, data, source }: { token: string; data: Exper
           <button type="button" onClick={() => go('estimate')} className={`${buttonClass.primary} mt-6 w-full`}>
             {s.context.start}
           </button>
-          <Link href={`/q/${encodeURIComponent(token)}/record`} className={`${buttonClass.link} mt-2`}>
-            {s.record.link}
-          </Link>
+          <div className="mt-2 flex flex-wrap gap-x-6">
+            <Link href={`/q/${encodeURIComponent(token)}/record`} className={buttonClass.link}>
+              {s.record.link}
+            </Link>
+            {data.anonymityLevel && (
+              <Link href={`/q/${encodeURIComponent(token)}/settings`} className={buttonClass.link}>
+                {s.settings.link}
+              </Link>
+            )}
+          </div>
         </>
       )}
 
@@ -213,7 +220,7 @@ export function ExpertFlow({ token, data, source }: { token: string; data: Exper
                   {s.estimate.reasonCount(reason.length, MAX_REASON)}
                 </p>
               </div>
-              {step === 'estimate' && <WhoSees s={s} level={data.anonymityLevel} />}
+              {step === 'estimate' && <WhoSees s={s} level={data.anonymityLevel} token={token} />}
               {step === 'revise' && <p className="text-sm text-ink-muted">{s.revise.firstAnswerKept}</p>}
               <div className="grid gap-2">
                 <button type="submit" disabled={busy} className={buttonClass.primary}>
@@ -375,7 +382,7 @@ function SimilarRisks({ data, s }: { data: ExpertQuestion; s: Strings }) {
   );
 }
 
-function WhoSees({ s, level }: { s: Strings; level: AnonymityLevel | null }) {
+function WhoSees({ s, level, token }: { s: Strings; level: AnonymityLevel | null; token: string }) {
   // The level comes from GET /q/{token}/settings. On a backend without that endpoint it is null,
   // and the ACAPS line stays generic (true for every level).
   const info = level ? s.anonymity.levels[level] : null;
@@ -388,6 +395,12 @@ function WhoSees({ s, level }: { s: Strings; level: AnonymityLevel | null }) {
         <li>{s.whoSees.peers}</li>
         <li>{s.whoSees.public}</li>
       </ul>
+      {/* Only offered when this backend has the settings endpoint (level known). */}
+      {level && (
+        <Link href={`/q/${encodeURIComponent(token)}/settings`} className={`${buttonClass.link} text-sm`}>
+          {s.whoSees.change}
+        </Link>
+      )}
     </div>
   );
 }

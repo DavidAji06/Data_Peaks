@@ -47,9 +47,12 @@ Checks: `npm run lint`, `npm run build`, `npm run check:contrast`.
 | `/q/demo-expert-a` | Expert | Context → blind estimate → group view → revise → receipt |
 | `/q/demo-expert-b` | Expert | Same question, already answered: opens on the group view |
 | `/q/[token]/record` | Expert | Track record (Brier scores) |
+| `/q/[token]/settings` | Expert | Privacy settings: anonymity level (with who sees what), country, topics, open questions at a time |
+| `/join/[token]` | New expert | Sign-up from a moderator's invite link: the expert chooses their own anonymity level |
 | `/mod` | ACAPS | Alert queue (pending/approved/rejected), approve with an editable question, or reject |
 | `/mod/questions`, `/mod/questions/[id]` | ACAPS | Participation, first vs latest median, 5-band distribution, labelled answers, resolve |
 | `/mod/leaderboard` | ACAPS | Calibration (anonymous experts never ranked) |
+| `/mod/panel` | ACAPS | Invite an expert: email + country → one-time sign-up link |
 | `/mod/risks`, `/mod/risks/[id]` | ACAPS | Ranked risks with score breakdown; risk detail with triggers and a decision panel |
 | `/outcomes/[questionId]` | Public | Group figures only |
 
@@ -58,8 +61,8 @@ Checks: `npm run lint`, `npm run build`, `npm run check:contrast`.
 - `lib/types.ts`: the contract. `Api*` types are the backend JSON exactly (snake_case); UI types are camelCase.
 - `lib/adapters.ts`: the only place `Api*` becomes UI data.
 - `lib/api.ts` (server only): one loader per screen. Adds the moderator key only on moderator loaders.
-- `lib/client-api.ts` (browser): submit, revise, group view, approve/reject, resolve, AI summary.
-- `app/api/mod/[...path]`: forwards the three moderator actions (alert decision, resolve, AI summary) with the key added on the server. Not a general proxy.
+- `lib/client-api.ts` (browser): submit, revise, group view, join, settings, approve/reject, resolve, AI summary, panel invite.
+- `app/api/mod/[...path]`: forwards the four moderator actions (alert decision, resolve, AI summary, panel invite) with the key added on the server. Not a general proxy.
 - `lib/server/mock-backend.ts` + `mock/db.json`: TypeScript copy of the backend over a snapshot of its seed, for the offline fallback. Refresh with `npm run mocks:snapshot` after `python -m app.seed`.
 - `mock/curated.json`: real Risk Radar data shown while the API still returns placeholder samples (similar risks, ranking), labelled "Demo data until the ML pipeline lands". Rebuild with `npm run mocks:extract`.
 - `lib/anonymity.ts`: small-n rule (no figures below 5 answers, same as the backend).
@@ -68,13 +71,13 @@ Checks: `npm run lint`, `npm run build`, `npm run check:contrast`.
 
 ## Endpoints used
 
-Expert (no key): `GET /q/{token}`, `GET /q/{token}/settings`, `POST /q/{token}/responses`, `POST /q/{token}/revision`, `GET /q/{token}/group`, `GET /q/{token}/track-record`.
+Expert (no key): `GET /q/{token}`, `GET /q/{token}/settings`, `PATCH /q/{token}/settings`, `GET /join/{token}`, `POST /join/{token}`, `POST /q/{token}/responses`, `POST /q/{token}/revision`, `GET /q/{token}/group`, `GET /q/{token}/track-record`.
 
-Moderator (with `X-Moderator-Key`): `GET /alerts?status=`, `POST /alerts/{id}/decision`, `GET /risks/ranked`, `GET /risks/{id}`, `GET /moderator/questions`, `GET /moderator/questions/{id}`, `POST /moderator/questions/{id}/resolve`, `POST /moderator/questions/{id}/summarise`, `GET /moderator/leaderboard`.
+Moderator (with `X-Moderator-Key`): `GET /alerts?status=`, `POST /alerts/{id}/decision`, `GET /risks/ranked`, `GET /risks/{id}`, `GET /moderator/questions`, `GET /moderator/questions/{id}`, `POST /moderator/questions/{id}/resolve`, `POST /moderator/questions/{id}/summarise`, `GET /moderator/leaderboard`, `POST /moderator/panel-invites`.
 
 Public (no key): `GET /public/questions` (resolved questions only; figures null below 5 answers). `/outcomes` lists them, `/outcomes/[id]` shows one.
 
-Not used yet: `/join/{token}` (sign-up), `PATCH /q/{token}/settings`, `POST /moderator/panel-invites`, `POST /alerts/import`.
+Not used yet: `POST /alerts/import`.
 
 ## Security notes
 
@@ -88,11 +91,12 @@ Not used yet: `/join/{token}` (sign-up), `PATCH /q/{token}/settings`, `POST /mod
 Done in `d4d949d` (thanks): small-group protection (now 5 answers), multi-country routing, a public endpoint, stored AI themes with a summarise endpoint, ML file hooks.
 
 Still open:
-1. **`GET /alerts/{id}`**: the alert page currently searches all three status lists.
-2. **A risk-decision endpoint** (keep / raise / lower / update trigger / add trigger, with a note). The decision panel is page-only for now and labelled "Not saved to server yet".
-3. **Seed content**: alerts point at trigger `T0001`, which isn't one of R1043's triggers (`T0618`–`T0620`). The alert page warns about it. Real T0618 content would make the demo read much better.
-4. **Reason length**: the backend accepts up to 280 characters. Fine; just keep the expert prompt "one or two lines".
-5. **`GET /public/questions/{id}`** (optional): the public detail page currently fetches the whole list and picks one.
+1. **Anonymity changes are retroactive.** The moderator view labels every answer with the expert's *current* level, so switching from "Fully anonymous" to "Known to ACAPS" reveals who gave earlier answers (and puts past scores on the calibration ranking). The settings page warns about this before saving. Safer: store the level on each response when it's given, and label answers with that.
+2. **`GET /alerts/{id}`**: the alert page currently searches all three status lists.
+3. **A risk-decision endpoint** (keep / raise / lower / update trigger / add trigger, with a note). The decision panel is page-only for now and labelled "Not saved to server yet".
+4. **Seed content**: alerts point at trigger `T0001`, which isn't one of R1043's triggers (`T0618`–`T0620`). The alert page warns about it. Real T0618 content would make the demo read much better.
+5. **Reason length**: the backend accepts up to 280 characters. Fine; just keep the expert prompt "one or two lines".
+6. **`GET /public/questions/{id}`** (optional): the public detail page currently fetches the whole list and picks one.
 
 ## Open questions for the team
 

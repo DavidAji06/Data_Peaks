@@ -172,6 +172,37 @@ export interface ApiQuestionDetail {
   themes: ApiThemes;
 }
 
+/** POST /moderator/panel-invites (moderator key). Email is synthetic in the demo and never returned. */
+export interface ApiPanelInviteIn {
+  email: string;
+  country: string; // 2–80 characters
+}
+export interface ApiPanelInviteOut {
+  status: 'invited';
+  join_link: string; // http://localhost:3000/join/{token}: the invitee's credential, shown once to the moderator
+}
+
+/** GET /join/{token}: 404 unknown invite, 409 already used. */
+export interface ApiJoinInfo {
+  country: string;
+}
+
+/** POST /join/{token} */
+export interface ApiJoinIn {
+  anonymity_level: AnonymityLevel;
+  country: string;
+  topics: string[]; // at most 10
+  language?: string; // backend default "en"; the app is English only
+  max_open_questions: number; // 1–5
+}
+export interface ApiJoinOut {
+  status: 'joined';
+  pseudonym: string;
+}
+
+/** PATCH /q/{token}/settings: only the fields sent change. Returns the full settings. */
+export type ApiSettingsUpdate = Partial<Pick<ApiExpertSettings, 'anonymity_level' | 'country' | 'topics' | 'max_open_questions'>>;
+
 /** GET /public/questions (no key): resolved questions only. Figures are null below 5 answers. */
 export interface ApiPublicQuestion {
   id: string;
@@ -443,6 +474,14 @@ export interface RankedRisk {
 export interface RankedRisks {
   items: RankedRisk[];
   areDemo: boolean; // curated 28 active risks with placeholder scores, until the ML ranking lands
+}
+
+export interface ExpertSettings {
+  pseudonym: string;
+  anonymityLevel: AnonymityLevel;
+  country: string;
+  topics: string[];
+  maxOpenQuestions: number;
 }
 
 /** One resolved question on the public page. Group figures are null below 5 answers. */
