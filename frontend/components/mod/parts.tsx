@@ -22,18 +22,21 @@ export function PageHeader({
   back?: { href: string; label: string };
 }) {
   return (
-    <div className="mb-5">
+    <div className="mb-8">
       {back && (
-        <Link href={back.href} className="mb-1 inline-flex min-h-11 items-center text-sm font-medium text-primary-600 underline underline-offset-4 hover:text-primary-700">
+        <Link href={back.href} className="mb-3 inline-flex min-h-11 items-center text-sm font-medium text-primary-600 underline underline-offset-4 hover:text-primary-700">
           ← {mod.backTo(back.label)}
         </Link>
       )}
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-xl font-semibold text-ink-900 sm:text-2xl">{title}</h1>
+      <div className="text-center mb-4">
+        <h1 className="text-3xl font-bold text-ink-900 sm:text-4xl mb-1">{title}</h1>
+        <p className="text-sm font-medium text-ink-500">ACAPS Moderator page</p>
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-2">
         {source === 'demo' && <DemoBadge>{mod.demoOffline}</DemoBadge>}
         {demoUntilMl && <DemoBadge>{mod.demoUntilMl}</DemoBadge>}
       </div>
-      {intro && <p className="mt-1 max-w-2xl text-ink-500">{intro}</p>}
+      {intro && <p className="mt-4 text-center max-w-2xl text-ink-500 mx-auto">{intro}</p>}
     </div>
   );
 }

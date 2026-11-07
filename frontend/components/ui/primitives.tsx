@@ -22,12 +22,12 @@ export function WhiteCard({ children, className = '' }: { children: ReactNode; c
   return <section className={`rounded-sm bg-white border border-border-subtle p-3.5 ${className}`} style={{ borderRadius: '14px' }}>{children}</section>;
 }
 
-/** ACAPS risk level as given by the data ("High", "Medium", "Low"); colour is never the only signal. */
+/** ACAPS risk level as given by the data ("High", "Medium", "Low"); colour is never the only signal. Red (high) to blue (low) */
 export function RiskChip({ level, label }: { level: string | null; label: string }) {
   const tone = (level ?? '').toLowerCase();
   const cls =
     tone === 'high'
-      ? 'bg-gold-50 text-gold-700'
+      ? 'bg-risk-high-soft text-risk-high'
       : tone === 'medium'
         ? 'bg-risk-medium-soft text-risk-medium'
         : tone === 'low'

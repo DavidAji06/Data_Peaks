@@ -37,16 +37,16 @@
   --color-grey-chip-700: #b8a8ff;   /* neon purple */
   --color-grey-chip-50: #1a0f2e;    /* purple background */
 
-  /* Risk levels (ACAPS): vibrant neons */
-  --color-risk-low: #00ff00;        /* neon green */
-  --color-risk-low-soft: #0a1f0a;
-  --color-risk-low-solid: #00d000;
-  --color-risk-medium: #ffaa00;     /* neon orange */
-  --color-risk-medium-soft: #1a0f00;
-  --color-risk-medium-solid: #ff9500;
+  /* Risk levels (ACAPS): vibrant neons - red (high) to blue (low) */
   --color-risk-high: #ff3333;       /* neon red */
   --color-risk-high-soft: #1a0505;
   --color-risk-high-solid: #ff1111;
+  --color-risk-medium: #ffaa00;     /* neon orange */
+  --color-risk-medium-soft: #1a0f00;
+  --color-risk-medium-solid: #ff9500;
+  --color-risk-low: #3b82f6;        /* bright blue */
+  --color-risk-low-soft: #0a1a3a;
+  --color-risk-low-solid: #2563eb;
 
   /* Probability band gradient */
   --color-band: #0a3a50;
