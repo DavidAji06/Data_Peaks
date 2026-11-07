@@ -80,5 +80,4 @@ export function MiniBar({ label, value }: { label: string; value: number }) {
 /** Brier scores: 4 decimals, as the backend rounds them. */
 export const fmtBrier = (b: number) => b.toFixed(4).replace(/0{1,2}$/, '');
 
-export const fmtDate = (iso: string | null) =>
-  iso ? new Date(`${iso.slice(0, 10)}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '';
+// NOTE: fmtDate has moved to lib/format-date.ts to avoid new Date() in prerendering

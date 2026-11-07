@@ -1,6 +1,6 @@
 import { mod } from '@/lib/i18n/mod';
 import type { ParsedTrigger } from '@/lib/types';
-import { fmtDate } from './parts';
+import { fmtDate } from '@/lib/format-date';
 
 /** One ACAPS trigger as recorded: completion bar (with the number), description, objective, last update. */
 export function TriggerCard({ trigger, highlight = false }: { trigger: ParsedTrigger; highlight?: boolean }) {

@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { CreateQuestionDialog } from './CreateQuestionDialog';
-import { StatusTag, fmtDate } from './parts';
+import { StatusTag } from './parts';
+import { fmtDate } from '@/lib/format-date';
 import { mod } from '@/lib/i18n/mod';
 import type { Alert, AlertStatus, DataSource } from '@/lib/types';
 

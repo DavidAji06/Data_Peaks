@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { PageHeader, StatusTag, fmtDate } from '@/components/mod/parts';
+import { PageHeader, StatusTag } from '@/components/mod/parts';
+import { fmtDate } from '@/lib/format-date';
 import { getModeratorQuestions } from '@/lib/api';
 import { canShowAggregate } from '@/lib/anonymity';
 import { mod } from '@/lib/i18n/mod';

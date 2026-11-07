@@ -6,7 +6,8 @@ import { RiskChip } from '@/components/ui/primitives';
 import { mod } from '@/lib/i18n/mod';
 import { toPercent } from '@/lib/probability';
 import type { RankedRisk } from '@/lib/types';
-import { MiniBar, fmtDate } from './parts';
+import { MiniBar } from './parts';
+import { fmtDate } from '@/lib/format-date';
 
 const t = mod.risks;
 
