@@ -7,6 +7,7 @@ Config, read from the environment or the repo's .env:
     GREENPT_REASONING  reasoning_effort sent with every call, default "none" (thinking off).
                        GreenPT enables thinking by default; on deepseek-v4 that burned up to
                        8,000 hidden tokens per call and returned empty replies (2026-11-07).
+    GREENPT_NO_CACHE   any value: always call the API (live test), replies are still saved
     GREENPT_BUDGET_USD hard stop: refuse new (uncached) calls once estimated spend reaches it
 
 Every successful response is cached on disk, keyed by (model, messages, temperature), so
@@ -81,7 +82,7 @@ class GreenPT:
             key_parts.append(self.reasoning)
         key = hashlib.sha256(json.dumps(key_parts, sort_keys=True).encode("utf-8")).hexdigest()
         cached = CACHE_DIR / f"{key}.json"
-        if cached.exists():
+        if cached.exists() and not env("GREENPT_NO_CACHE"):
             return json.loads(cached.read_text(encoding="utf-8"))["content"]
         if self.budget is not None and spent_usd() >= self.budget:
             raise BudgetExceeded(f"budget ${self.budget:.2f} reached (spent ~${spent_usd():.3f})")

@@ -1,0 +1,4601 @@
+[
+ {
+  "crisis_id": "AFG001",
+  "crisis_name": "Complex crisis in Afghanistan",
+  "connected_crises": [
+   "AFG005"
+  ],
+  "drivers": [
+   "Conflict/ Violence",
+   "Political/economic crisis",
+   "Floods",
+   "Drought/drier conditions",
+   "Earthquake"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "AFG"
+  ],
+  "country": [
+   "Afghanistan"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 9.2,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 9.562028156842326,
+  "Geographical Impact": 9.854818876951647,
+  "Human Impact": 9.390959703888882,
+  "Conditions of affected people": 9.0,
+  "People in need": 10.0,
+  "Concentration of conditions": 8.0,
+  "Complexity": 9.231737643398025,
+  "Society and safety": 7.932270943081591,
+  "Operating environment": 10.0,
+  "Last updated": "2026-10-24",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "BDI004",
+  "crisis_name": "Displacement from Eastern DRC",
+  "connected_crises": null,
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "BDI"
+  ],
+  "country": [
+   "Burundi"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.2,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 4.847601097525029,
+  "Geographical Impact": 2.6245278027363326,
+  "Human Impact": 5.730145398997613,
+  "Conditions of affected people": 4.993166087348724,
+  "People in need": 3.9863321746974476,
+  "Concentration of conditions": 6.0,
+  "Complexity": 5.78416936861194,
+  "Society and safety": 6.053947250679012,
+  "Operating environment": 5.5,
+  "Last updated": "2026-10-21",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "BEN002",
+  "crisis_name": "Conflict in northern region of Benin",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "BEN"
+  ],
+  "country": [
+   "Benin"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 4.6,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 4.552859282756647,
+  "Geographical Impact": 3.5816787394391962,
+  "Human Impact": 4.990412216740411,
+  "Conditions of affected people": 4.634879055460263,
+  "People in need": 3.4039643302331273,
+  "Concentration of conditions": 5.865793780687398,
+  "Complexity": 4.4858979912670875,
+  "Society and safety": 4.938594861889542,
+  "Operating environment": 4.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "BFA002",
+  "crisis_name": "Conflict and Climatic Shocks in Burkina Faso",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Drought/drier conditions",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "BFA"
+  ],
+  "country": [
+   "Burkina Faso"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 8.3,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.568034870206372,
+  "Geographical Impact": 9.354284508488496,
+  "Human Impact": 8.051440879871215,
+  "Conditions of affected people": 8.411162885498891,
+  "People in need": 8.822325770997782,
+  "Concentration of conditions": 8.0,
+  "Complexity": 8.074125880148896,
+  "Society and safety": 6.742189340703555,
+  "Operating environment": 9.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "BGD001",
+  "crisis_name": "Multiple crises in Bangladesh",
+  "connected_crises": [
+   "BGD002",
+   "BGD008"
+  ],
+  "drivers": [
+   "International Displacement",
+   "Floods",
+   "Cyclone",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "BGD"
+  ],
+  "country": [
+   "Bangladesh"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 6.9,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 6.539001932752085,
+  "Geographical Impact": 7.316642049755292,
+  "Human Impact": 6.092316989628643,
+  "Conditions of affected people": 8.158702951229596,
+  "People in need": 10.0,
+  "Concentration of conditions": 6.317405902459191,
+  "Complexity": 5.0984650358478065,
+  "Society and safety": 4.668195953934616,
+  "Operating environment": 5.5,
+  "Last updated": "2026-10-25",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "BGD002",
+  "crisis_name": "Displacement of Rohingyas to Bangladesh",
+  "connected_crises": [
+   "MMR002",
+   "BGD001"
+  ],
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "BGD"
+  ],
+  "country": [
+   "Bangladesh"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 6.4,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 5.93804176982658,
+  "Geographical Impact": 0.4370387152725582,
+  "Human Impact": 7.509827059306905,
+  "Conditions of affected people": 7.673533304426542,
+  "People in need": 7.347066608853083,
+  "Concentration of conditions": 8.0,
+  "Complexity": 4.584639784003658,
+  "Society and safety": 4.668195953934616,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-25",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "BGD012",
+  "crisis_name": "Climatic shocks and political/economic crisis in Bangladesh",
+  "connected_crises": null,
+  "drivers": [
+   "Cyclone",
+   "Floods",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "BGD"
+  ],
+  "country": [
+   "Bangladesh"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 6.7,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 7.638633206236792,
+  "Geographical Impact": 7.285508399848762,
+  "Human Impact": 7.802777453611856,
+  "Conditions of affected people": 8.137201540436457,
+  "People in need": 10.0,
+  "Concentration of conditions": 6.274403080872913,
+  "Complexity": 3.6625771414021253,
+  "Society and safety": 4.668195953934616,
+  "Operating environment": 2.5,
+  "Last updated": "2026-10-25",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "BRA002",
+  "crisis_name": "Displacement from Venezuela to Brazil",
+  "connected_crises": [
+   "VEN001"
+  ],
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "BRA"
+  ],
+  "country": [
+   "Brazil"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 5.2,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 7.495257804312378,
+  "Geographical Impact": 8.139147214874027,
+  "Human Impact": 7.122750303065159,
+  "Conditions of affected people": 4.170718440555829,
+  "People in need": 5.827293423354003,
+  "Concentration of conditions": 2.5141434577576547,
+  "Complexity": 4.506770850629827,
+  "Society and safety": 4.977426853518518,
+  "Operating environment": 4.0,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "CAF001",
+  "crisis_name": "Conflict and Climatic Shocks in CAR",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "CAF"
+  ],
+  "country": [
+   "Central African Republic"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 8.0,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.559666327423077,
+  "Geographical Impact": 8.804292931755132,
+  "Human Impact": 8.427790426089459,
+  "Conditions of affected people": 7.869247689943887,
+  "People in need": 7.8172587218090115,
+  "Concentration of conditions": 7.921236658078763,
+  "Complexity": 7.724083418184016,
+  "Society and safety": 6.717595820307051,
+  "Operating environment": 8.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "CHL002",
+  "crisis_name": "Displacement from Venezuela to Chile",
+  "connected_crises": [
+   "VEN001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "CHL"
+  ],
+  "country": [
+   "Chile"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 5.0,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 5.834548165081237,
+  "Geographical Impact": 7.43450382030812,
+  "Human Impact": 4.789859708522572,
+  "Conditions of affected people": 5.641897547529243,
+  "People in need": 5.873092794735098,
+  "Concentration of conditions": 5.410702300323388,
+  "Complexity": 3.378569131004009,
+  "Society and safety": 2.066911963765432,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "CIV002",
+  "crisis_name": "Displacement from Burkina Faso to northern Côte d’Ivoire",
+  "connected_crises": [
+   "BFA002",
+   "MLI001"
+  ],
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "CIV"
+  ],
+  "country": [
+   "Ivory Coast"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 4.5,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 4.389880299410071,
+  "Geographical Impact": 1.2762878031331562,
+  "Human Impact": 5.554756774322685,
+  "Conditions of affected people": 4.637118721732614,
+  "People in need": 3.2742374434652275,
+  "Concentration of conditions": 6.0,
+  "Complexity": 4.210499812236568,
+  "Society and safety": 5.240344992160494,
+  "Operating environment": 3.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "CMR005",
+  "crisis_name": "Complex crisis in Cameroon",
+  "connected_crises": null,
+  "drivers": [
+   "International Displacement",
+   "Conflict/ Violence",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "CMR"
+  ],
+  "country": [
+   "Cameroon"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 8.2,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.938500099457366,
+  "Geographical Impact": 9.123023327163592,
+  "Human Impact": 8.83991212207633,
+  "Conditions of affected people": 8.098233103150545,
+  "People in need": 8.196466206301087,
+  "Concentration of conditions": 8.0,
+  "Complexity": 7.737883645365992,
+  "Society and safety": 6.753325076178551,
+  "Operating environment": 8.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "COD001",
+  "crisis_name": "Complex crisis in DRC",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "COD"
+  ],
+  "country": [
+   "Democratic Republic of the Congo"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 9.2,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 9.502963121827205,
+  "Geographical Impact": 10.0,
+  "Human Impact": 9.176426074106441,
+  "Conditions of affected people": 9.0,
+  "People in need": 10.0,
+  "Concentration of conditions": 8.0,
+  "Complexity": 9.23479166185638,
+  "Society and safety": 7.942593903024693,
+  "Operating environment": 10.0,
+  "Last updated": "2026-09-30",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "COL001",
+  "crisis_name": "Conflict and Climatic Shocks in Colombia",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Drought/drier conditions",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "COL"
+  ],
+  "country": [
+   "Colombia"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 8.4,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 9.09919668260111,
+  "Geographical Impact": 10.0,
+  "Human Impact": 8.403816539116631,
+  "Conditions of affected people": 8.738219567607834,
+  "People in need": 9.486139691405858,
+  "Concentration of conditions": 7.990299443809809,
+  "Complexity": 7.363050293448476,
+  "Society and safety": 5.73104136489489,
+  "Operating environment": 8.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "COL002",
+  "crisis_name": "Displacement from Venezuela to Colombia",
+  "connected_crises": [
+   "VEN001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "COL"
+  ],
+  "country": [
+   "Colombia"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 6.9,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 7.207616855930427,
+  "Geographical Impact": 8.741191225812738,
+  "Human Impact": 6.101390752728378,
+  "Conditions of affected people": 7.204291054485294,
+  "People in need": 8.408582108970588,
+  "Concentration of conditions": 6.0,
+  "Complexity": 6.130338140443771,
+  "Society and safety": 5.73104136489489,
+  "Operating environment": 6.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "COL004",
+  "crisis_name": "Multiple Crises in Colombia",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Drought/drier conditions",
+   "International Displacement",
+   "Floods",
+   "Earthquake"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "COL"
+  ],
+  "country": [
+   "Colombia"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 8.5,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 9.336687654750591,
+  "Geographical Impact": 10.0,
+  "Human Impact": 8.868741704925842,
+  "Conditions of affected people": 8.995149721904905,
+  "People in need": 10.0,
+  "Concentration of conditions": 7.990299443809809,
+  "Complexity": 7.019901660837754,
+  "Society and safety": 5.73104136489489,
+  "Operating environment": 8.0,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "COL005",
+  "crisis_name": "2026 Earthquake in Colombia",
+  "connected_crises": null,
+  "drivers": [
+   "Earthquake"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "COL"
+  ],
+  "country": [
+   "Colombia"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 5.1,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 5.817026450905303,
+  "Geographical Impact": 3.585108388607326,
+  "Human Impact": 6.670894701551586,
+  "Conditions of affected people": 4.151811655249756,
+  "People in need": 3.6679018170585422,
+  "Concentration of conditions": 4.635721493440969,
+  "Complexity": 5.867244764755737,
+  "Society and safety": 5.73104136489489,
+  "Operating environment": 6.0,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "CRI001",
+  "crisis_name": "Multiple Crises in Costa Rica",
+  "connected_crises": [
+   "CRI002",
+   "CRI003"
+  ],
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "CRI"
+  ],
+  "country": [
+   "Costa Rica"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 4.6,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 5.507778232779129,
+  "Geographical Impact": 7.626836180712702,
+  "Human Impact": 4.005303790201772,
+  "Conditions of affected people": 5.247719865826194,
+  "People in need": 4.624632754462432,
+  "Concentration of conditions": 5.870806977189956,
+  "Complexity": 2.91764708897553,
+  "Society and safety": 2.29073630617284,
+  "Operating environment": 3.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "CRI002",
+  "crisis_name": "Displacement from Nicaragua to Costa Rica",
+  "connected_crises": [
+   "NIC001"
+  ],
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "CRI"
+  ],
+  "country": [
+   "Costa Rica"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 4.0,
+  "INFORM Severity category (numeric)": 2,
+  "INFORM Severity category": "Low",
+  "Reliability": "High",
+  "Impact of the crisis": 4.242283660824495,
+  "Geographical Impact": 4.912904477088979,
+  "Human Impact": 3.8802355969780855,
+  "Conditions of affected people": 5.21396600573123,
+  "People in need": 4.42793201146246,
+  "Concentration of conditions": 6.0,
+  "Complexity": 1.903852980054573,
+  "Society and safety": 2.29073630617284,
+  "Operating environment": 1.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "CRI003",
+  "crisis_name": "Displacement from Venezuela to Costa Rica",
+  "connected_crises": [
+   "VEN001"
+  ],
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "CRI"
+  ],
+  "country": [
+   "Costa Rica"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 3.1,
+  "INFORM Severity category (numeric)": 2,
+  "INFORM Severity category": "Low",
+  "Reliability": "High",
+  "Impact of the crisis": 4.883324993299931,
+  "Geographical Impact": 7.626836180712702,
+  "Human Impact": 2.7849592920402415,
+  "Conditions of affected people": 2.101891759591234,
+  "People in need": 1.590404182398876,
+  "Concentration of conditions": 2.6133793367835922,
+  "Complexity": 2.91764708897553,
+  "Society and safety": 2.29073630617284,
+  "Operating environment": 3.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "CUB004",
+  "crisis_name": "Complex Crisis in Cuba",
+  "connected_crises": null,
+  "drivers": [
+   "Cyclone",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "CUB"
+  ],
+  "country": [
+   "Cuba"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 6.9,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.505791088691613,
+  "Geographical Impact": 8.435319875076347,
+  "Human Impact": 8.540327620659838,
+  "Conditions of affected people": 7.372082150663168,
+  "People in need": 8.744164301326336,
+  "Concentration of conditions": 6.0,
+  "Complexity": 4.782589763109607,
+  "Society and safety": 5.053100320035532,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "DJI001",
+  "crisis_name": "Multiple crises in Djibouti",
+  "connected_crises": null,
+  "drivers": [
+   "Displacement",
+   "Drought"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "DJI"
+  ],
+  "country": [
+   "Djibouti"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.1,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 5.316844388052518,
+  "Geographical Impact": 6.209994992928489,
+  "Human Impact": 4.810970705428012,
+  "Conditions of affected people": 5.933658417135135,
+  "People in need": 4.7872088234691885,
+  "Concentration of conditions": 7.080108010801081,
+  "Complexity": 7.001626094833239,
+  "Society and safety": 5.682868115000001,
+  "Operating environment": 8.0,
+  "Last updated": "2026-10-22",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "DJI002",
+  "crisis_name": "International Displacement to Djibouti",
+  "connected_crises": null,
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "DJI"
+  ],
+  "country": [
+   "Djibouti"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.1,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 4.189013067158509,
+  "Geographical Impact": 1.7701263243286411,
+  "Human Impact": 5.152290832162857,
+  "Conditions of affected people": 4.985107678377499,
+  "People in need": 1.9702153567549985,
+  "Concentration of conditions": 8.0,
+  "Complexity": 5.843820242815099,
+  "Society and safety": 5.682868115000001,
+  "Operating environment": 6.0,
+  "Last updated": "2026-10-22",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "DJI003",
+  "crisis_name": "Drought in Djibouti",
+  "connected_crises": null,
+  "drivers": [
+   "Drought"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "DJI"
+  ],
+  "country": [
+   "Djibouti"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.2,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 4.301900004633923,
+  "Geographical Impact": 5.967419583270817,
+  "Human Impact": 3.276675051038072,
+  "Conditions of affected people": 5.639647977929136,
+  "People in need": 4.557853070086729,
+  "Concentration of conditions": 6.721442885771543,
+  "Complexity": 5.120558750485154,
+  "Society and safety": 5.682868115000001,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-22",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "DOM002",
+  "crisis_name": "Displacement from Venezuela to Dominican Republic",
+  "connected_crises": [
+   "VEN001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "DOM"
+  ],
+  "country": [
+   "Dominican Republic"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 4.2,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 6.536164183501982,
+  "Geographical Impact": 8.193873051901868,
+  "Human Impact": 5.3819220365798754,
+  "Conditions of affected people": 2.733714124661443,
+  "People in need": 2.81699346671419,
+  "Concentration of conditions": 2.650434782608696,
+  "Complexity": 4.033906564849245,
+  "Society and safety": 4.067651459444445,
+  "Operating environment": 4.0,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "DZA002",
+  "crisis_name": "International displacement to Algeria",
+  "connected_crises": [
+   "ESP002",
+   "ITA002"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "DZA"
+  ],
+  "country": [
+   "Algeria"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.3,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 8.199624972951467,
+  "Geographical Impact": 10.0,
+  "Human Impact": 6.398155549506429,
+  "Conditions of affected people": 3.61748269491944,
+  "People in need": 4.781896346780663,
+  "Concentration of conditions": 2.4530690430582163,
+  "Complexity": 4.570736376239917,
+  "Society and safety": 5.83729583641422,
+  "Operating environment": 3.0,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "DZA003",
+  "crisis_name": "Displacement of Sahrawi refugees to Tindouf",
+  "connected_crises": null,
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "DZA"
+  ],
+  "country": [
+   "Algeria"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.3,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 4.131049775110451,
+  "Geographical Impact": 2.1646312021425334,
+  "Human Impact": 4.945689748272896,
+  "Conditions of affected people": 6.063410171881324,
+  "People in need": 4.12682034376265,
+  "Concentration of conditions": 8.0,
+  "Complexity": 4.775529524927171,
+  "Society and safety": 5.83729583641422,
+  "Operating environment": 3.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "DZA004",
+  "crisis_name": "Multiple crises in Algeria",
+  "connected_crises": null,
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "DZA"
+  ],
+  "country": [
+   "Algeria"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.6,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 8.295195972154048,
+  "Geographical Impact": 10.0,
+  "Human Impact": 6.628298358568711,
+  "Conditions of affected people": 4.166564455256198,
+  "People in need": 5.497782862373806,
+  "Concentration of conditions": 2.835346048138586,
+  "Complexity": 4.775529524927171,
+  "Society and safety": 5.83729583641422,
+  "Operating environment": 3.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "ECU001",
+  "crisis_name": "Multiple crises in Ecuador",
+  "connected_crises": null,
+  "drivers": [
+   "International Displacement",
+   "Conflict/ Violence",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "ECU"
+  ],
+  "country": [
+   "Ecuador"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 7.4,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.567063376684148,
+  "Geographical Impact": 9.11906260308842,
+  "Human Impact": 8.236110582510968,
+  "Conditions of affected people": 7.248401781312253,
+  "People in need": 8.290461251590623,
+  "Concentration of conditions": 6.206342311033883,
+  "Complexity": 6.687121805269496,
+  "Society and safety": 5.691260883301609,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "ECU002",
+  "crisis_name": "Displacement from Venezuela to Ecuador",
+  "connected_crises": [
+   "VEN001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "ECU"
+  ],
+  "country": [
+   "Ecuador"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 5.5,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 5.121755992280944,
+  "Geographical Impact": 5.794409247680253,
+  "Human Impact": 4.754158967757289,
+  "Conditions of affected people": 5.686995105024324,
+  "People in need": 5.680501722799329,
+  "Concentration of conditions": 5.6934884872493186,
+  "Complexity": 5.596459550602507,
+  "Society and safety": 5.691260883301609,
+  "Operating environment": 5.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "ECU005",
+  "crisis_name": "Conflict, violence and Climatic Shocks in Ecuador",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Floods",
+   "Drought/drier conditions"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "ECU"
+  ],
+  "country": [
+   "Ecuador"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 7.2,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.115024020759122,
+  "Geographical Impact": 9.081876320437043,
+  "Human Impact": 7.470573684692021,
+  "Conditions of affected people": 7.112872638915382,
+  "People in need": 8.030291231492784,
+  "Concentration of conditions": 6.195454046337981,
+  "Complexity": 6.687121805269496,
+  "Society and safety": 5.691260883301609,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "EGY004",
+  "crisis_name": "International displacement to Egypt",
+  "connected_crises": [
+   "SDN001",
+   "SYR003"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "EGY"
+  ],
+  "country": [
+   "Egypt"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.8,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 4.802509401260577,
+  "Geographical Impact": 4.128450001204253,
+  "Human Impact": 5.114730633848684,
+  "Conditions of affected people": 6.60675881982242,
+  "People in need": 7.21351763964484,
+  "Concentration of conditions": 6.0,
+  "Complexity": 5.044639236849505,
+  "Society and safety": 4.552324398024692,
+  "Operating environment": 5.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "ERI001",
+  "crisis_name": "Complex crisis in Eritrea",
+  "connected_crises": [
+   "ETH004",
+   "ETH003"
+  ],
+  "drivers": [
+   "International Displacement",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "ERI"
+  ],
+  "country": [
+   "Eritrea"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.5,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 7.4555568209430705,
+  "Geographical Impact": 7.760726148327901,
+  "Human Impact": 7.292701611065875,
+  "Conditions of affected people": 6.402321141930376,
+  "People in need": 6.804642283860751,
+  "Concentration of conditions": 6.0,
+  "Complexity": 5.958498324175378,
+  "Society and safety": 7.095232677685185,
+  "Operating environment": 4.5,
+  "Last updated": "2026-09-29",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "ESP002",
+  "crisis_name": "International displacement to Spain",
+  "connected_crises": [
+   "DZA002",
+   "TUN002",
+   "MAR002",
+   "LBY002"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "ESP"
+  ],
+  "country": [
+   "Spain"
+  ],
+  "regions": [
+   "Europe"
+  ],
+  "INFORM Severity Index": 3.5,
+  "INFORM Severity category (numeric)": 2,
+  "INFORM Severity category": "Low",
+  "Reliability": "Very High",
+  "Impact of the crisis": 5.282963276118399,
+  "Geographical Impact": 4.560858806957336,
+  "Human Impact": 5.613591024534914,
+  "Conditions of affected people": 2.730254340887252,
+  "People in need": 2.9549690839082743,
+  "Concentration of conditions": 2.505539597866229,
+  "Complexity": 3.079826396584848,
+  "Society and safety": 3.620610369278223,
+  "Operating environment": 2.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "ETH001",
+  "crisis_name": "Multiple crises in Ethiopia",
+  "connected_crises": null,
+  "drivers": [
+   "International Displacement",
+   "Conflict/ Violence",
+   "Drought/drier conditions",
+   "Floods",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "ETH"
+  ],
+  "country": [
+   "Ethiopia"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 8.6,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 9.33063574957611,
+  "Geographical Impact": 9.99999932188078,
+  "Human Impact": 8.857260771879666,
+  "Conditions of affected people": 8.0,
+  "People in need": 10.0,
+  "Concentration of conditions": 6.0,
+  "Complexity": 8.918270350959405,
+  "Society and safety": 6.783415571666667,
+  "Operating environment": 10.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "ETH003",
+  "crisis_name": "International Displacement to Ethiopia",
+  "connected_crises": null,
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "ETH"
+  ],
+  "country": [
+   "Ethiopia"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.7,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 6.7441152238913284,
+  "Geographical Impact": 5.557358720041447,
+  "Human Impact": 7.2387048133782805,
+  "Conditions of affected people": 6.350499927733019,
+  "People in need": 6.700999855466039,
+  "Concentration of conditions": 6.0,
+  "Complexity": 7.157911211283906,
+  "Society and safety": 6.783415571666667,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "ETH006",
+  "crisis_name": "Conflict, Climatic and Economic shocks in Ethiopia",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Floods",
+   "Drought/drier conditions",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "ETH"
+  ],
+  "country": [
+   "Ethiopia"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 8.4,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 9.31457131609568,
+  "Geographical Impact": 9.99999932188078,
+  "Human Impact": 8.826688844226481,
+  "Conditions of affected people": 8.0,
+  "People in need": 10.0,
+  "Concentration of conditions": 6.0,
+  "Complexity": 8.08848871676094,
+  "Society and safety": 6.783415571666667,
+  "Operating environment": 9.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "GRC002",
+  "crisis_name": "International Displacement to Greece",
+  "connected_crises": [
+   "TUR003"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "GRC"
+  ],
+  "country": [
+   "Greece"
+  ],
+  "regions": [
+   "Europe"
+  ],
+  "INFORM Severity Index": 4.3,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Very High",
+  "Impact of the crisis": 4.68031170435882,
+  "Geographical Impact": 1.8393177662472857,
+  "Human Impact": 5.755419361982985,
+  "Conditions of affected people": 4.540465476769803,
+  "People in need": 3.0809309535396068,
+  "Concentration of conditions": 6.0,
+  "Complexity": 3.567655257284399,
+  "Society and safety": 3.634709126181295,
+  "Operating environment": 3.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "GTM001",
+  "crisis_name": "Climatic Shocks and Violence in Guatemala",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Drought/drier conditions"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "GTM"
+  ],
+  "country": [
+   "Guatemala"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 7.4,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Very High",
+  "Impact of the crisis": 8.330264108085421,
+  "Geographical Impact": 8.837528778747505,
+  "Human Impact": 8.035649571461214,
+  "Conditions of affected people": 7.384386922901543,
+  "People in need": 8.34051297623787,
+  "Concentration of conditions": 6.428260869565217,
+  "Complexity": 6.638773080556133,
+  "Society and safety": 6.245806593923668,
+  "Operating environment": 7.0,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "HND001",
+  "crisis_name": "Climatic Shocks and Conflict and Violence in Honduras",
+  "connected_crises": null,
+  "drivers": [
+   "Drought/drier conditions",
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "HND"
+  ],
+  "country": [
+   "Honduras"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 6.9,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 7.718114413893519,
+  "Geographical Impact": 8.429741205760795,
+  "Human Impact": 7.294334080363354,
+  "Conditions of affected people": 6.985092437028408,
+  "People in need": 7.5812959851679285,
+  "Concentration of conditions": 6.388888888888888,
+  "Complexity": 6.029060217697744,
+  "Society and safety": 5.510022640046233,
+  "Operating environment": 6.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "HTI001",
+  "crisis_name": "Complex crisis in Haiti",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Political/economic crisis",
+   "Floods",
+   "Drought/drier conditions",
+   "Cyclone"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "HTI"
+  ],
+  "country": [
+   "Haiti"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 8.9,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "Very High",
+  "Impact of the crisis": 9.117210896890441,
+  "Geographical Impact": 8.049588186822486,
+  "Human Impact": 9.501998745930319,
+  "Conditions of affected people": 9.399556662682047,
+  "People in need": 9.357096518641406,
+  "Concentration of conditions": 9.442016806722688,
+  "Complexity": 8.072320051357254,
+  "Society and safety": 6.736992166713229,
+  "Operating environment": 9.0,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "IDN002",
+  "crisis_name": "Conflict in Papua",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "IDN"
+  ],
+  "country": [
+   "Indonesia"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 5.4,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 6.287629276537832,
+  "Geographical Impact": 4.128735567051752,
+  "Human Impact": 7.102080528805207,
+  "Conditions of affected people": 4.27032732739862,
+  "People in need": 3.679345736519857,
+  "Concentration of conditions": 4.861308918277382,
+  "Complexity": 6.4312428459183035,
+  "Society and safety": 5.046172562925613,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "IDN007",
+  "crisis_name": "Multiple crises in Indonesia",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Floods",
+   "Cyclone"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "IDN"
+  ],
+  "country": [
+   "Indonesia"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 5.5,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 5.933070293168733,
+  "Geographical Impact": 4.349749936465123,
+  "Human Impact": 6.579724295796534,
+  "Conditions of affected people": 4.603923446609624,
+  "People in need": 4.247192830878933,
+  "Concentration of conditions": 4.960654062340316,
+  "Complexity": 6.4312428459183035,
+  "Society and safety": 5.046172562925613,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "IDN010",
+  "crisis_name": "Earthquake East Nusa Tenggara",
+  "connected_crises": null,
+  "drivers": [
+   "Earthquake"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "IDN"
+  ],
+  "country": [
+   "Indonesia"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 4.0,
+  "INFORM Severity category (numeric)": 2,
+  "INFORM Severity category": "Low",
+  "Reliability": "High",
+  "Impact of the crisis": 4.154879139196983,
+  "Geographical Impact": 1.435804105325159,
+  "Human Impact": 5.212785998090105,
+  "Conditions of affected people": 3.573131763014491,
+  "People in need": 2.6177661167025574,
+  "Concentration of conditions": 4.528497409326425,
+  "Complexity": 4.543885525050588,
+  "Society and safety": 5.046172562925613,
+  "Operating environment": 4.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "IRN001",
+  "crisis_name": "Multiple crises in Iran",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "International Displacement",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "IRN"
+  ],
+  "country": [
+   "Iran"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 8.6,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.709519666501627,
+  "Geographical Impact": 9.745027404134293,
+  "Human Impact": 7.926840006767417,
+  "Conditions of affected people": 8.475121951219512,
+  "People in need": 10.0,
+  "Concentration of conditions": 6.950243902439024,
+  "Complexity": 8.638080621975268,
+  "Society and safety": 7.315047786851852,
+  "Operating environment": 9.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "IRN004",
+  "crisis_name": "Displacement from Afghanistan to Iran",
+  "connected_crises": null,
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "IRN"
+  ],
+  "country": [
+   "Iran"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 7.7,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 7.231363998971399,
+  "Geographical Impact": 5.466897125785964,
+  "Human Impact": 7.894464191060303,
+  "Conditions of affected people": 8.115879131978357,
+  "People in need": 8.231758263956714,
+  "Concentration of conditions": 8.0,
+  "Complexity": 7.408678606835849,
+  "Society and safety": 7.315047786851852,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "IRN005",
+  "crisis_name": "Conflict in Iran",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "IRN"
+  ],
+  "country": [
+   "Iran"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 8.3,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.396685424502872,
+  "Geographical Impact": 9.745027404134293,
+  "Human Impact": 7.28481762195506,
+  "Conditions of affected people": 8.0,
+  "People in need": 10.0,
+  "Concentration of conditions": 6.0,
+  "Complexity": 8.638080621975268,
+  "Society and safety": 7.315047786851852,
+  "Operating environment": 9.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "IRQ002",
+  "crisis_name": "Internal displacement in Iraq",
+  "connected_crises": [
+   "IRQ001"
+  ],
+  "drivers": [
+   "Conflict/ Violence",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "IRQ"
+  ],
+  "country": [
+   "Iraq"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 6.9,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 7.672783667007904,
+  "Geographical Impact": 9.393254562351506,
+  "Human Impact": 6.246732130708712,
+  "Conditions of affected people": 7.360438602386576,
+  "People in need": 8.163899107217336,
+  "Concentration of conditions": 6.556978097555815,
+  "Complexity": 5.647628241697198,
+  "Society and safety": 4.637694109197532,
+  "Operating environment": 6.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "ITA002",
+  "crisis_name": "International Displacement to Italy",
+  "connected_crises": [
+   "TUN002",
+   "MAR002",
+   "LBY002",
+   "DZA002"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "ITA"
+  ],
+  "country": [
+   "Italy"
+  ],
+  "regions": [
+   "Europe"
+  ],
+  "INFORM Severity Index": 3.8,
+  "INFORM Severity category (numeric)": 2,
+  "INFORM Severity category": "Low",
+  "Reliability": "Very High",
+  "Impact of the crisis": 5.428009559307886,
+  "Geographical Impact": 4.824245411226848,
+  "Human Impact": 5.707786820535018,
+  "Conditions of affected people": 3.025733990687921,
+  "People in need": 3.4176862175492344,
+  "Concentration of conditions": 2.6337817638266072,
+  "Complexity": 3.4347066767737457,
+  "Society and safety": 3.368853222707764,
+  "Operating environment": 3.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "JOR002",
+  "crisis_name": "International displacement from Syria to Jordan",
+  "connected_crises": [
+   "SYR003"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "JOR"
+  ],
+  "country": [
+   "Jordan"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 5.7,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 5.823075899291233,
+  "Geographical Impact": 6.205539784593202,
+  "Human Impact": 5.620803090522463,
+  "Conditions of affected people": 6.685200902096748,
+  "People in need": 7.370401804193497,
+  "Concentration of conditions": 6.0,
+  "Complexity": 3.973669297425942,
+  "Society and safety": 4.417860296604939,
+  "Operating environment": 3.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "KEN001",
+  "crisis_name": "Multiple crises in Kenya",
+  "connected_crises": null,
+  "drivers": [
+   "Drought/drier conditions",
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "KEN"
+  ],
+  "country": [
+   "Kenya"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.8,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 7.249660124215,
+  "Geographical Impact": 7.916878653126253,
+  "Human Impact": 6.86547732287508,
+  "Conditions of affected people": 7.564230151263794,
+  "People in need": 8.298455431606984,
+  "Concentration of conditions": 6.830004870920604,
+  "Complexity": 5.358360510871882,
+  "Society and safety": 5.695706470802469,
+  "Operating environment": 5.0,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "KEN002",
+  "crisis_name": "International displacement to Kenya",
+  "connected_crises": [
+   "SSD001",
+   "SOM001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "KEN"
+  ],
+  "country": [
+   "Kenya"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.6,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 6.164746861005241,
+  "Geographical Impact": 2.3344726715157718,
+  "Human Impact": 7.397768355202489,
+  "Conditions of affected people": 6.11108683767103,
+  "People in need": 5.155142211593769,
+  "Concentration of conditions": 7.0670314637482905,
+  "Complexity": 4.483521145733795,
+  "Society and safety": 5.695706470802469,
+  "Operating environment": 3.0,
+  "Last updated": "2026-10-21",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "KEN003",
+  "crisis_name": "Drought in ASAL areas of Kenya",
+  "connected_crises": [
+   "SOM001",
+   "ETH005"
+  ],
+  "drivers": [
+   "Drought"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "KEN"
+  ],
+  "country": [
+   "Kenya"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.7,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 7.146075987594504,
+  "Geographical Impact": 7.76947176183564,
+  "Human Impact": 6.792035867763614,
+  "Conditions of affected people": 7.456937783436113,
+  "People in need": 8.123191102231498,
+  "Concentration of conditions": 6.790684464640728,
+  "Complexity": 5.127647081913047,
+  "Society and safety": 5.695706470802469,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-21",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "LBN002",
+  "crisis_name": "International displacement from Syria to Lebanon",
+  "connected_crises": [
+   "SYR003"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "LBN"
+  ],
+  "country": [
+   "Lebanon"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 6.3,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Very High",
+  "Impact of the crisis": 6.5936973639216205,
+  "Geographical Impact": 7.065170810653619,
+  "Human Impact": 6.337741448707118,
+  "Conditions of affected people": 6.164022122229874,
+  "People in need": 6.056346131252202,
+  "Concentration of conditions": 6.271698113207547,
+  "Complexity": 6.368191813589234,
+  "Society and safety": 6.232615902309935,
+  "Operating environment": 6.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "LBN006",
+  "crisis_name": "Complex crisis in Lebanon",
+  "connected_crises": [
+   "SYR003"
+  ],
+  "drivers": [
+   "Conflict/ Violence",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "LBN"
+  ],
+  "country": [
+   "Lebanon"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 8.0,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.691599648871534,
+  "Geographical Impact": 7.065170810653619,
+  "Human Impact": 9.24007663198241,
+  "Conditions of affected people": 7.428021278974438,
+  "People in need": 8.58434444474133,
+  "Concentration of conditions": 6.271698113207547,
+  "Complexity": 8.307578012251408,
+  "Society and safety": 6.232615902309935,
+  "Operating environment": 9.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "LBY002",
+  "crisis_name": "International displacement to Libya",
+  "connected_crises": [
+   "ITA002",
+   "ESP002"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "LBY"
+  ],
+  "country": [
+   "Libya"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.3,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Very High",
+  "Impact of the crisis": 7.777317805746702,
+  "Geographical Impact": 9.229462909781027,
+  "Human Impact": 6.673606775571062,
+  "Conditions of affected people": 6.014809778933021,
+  "People in need": 6.029619557866042,
+  "Concentration of conditions": 6.0,
+  "Complexity": 5.559524566091927,
+  "Society and safety": 6.449245253942332,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "LBY004",
+  "crisis_name": "Displacement from Sudan to Libya",
+  "connected_crises": [
+   "SDN001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "LBY"
+  ],
+  "country": [
+   "Libya"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.3,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 5.223725649956884,
+  "Geographical Impact": 5.9648047748440325,
+  "Human Impact": 4.814079268331403,
+  "Conditions of affected people": 7.010299956639813,
+  "People in need": 6.020599913279625,
+  "Concentration of conditions": 8.0,
+  "Complexity": 5.996597712001744,
+  "Society and safety": 6.449245253942332,
+  "Operating environment": 5.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "LBY005",
+  "crisis_name": "Multiple crises in Libya",
+  "connected_crises": [
+   "ITA002",
+   "ESP002",
+   "SDN001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "LBY"
+  ],
+  "country": [
+   "Libya"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 7.2,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.011397212290372,
+  "Geographical Impact": 9.229462909781027,
+  "Human Impact": 7.132667553056183,
+  "Conditions of affected people": 7.513711093958214,
+  "People in need": 7.027422187916429,
+  "Concentration of conditions": 8.0,
+  "Complexity": 5.996597712001744,
+  "Society and safety": 6.449245253942332,
+  "Operating environment": 5.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "LSO004",
+  "crisis_name": "Drought in Lesotho",
+  "connected_crises": null,
+  "drivers": [
+   "Drought/drier conditions"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "LSO"
+  ],
+  "country": [
+   "Lesotho"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 4.8,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 5.626249554684902,
+  "Geographical Impact": 5.946834138979005,
+  "Human Impact": 5.458569842174327,
+  "Conditions of affected people": 5.487933981711397,
+  "People in need": 4.975867963422793,
+  "Concentration of conditions": 6.0,
+  "Complexity": 3.2343414908880748,
+  "Society and safety": 4.301458710493829,
+  "Operating environment": 2.0,
+  "Last updated": "2026-10-21",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "MAR002",
+  "crisis_name": "International displacement to Morocco",
+  "connected_crises": [
+   "ESP002",
+   "ITA002"
+  ],
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "MAR"
+  ],
+  "country": [
+   "Morocco"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 3.6,
+  "INFORM Severity category (numeric)": 2,
+  "INFORM Severity category": "Low",
+  "Reliability": "High",
+  "Impact of the crisis": 4.264528727654438,
+  "Geographical Impact": 1.8676021509954015,
+  "Human Impact": 5.218709709089812,
+  "Conditions of affected people": 2.025705356662366,
+  "People in need": 1.590404182398876,
+  "Concentration of conditions": 2.461006530925855,
+  "Complexity": 5.224956131523934,
+  "Society and safety": 5.870415581809088,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "MDG002",
+  "crisis_name": "Drought in Southern Madagascar",
+  "connected_crises": [
+   "MWI002",
+   "NAM002",
+   "TZA003",
+   "SWZ001",
+   "ZMB002",
+   "ZWE001"
+  ],
+  "drivers": [
+   "Drought/drier conditions"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "MDG"
+  ],
+  "country": [
+   "Madagascar"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.3,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 6.119608935473387,
+  "Geographical Impact": 7.967049854191416,
+  "Human Impact": 4.821824339583309,
+  "Conditions of affected people": 7.545499734618465,
+  "People in need": 8.569643454061309,
+  "Concentration of conditions": 6.521356015175622,
+  "Complexity": 4.5389643101621555,
+  "Society and safety": 5.037079514876543,
+  "Operating environment": 4.0,
+  "Last updated": "2026-10-22",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "MEX003",
+  "crisis_name": "International Displacement to Mexico",
+  "connected_crises": [
+   "GTM003",
+   "SLV001",
+   "HND001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "MEX"
+  ],
+  "country": [
+   "Mexico"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 5.8,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 5.624042031014068,
+  "Geographical Impact": 5.306720131551562,
+  "Human Impact": 5.776137046491628,
+  "Conditions of affected people": 6.604274010871699,
+  "People in need": 7.208548021743399,
+  "Concentration of conditions": 6.0,
+  "Complexity": 4.602337798708712,
+  "Society and safety": 5.153655325327122,
+  "Operating environment": 4.0,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "MLI001",
+  "crisis_name": "Complex crisis in Mali",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Drought/drier conditions",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "MLI"
+  ],
+  "country": [
+   "Mali"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 8.6,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 9.553987637428127,
+  "Geographical Impact": 9.855575825870009,
+  "Human Impact": 9.377027169992186,
+  "Conditions of affected people": 7.999951906506897,
+  "People in need": 9.090990676011957,
+  "Concentration of conditions": 6.9089131370018375,
+  "Complexity": 8.462749763906592,
+  "Society and safety": 6.757706943641974,
+  "Operating environment": 9.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "MMR008",
+  "crisis_name": "Complex crisis in Myanmar",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Earthquake",
+   "International Displacement",
+   "Cyclone",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "MMR"
+  ],
+  "country": [
+   "Myanmar"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 9.5,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 9.709251949094043,
+  "Geographical Impact": 9.866605083378614,
+  "Human Impact": 9.623264793924985,
+  "Conditions of affected people": 9.53624772313297,
+  "People in need": 10.0,
+  "Concentration of conditions": 9.072495446265938,
+  "Complexity": 9.176219799736936,
+  "Society and safety": 7.741687162962964,
+  "Operating environment": 10.0,
+  "Last updated": "2026-10-25",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "MOZ004",
+  "crisis_name": "Conflict in northern Mozambique",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "MOZ"
+  ],
+  "country": [
+   "Mozambique"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 7.2,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 6.442433852439464,
+  "Geographical Impact": 4.7076361733406324,
+  "Human Impact": 7.124692315383002,
+  "Conditions of affected people": 7.690523162373999,
+  "People in need": 7.381046324747999,
+  "Concentration of conditions": 8.0,
+  "Complexity": 6.979461356769176,
+  "Society and safety": 6.383887503942375,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-22",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "MRT002",
+  "crisis_name": "Displacement from Mali to Mauritania",
+  "connected_crises": [
+   "MLI001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "MRT"
+  ],
+  "country": [
+   "Mauritania"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.2,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 4.413419078102052,
+  "Geographical Impact": 4.238897623095628,
+  "Human Impact": 4.499010698444986,
+  "Conditions of affected people": 6.141496450194438,
+  "People in need": 5.686212374279729,
+  "Concentration of conditions": 6.596780526109148,
+  "Complexity": 4.198364634441374,
+  "Society and safety": 4.832650167222223,
+  "Operating environment": 3.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "MRT003",
+  "crisis_name": "Climatic shocks in Mauritania",
+  "connected_crises": null,
+  "drivers": [
+   "Drought/drier conditions",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "MRT"
+  ],
+  "country": [
+   "Mauritania"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.2,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 5.8185685081727145,
+  "Geographical Impact": 9.051710026919121,
+  "Human Impact": 2.6266146005076774,
+  "Conditions of affected people": 5.884208709956475,
+  "People in need": 5.663233347786729,
+  "Concentration of conditions": 6.105184072126221,
+  "Complexity": 3.5477946912762786,
+  "Society and safety": 4.832650167222223,
+  "Operating environment": 2.0,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "MRT004",
+  "crisis_name": "Multiple crises in Mauritania",
+  "connected_crises": null,
+  "drivers": [
+   "Drought/drier conditions",
+   "Floods",
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "MRT"
+  ],
+  "country": [
+   "Mauritania"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.1,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 6.921787913981182,
+  "Geographical Impact": 9.096294552235902,
+  "Human Impact": 5.070261220609893,
+  "Conditions of affected people": 6.529542197964358,
+  "People in need": 6.678201773698355,
+  "Concentration of conditions": 6.380882622230361,
+  "Complexity": 4.668471674760434,
+  "Society and safety": 4.832650167222223,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "MWI002",
+  "crisis_name": "Climatic shocks in Malawi",
+  "connected_crises": [
+   "NAM002",
+   "TZA003",
+   "SWZ001",
+   "ZMB002",
+   "ZWE001",
+   "MDG002"
+  ],
+  "drivers": [
+   "Drought/drier conditions",
+   "Cyclone",
+   "Floods",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "MWI"
+  ],
+  "country": [
+   "Malawi"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.8,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 6.450807546881526,
+  "Geographical Impact": 8.371680530769256,
+  "Human Impact": 5.032684738847797,
+  "Conditions of affected people": 7.028565682878876,
+  "People in need": 8.057131365757751,
+  "Concentration of conditions": 6.0,
+  "Complexity": 6.569235950220036,
+  "Society and safety": 4.480480047037038,
+  "Operating environment": 8.0,
+  "Last updated": "2026-10-22",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "MYS001",
+  "crisis_name": "International Displacement to Malaysia",
+  "connected_crises": [
+   "MMR002"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "MYS"
+  ],
+  "country": [
+   "Malaysia"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 3.7,
+  "INFORM Severity category (numeric)": 2,
+  "INFORM Severity category": "Low",
+  "Reliability": "Very High",
+  "Impact of the crisis": 3.6974972507256156,
+  "Geographical Impact": 3.598250100918568,
+  "Human Impact": 3.746628080998484,
+  "Conditions of affected people": 3.912585718159116,
+  "People in need": 4.379557401230511,
+  "Concentration of conditions": 3.4456140350877194,
+  "Complexity": 3.417891628891622,
+  "Society and safety": 3.334897475864198,
+  "Operating environment": 3.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "NAM002",
+  "crisis_name": "Drought in Namibia",
+  "connected_crises": [
+   "MWI002",
+   "TZA003",
+   "SWZ001",
+   "ZMB002",
+   "ZWE001",
+   "MDG002"
+  ],
+  "drivers": [
+   "Drought"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "NAM"
+  ],
+  "country": [
+   "Namibia"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.3,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 5.8759212082568,
+  "Geographical Impact": 8.680325168129677,
+  "Human Impact": 3.4282089623729473,
+  "Conditions of affected people": 5.684433605149799,
+  "People in need": 5.368867210299599,
+  "Concentration of conditions": 6.0,
+  "Complexity": 4.230566274643636,
+  "Society and safety": 4.45365681080247,
+  "Operating environment": 4.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "NER006",
+  "crisis_name": "Complex crisis in Niger",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Drought/drier conditions",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "NER"
+  ],
+  "country": [
+   "Niger"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 7.7,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 7.1712747848407155,
+  "Geographical Impact": 7.048244966889047,
+  "Human Impact": 7.231385487248882,
+  "Conditions of affected people": 7.562757256531,
+  "People in need": 8.295638994389801,
+  "Concentration of conditions": 6.829875518672199,
+  "Complexity": 8.385049668289097,
+  "Society and safety": 6.498511186258177,
+  "Operating environment": 9.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "NGA004",
+  "crisis_name": "Conflict in the BAY states",
+  "connected_crises": [
+   "NER002",
+   "CMR002",
+   "TCD003"
+  ],
+  "drivers": [
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "NGA"
+  ],
+  "country": [
+   "Nigeria"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 8.6,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.84848650149848,
+  "Geographical Impact": 4.470570487415918,
+  "Human Impact": 9.7903719941045,
+  "Conditions of affected people": 8.621635750574939,
+  "People in need": 9.243271501149879,
+  "Concentration of conditions": 8.0,
+  "Complexity": 8.400562374543306,
+  "Society and safety": 6.550858002160493,
+  "Operating environment": 9.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "NGA007",
+  "crisis_name": "Conflict in North West Nigeria",
+  "connected_crises": [
+   "NER004"
+  ],
+  "drivers": [
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "NGA"
+  ],
+  "country": [
+   "Nigeria"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 7.9,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 7.637715251105873,
+  "Geographical Impact": 5.196060596934369,
+  "Human Impact": 8.449453461033512,
+  "Conditions of affected people": 8.449765019962975,
+  "People in need": 9.930157756493218,
+  "Concentration of conditions": 6.9693722834327305,
+  "Complexity": 7.053084414401174,
+  "Society and safety": 6.550858002160493,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "NGA008",
+  "crisis_name": "International displacement from Cameroon to Nigeria",
+  "connected_crises": [
+   "CMR003"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "NGA"
+  ],
+  "country": [
+   "Nigeria"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 4.6,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 4.98728006855191,
+  "Geographical Impact": 3.904428137815513,
+  "Human Impact": 5.466070233800999,
+  "Conditions of affected people": 3.173781951697195,
+  "People in need": 3.5972708201587507,
+  "Concentration of conditions": 2.750293083235639,
+  "Complexity": 6.283279264967701,
+  "Society and safety": 6.550858002160493,
+  "Operating environment": 6.0,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "NGA009",
+  "crisis_name": "Multiple Crises in Nigeria",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "NGA"
+  ],
+  "country": [
+   "Nigeria"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 8.5,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.520903270795408,
+  "Geographical Impact": 7.8070517211772605,
+  "Human Impact": 8.817720670841313,
+  "Conditions of affected people": 8.516706981706475,
+  "People in need": 10.0,
+  "Concentration of conditions": 7.0334139634129516,
+  "Complexity": 8.400562374543306,
+  "Society and safety": 6.550858002160493,
+  "Operating environment": 9.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "NGA010",
+  "crisis_name": "Conflict in North Central Nigeria",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "NGA"
+  ],
+  "country": [
+   "Nigeria"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 7.4,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 7.0272982969688815,
+  "Geographical Impact": 5.4320085247811045,
+  "Human Impact": 7.648060135072848,
+  "Conditions of affected people": 7.730050138308866,
+  "People in need": 9.460100276617732,
+  "Concentration of conditions": 6.0,
+  "Complexity": 7.053084414401174,
+  "Society and safety": 6.550858002160493,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "NPL002",
+  "crisis_name": "Floods in Nepal",
+  "connected_crises": null,
+  "drivers": null,
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "NPL"
+  ],
+  "country": [
+   "Nepal"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 4.5,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 3.7717896430244897,
+  "Geographical Impact": 1.687449223003807,
+  "Human Impact": 4.63410930720043,
+  "Conditions of affected people": 4.376565061832045,
+  "People in need": 3.0809309535396068,
+  "Concentration of conditions": 5.672199170124482,
+  "Complexity": 5.159415850351613,
+  "Society and safety": 5.753059207035084,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "PAK006",
+  "crisis_name": "Climatic Shocks in Pakistan",
+  "connected_crises": null,
+  "drivers": [
+   "Floods",
+   "Conflict/ Violence",
+   "Drought/drier conditions"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "PAK"
+  ],
+  "country": [
+   "Pakistan"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 7.9,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 8.494426303716738,
+  "Geographical Impact": 6.851598865166477,
+  "Human Impact": 9.060198367056795,
+  "Conditions of affected people": 8.086085559109993,
+  "People in need": 9.747769949028928,
+  "Concentration of conditions": 6.424401169191057,
+  "Complexity": 7.190760236651637,
+  "Society and safety": 6.85503853234568,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-24",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "PAK007",
+  "crisis_name": "Displacement from Afghanistan to Pakistan",
+  "connected_crises": null,
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "PAK"
+  ],
+  "country": [
+   "Pakistan"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 6.3,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 7.283433949607847,
+  "Geographical Impact": 6.7311440764107,
+  "Human Impact": 7.5328870610655505,
+  "Conditions of affected people": 5.984363506190045,
+  "People in need": 7.289854451551374,
+  "Concentration of conditions": 4.678872560828716,
+  "Complexity": 6.011176559983151,
+  "Society and safety": 6.85503853234568,
+  "Operating environment": 5.0,
+  "Last updated": "2026-10-24",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "PAK008",
+  "crisis_name": "Multiple crises in Pakistan",
+  "connected_crises": [
+   "PAK007",
+   "PAK006",
+   "PAK004"
+  ],
+  "drivers": [
+   "Floods",
+   "International Displacement",
+   "Political/economic crisis",
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "PAK"
+  ],
+  "country": [
+   "Pakistan"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 8.3,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 7.9571568229690826,
+  "Geographical Impact": 7.414845938927928,
+  "Human Impact": 8.197701612791995,
+  "Conditions of affected people": 8.49493513428455,
+  "People in need": 9.991142302005409,
+  "Concentration of conditions": 6.998727966563692,
+  "Complexity": 8.113605129344432,
+  "Society and safety": 6.85503853234568,
+  "Operating environment": 9.0,
+  "Last updated": "2026-10-24",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "PAN002",
+  "crisis_name": "Displacement from Venezuela to Panama",
+  "connected_crises": [
+   "VEN001",
+   "COL002",
+   "ECU002",
+   "DOM002",
+   "CHL002",
+   "TTO002",
+   "PER002",
+   "BRA002"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "PAN"
+  ],
+  "country": [
+   "Panama"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 3.8,
+  "INFORM Severity category (numeric)": 2,
+  "INFORM Severity category": "Low",
+  "Reliability": "High",
+  "Impact of the crisis": 5.137432031559427,
+  "Geographical Impact": 7.69318595293365,
+  "Human Impact": 3.213757999249786,
+  "Conditions of affected people": 2.715544191351871,
+  "People in need": 2.300653600095046,
+  "Concentration of conditions": 3.130434782608696,
+  "Complexity": 4.180487374770663,
+  "Society and safety": 3.845532819135804,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "PER002",
+  "crisis_name": "Displacement from Venezuela to Peru",
+  "connected_crises": [
+   "VEN001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "PER"
+  ],
+  "country": [
+   "Peru"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 6.0,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Very High",
+  "Impact of the crisis": 6.478091119042292,
+  "Geographical Impact": 7.791337505298772,
+  "Human Impact": 5.637902173143863,
+  "Conditions of affected people": 6.854334065435432,
+  "People in need": 7.708668130870864,
+  "Concentration of conditions": 6.0,
+  "Complexity": 4.224704308816664,
+  "Society and safety": 3.937944929259259,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "PHL001",
+  "crisis_name": "Multiple crises in the Philippines",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Cyclone",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "PHL"
+  ],
+  "country": [
+   "Philippines"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 5.8,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Very High",
+  "Impact of the crisis": 5.644612966837084,
+  "Geographical Impact": 7.041127710416924,
+  "Human Impact": 4.7758066857583685,
+  "Conditions of affected people": 6.174165538658398,
+  "People in need": 7.381046324747999,
+  "Concentration of conditions": 4.967284752568797,
+  "Complexity": 5.290274634227163,
+  "Society and safety": 5.072710405851616,
+  "Operating environment": 5.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "PHL003",
+  "crisis_name": "Conflict in Mindanao",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "PHL"
+  ],
+  "country": [
+   "Philippines"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 4.9,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Very High",
+  "Impact of the crisis": 4.2719166808949645,
+  "Geographical Impact": 0.48424939861680333,
+  "Human Impact": 5.624490747894488,
+  "Conditions of affected people": 4.644619557110408,
+  "People in need": 3.289239114220817,
+  "Concentration of conditions": 6.0,
+  "Complexity": 5.834394652425537,
+  "Society and safety": 5.072710405851616,
+  "Operating environment": 6.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "PHL020",
+  "crisis_name": "2026 Sarangani Earthquake",
+  "connected_crises": null,
+  "drivers": [
+   "Earthquake"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "PHL"
+  ],
+  "country": [
+   "Philippines"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 5.6,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Very High",
+  "Impact of the crisis": 4.2198968001858175,
+  "Geographical Impact": 2.363100750275783,
+  "Human Impact": 4.994808139229111,
+  "Conditions of affected people": 6.67035962633522,
+  "People in need": 7.340719252670439,
+  "Concentration of conditions": 6.0,
+  "Complexity": 4.792840936776824,
+  "Society and safety": 5.072710405851616,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "PHL021",
+  "crisis_name": "Southwest Monsoon, Floods and Tropical Cyclones",
+  "connected_crises": null,
+  "drivers": [
+   "Cyclone",
+   "Floods",
+   "Monsoon"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "PHL"
+  ],
+  "country": [
+   "Philippines"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 4.1,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Very High",
+  "Impact of the crisis": 5.007395256671313,
+  "Geographical Impact": 6.746060261774748,
+  "Human Impact": 3.8934446632239776,
+  "Conditions of affected people": 3.086412033388138,
+  "People in need": 2.14484225495396,
+  "Concentration of conditions": 4.027981811822316,
+  "Complexity": 4.792840936776824,
+  "Society and safety": 5.072710405851616,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "PSE002",
+  "crisis_name": "Multiple crises in Palestine",
+  "connected_crises": [
+   "PSE003",
+   "PSE004"
+  ],
+  "drivers": [
+   "Conflict"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "PSE"
+  ],
+  "country": [
+   "Palestine"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 8.5,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.78497272109659,
+  "Geographical Impact": 6.934217334869813,
+  "Human Impact": 9.375203497760022,
+  "Conditions of affected people": 8.026419046126705,
+  "People in need": 8.529028568443886,
+  "Concentration of conditions": 7.523809523809524,
+  "Complexity": 8.797834922682746,
+  "Society and safety": 6.29498905955641,
+  "Operating environment": 10.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "PSE003",
+  "crisis_name": "Conflict in the West Bank",
+  "connected_crises": [
+   "PSE002"
+  ],
+  "drivers": [
+   "Conflict"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "PSE"
+  ],
+  "country": [
+   "Palestine"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 7.3,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 7.55704244866727,
+  "Geographical Impact": 5.443761805908172,
+  "Human Impact": 8.296627460028262,
+  "Conditions of affected people": 6.636405979907955,
+  "People in need": 7.272811959815909,
+  "Concentration of conditions": 6.0,
+  "Complexity": 7.922479935276508,
+  "Society and safety": 6.29498905955641,
+  "Operating environment": 9.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "PSE004",
+  "crisis_name": "Conflict in Gaza",
+  "connected_crises": [
+   "PSE002"
+  ],
+  "drivers": [
+   "Conflict"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "PSE"
+  ],
+  "country": [
+   "Palestine"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 8.1,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 7.656161556085201,
+  "Geographical Impact": 1.6658052157304601,
+  "Human Impact": 9.021552524505584,
+  "Conditions of affected people": 7.8703654912232,
+  "People in need": 7.740730982446399,
+  "Concentration of conditions": 8.0,
+  "Complexity": 8.797834922682746,
+  "Society and safety": 6.29498905955641,
+  "Operating environment": 10.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "SDN001",
+  "crisis_name": "Complex crisis in Sudan",
+  "connected_crises": [
+   "EGY004",
+   "LBY004"
+  ],
+  "drivers": [
+   "International Displacement",
+   "Conflict/ Violence",
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "SDN"
+  ],
+  "country": [
+   "Sudan"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 9.5,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 9.881564291507424,
+  "Geographical Impact": 9.963306102169714,
+  "Human Impact": 9.83853563885484,
+  "Conditions of affected people": 9.654158607350096,
+  "People in need": 10.0,
+  "Concentration of conditions": 9.308317214700192,
+  "Complexity": 9.032737204554328,
+  "Society and safety": 8.429956431172839,
+  "Operating environment": 9.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "SLV001",
+  "crisis_name": "Political and Economic crisis in El Salvador",
+  "connected_crises": null,
+  "drivers": [
+   "Political/economic crisis"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "SLV"
+  ],
+  "country": [
+   "El Salvador"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 5.8,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 6.782285814324934,
+  "Geographical Impact": 7.4489207910572715,
+  "Human Impact": 6.404756650404837,
+  "Conditions of affected people": 6.18880650293403,
+  "People in need": 6.37761300586806,
+  "Concentration of conditions": 6.0,
+  "Complexity": 4.304789099342864,
+  "Society and safety": 4.596514643127851,
+  "Operating environment": 4.0,
+  "Last updated": "2026-02-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "SOM001",
+  "crisis_name": "Complex crisis in Somalia",
+  "connected_crises": [
+   "KEN002",
+   "ETH003",
+   "YEM002",
+   "UGA005"
+  ],
+  "drivers": [
+   "Conflict",
+   "Displacement",
+   "Floods",
+   "Drought"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "SOM"
+  ],
+  "country": [
+   "Somalia"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 8.8,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "Very High",
+  "Impact of the crisis": 9.221651916194869,
+  "Geographical Impact": 9.489486525170673,
+  "Human Impact": 9.071576330726247,
+  "Conditions of affected people": 8.58314455401999,
+  "People in need": 9.112796668990498,
+  "Concentration of conditions": 8.053492439049482,
+  "Complexity": 8.657718276963935,
+  "Society and safety": 7.375095415400601,
+  "Operating environment": 9.5,
+  "Last updated": "2026-10-21",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "SOM002",
+  "crisis_name": "International displacement to Somalia",
+  "connected_crises": [
+   "YEM001",
+   "ETH001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "SOM"
+  ],
+  "country": [
+   "Somalia"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 4.1,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 4.090732468943279,
+  "Geographical Impact": 3.1271604994049844,
+  "Human Impact": 4.527989414710576,
+  "Conditions of affected people": 2.384149239409012,
+  "People in need": 1.7715963901408518,
+  "Concentration of conditions": 2.996702088677171,
+  "Complexity": 6.741306615068812,
+  "Society and safety": 7.375095415400601,
+  "Operating environment": 6.0,
+  "Last updated": "2026-10-21",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "SSD001",
+  "crisis_name": "Complex crisis in South Sudan",
+  "connected_crises": [
+   "KEN002",
+   "UGA005",
+   "ETH003"
+  ],
+  "drivers": [
+   "Conflict/ Violence",
+   "Floods",
+   "Political/economic crisis",
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "SSD"
+  ],
+  "country": [
+   "South Sudan"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 9.5,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 9.257236923384955,
+  "Geographical Impact": 9.309070305760116,
+  "Human Impact": 9.230763788794157,
+  "Conditions of affected people": 9.782415414158969,
+  "People in need": 9.989830828317938,
+  "Concentration of conditions": 9.575,
+  "Complexity": 9.208956159484442,
+  "Society and safety": 7.854736997113039,
+  "Operating environment": 10.0,
+  "Last updated": "2026-10-21",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "SSD004",
+  "crisis_name": "Displacement from Sudan to South Sudan",
+  "connected_crises": [
+   "SDN001"
+  ],
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "SSD"
+  ],
+  "country": [
+   "South Sudan"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 7.6,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.279943356866982,
+  "Geographical Impact": 9.309070305760116,
+  "Human Impact": 7.562437194355904,
+  "Conditions of affected people": 6.600280488264187,
+  "People in need": 7.200560976528374,
+  "Concentration of conditions": 6.0,
+  "Complexity": 8.489171452385929,
+  "Society and safety": 7.854736997113039,
+  "Operating environment": 9.0,
+  "Last updated": "2026-10-21",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "SWZ001",
+  "crisis_name": "Drought in Eswatini",
+  "connected_crises": [
+   "MWI002",
+   "NAM002",
+   "TZA003",
+   "ZMB002",
+   "ZWE001",
+   "MDG002"
+  ],
+  "drivers": [
+   "Drought"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "SWZ"
+  ],
+  "country": [
+   "Eswatini"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.5,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 5.626226011606924,
+  "Geographical Impact": 6.265608854481578,
+  "Human Impact": 5.275559678297755,
+  "Conditions of affected people": 5.783263776897919,
+  "People in need": 4.854553443763476,
+  "Concentration of conditions": 6.711974110032362,
+  "Complexity": 4.944170169863213,
+  "Society and safety": 5.762979155555556,
+  "Operating environment": 4.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "SYR003",
+  "crisis_name": "Complex crisis in Syria",
+  "connected_crises": [
+   "JOR003",
+   "LBN002",
+   "IRQ003",
+   "TUR002",
+   "EGY004"
+  ],
+  "drivers": [
+   "Conflict/ Violence",
+   "Political/economic crisis",
+   "Drought/drier conditions"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "SYR"
+  ],
+  "country": [
+   "Syria"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 8.9,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "Very High",
+  "Impact of the crisis": 9.349784531325882,
+  "Geographical Impact": 9.336754362886268,
+  "Human Impact": 9.356263688370245,
+  "Conditions of affected people": 9.0,
+  "People in need": 10.0,
+  "Concentration of conditions": 8.0,
+  "Complexity": 8.34336391560619,
+  "Society and safety": 7.482488961425415,
+  "Operating environment": 9.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "TCD001",
+  "crisis_name": "Complex crisis in Chad",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "TCD"
+  ],
+  "country": [
+   "Chad"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 8.4,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "Very High",
+  "Impact of the crisis": 9.106677672555513,
+  "Geographical Impact": 9.742398644192587,
+  "Human Impact": 8.685443176487208,
+  "Conditions of affected people": 8.476236231003774,
+  "People in need": 8.952472462007547,
+  "Concentration of conditions": 8.0,
+  "Complexity": 7.642362966196155,
+  "Society and safety": 7.243613852694736,
+  "Operating environment": 8.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "TCD005",
+  "crisis_name": "Displacement from Sudan to Chad",
+  "connected_crises": [
+   "SDN001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "TCD"
+  ],
+  "country": [
+   "Chad"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 7.1,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Very High",
+  "Impact of the crisis": 6.552618096572136,
+  "Geographical Impact": 3.5232069901790948,
+  "Human Impact": 7.577888320551717,
+  "Conditions of affected people": 7.582545022923913,
+  "People in need": 7.165090045847826,
+  "Concentration of conditions": 8.0,
+  "Complexity": 6.665078249144874,
+  "Society and safety": 7.243613852694736,
+  "Operating environment": 6.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "TGO002",
+  "crisis_name": "Conflict in Savanes region",
+  "connected_crises": null,
+  "drivers": [
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "TGO"
+  ],
+  "country": [
+   "Togo"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 4.6,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 2.9888435976557375,
+  "Geographical Impact": 1.607014863050876,
+  "Human Impact": 3.6024842806183037,
+  "Conditions of affected people": 4.92048057397176,
+  "People in need": 3.8409611479435215,
+  "Concentration of conditions": 6.0,
+  "Complexity": 5.314319242752292,
+  "Society and safety": 5.612471771372232,
+  "Operating environment": 5.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "THA001",
+  "crisis_name": "Multiple crises in Thailand",
+  "connected_crises": [
+   "THA003",
+   "THA004"
+  ],
+  "drivers": [
+   "International Displacement",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "THA"
+  ],
+  "country": [
+   "Thailand"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 6.2,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 4.599836308720861,
+  "Geographical Impact": 5.5199920142221055,
+  "Human Impact": 4.084439370048214,
+  "Conditions of affected people": 6.794868553442956,
+  "People in need": 7.589737106885913,
+  "Concentration of conditions": 6.0,
+  "Complexity": 6.437657345537717,
+  "Society and safety": 5.062787083708982,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-25",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "THA003",
+  "crisis_name": "Displacement from Myanmar to Thailand",
+  "connected_crises": [
+   "MMR002"
+  ],
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "THA"
+  ],
+  "country": [
+   "Thailand"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 4.5,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 3.147817046812696,
+  "Geographical Impact": 0.9491808879661829,
+  "Human Impact": 4.0617294256329215,
+  "Conditions of affected people": 4.89453427859401,
+  "People in need": 3.7890685571880214,
+  "Concentration of conditions": 6.0,
+  "Complexity": 4.78765144245199,
+  "Society and safety": 5.062787083708982,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-25",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "THA004",
+  "crisis_name": "Monsoon Floods in Thailand",
+  "connected_crises": null,
+  "drivers": [
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "THA"
+  ],
+  "country": [
+   "Thailand"
+  ],
+  "regions": [
+   "Asia"
+  ],
+  "INFORM Severity Index": 5.8,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "High",
+  "Impact of the crisis": 4.044557137702927,
+  "Geographical Impact": 5.43191543702717,
+  "Human Impact": 3.2285362417231283,
+  "Conditions of affected people": 6.740874185950139,
+  "People in need": 7.481748371900277,
+  "Concentration of conditions": 6.0,
+  "Complexity": 5.285493705740554,
+  "Society and safety": 5.062787083708982,
+  "Operating environment": 5.5,
+  "Last updated": "2026-10-25",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "TTO002",
+  "crisis_name": "Displacement from Venezuela to Trinidad and Tobago",
+  "connected_crises": [
+   "VEN001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "TTO"
+  ],
+  "country": [
+   "Trinidad and Tobago"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 3.4,
+  "INFORM Severity category (numeric)": 2,
+  "INFORM Severity category": "Low",
+  "Reliability": "High",
+  "Impact of the crisis": 4.677578925544367,
+  "Geographical Impact": 5.89376935648969,
+  "Human Impact": 3.9669774013607335,
+  "Conditions of affected people": 2.393685402852678,
+  "People in need": 1.2673708057053545,
+  "Concentration of conditions": 3.5200000000000005,
+  "Complexity": 3.669455486087038,
+  "Society and safety": 3.835138177197653,
+  "Operating environment": 3.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "TUN002",
+  "crisis_name": "International displacement to Tunisia",
+  "connected_crises": [
+   "ESP002",
+   "ITA002"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "TUN"
+  ],
+  "country": [
+   "Tunisia"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 3.9,
+  "INFORM Severity category (numeric)": 2,
+  "INFORM Severity category": "Low",
+  "Reliability": "High",
+  "Impact of the crisis": 4.814087963881125,
+  "Geographical Impact": 3.2067231545468173,
+  "Human Impact": 5.490690591198951,
+  "Conditions of affected people": 2.969397161887104,
+  "People in need": 2.687266579946292,
+  "Concentration of conditions": 3.251527743827915,
+  "Complexity": 4.666023007336135,
+  "Society and safety": 4.827876724744801,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-28",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "TUR001",
+  "crisis_name": "Multiple Crises in Türkiye",
+  "connected_crises": [
+   "TUR002",
+   "TUR003",
+   "TUR004",
+   "TUR005"
+  ],
+  "drivers": [
+   "International Displacement",
+   "Earthquake"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "TUR"
+  ],
+  "country": [
+   "Turkey"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 7.0,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 6.7169493202109125,
+  "Geographical Impact": 6.9881282626728325,
+  "Human Impact": 6.5747428730604165,
+  "Conditions of affected people": 7.755758068946778,
+  "People in need": 9.511516137893556,
+  "Concentration of conditions": 6.0,
+  "Complexity": 6.011483722145608,
+  "Society and safety": 5.471212423000654,
+  "Operating environment": 6.5,
+  "Last updated": "2026-10-21",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "TUR002",
+  "crisis_name": "Displacement from Syria to Türkiye",
+  "connected_crises": [
+   "SYR003"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "TUR"
+  ],
+  "country": [
+   "Turkey"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 6.8,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 5.919311759160152,
+  "Geographical Impact": 5.075081858646795,
+  "Human Impact": 6.296056890573607,
+  "Conditions of affected people": 7.607458379057348,
+  "People in need": 9.214916758114695,
+  "Concentration of conditions": 6.0,
+  "Complexity": 6.011483722145608,
+  "Society and safety": 5.471212423000654,
+  "Operating environment": 6.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "TUR003",
+  "crisis_name": "International Displacement to Türkiye",
+  "connected_crises": [
+   "GRC002",
+   "TUR001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "TUR"
+  ],
+  "country": [
+   "Turkey"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 5.7,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Very High",
+  "Impact of the crisis": 5.695392018961574,
+  "Geographical Impact": 5.86109083796796,
+  "Human Impact": 5.6105916630426025,
+  "Conditions of affected people": 6.058383368098559,
+  "People in need": 7.070771517165406,
+  "Concentration of conditions": 5.0459952190317106,
+  "Complexity": 5.004885035824672,
+  "Society and safety": 5.471212423000654,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "TZA001",
+  "crisis_name": "Multiple Crises in Tanzania",
+  "connected_crises": null,
+  "drivers": [
+   "International Displacement",
+   "Drought/drier conditions",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "TZA"
+  ],
+  "country": [
+   "Tanzania"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.5,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 4.800341825727955,
+  "Geographical Impact": 5.347130681112923,
+  "Human Impact": 4.507793209135828,
+  "Conditions of affected people": 5.954740301950814,
+  "People in need": 6.020599913279625,
+  "Concentration of conditions": 5.888880690622003,
+  "Complexity": 5.3524992778433305,
+  "Society and safety": 5.201121166234569,
+  "Operating environment": 5.5,
+  "Last updated": "2026-10-22",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "TZA002",
+  "crisis_name": "International Displacement to Tanzania",
+  "connected_crises": [
+   "BDI001",
+   "COD001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "TZA"
+  ],
+  "country": [
+   "Tanzania"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 4.8,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 4.790785433078151,
+  "Geographical Impact": 2.853552056054822,
+  "Human Impact": 5.581643200129496,
+  "Conditions of affected people": 4.341077238256402,
+  "People in need": 3.746172136556953,
+  "Concentration of conditions": 4.935982339955849,
+  "Complexity": 5.3524992778433305,
+  "Society and safety": 5.201121166234569,
+  "Operating environment": 5.5,
+  "Last updated": "2026-10-22",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "TZA003",
+  "crisis_name": "Drought and floods in Tanzania",
+  "connected_crises": [
+   "MWI002",
+   "NAM002",
+   "SWZ001",
+   "ZMB002",
+   "ZWE001",
+   "MDG002"
+  ],
+  "drivers": [
+   "Drought/drier conditions",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "TZA"
+  ],
+  "country": [
+   "Tanzania"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 5.1,
+  "INFORM Severity category (numeric)": 3,
+  "INFORM Severity category": "Medium",
+  "Reliability": "Medium",
+  "Impact of the crisis": 3.7196355349869927,
+  "Geographical Impact": 4.647272476429674,
+  "Human Impact": 3.2070285810698116,
+  "Conditions of affected people": 5.841679932222226,
+  "People in need": 5.683359864444452,
+  "Concentration of conditions": 6.0,
+  "Complexity": 4.860383138216414,
+  "Society and safety": 5.201121166234569,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-22",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "UGA001",
+  "crisis_name": "Multiple crises in Uganda",
+  "connected_crises": [
+   "UGA007",
+   "UGA005"
+  ],
+  "drivers": [
+   "International Displacement",
+   "Drought/drier conditions"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "UGA"
+  ],
+  "country": [
+   "Uganda"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 7.1,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 8.017081781904649,
+  "Geographical Impact": 5.881241297311147,
+  "Human Impact": 8.731307056146868,
+  "Conditions of affected people": 7.486825088839758,
+  "People in need": 8.52662716074971,
+  "Concentration of conditions": 6.4470230169298075,
+  "Complexity": 5.8617770998290375,
+  "Society and safety": 6.200228575308643,
+  "Operating environment": 5.5,
+  "Last updated": "2026-10-21",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "UGA005",
+  "crisis_name": "International Displacement to Uganda",
+  "connected_crises": [
+   "SSD001",
+   "COD001",
+   "UGA001"
+  ],
+  "drivers": [
+   "International Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "UGA"
+  ],
+  "country": [
+   "Uganda"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.1,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 6.81359636028839,
+  "Geographical Impact": 3.2554485758579865,
+  "Human Impact": 7.932520072077949,
+  "Conditions of affected people": 6.190208809914183,
+  "People in need": 6.025116760229512,
+  "Concentration of conditions": 6.355300859598854,
+  "Complexity": 5.413182531547727,
+  "Society and safety": 6.200228575308643,
+  "Operating environment": 4.5,
+  "Last updated": "2026-10-21",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "UGA007",
+  "crisis_name": "Food Security Crisis in Uganda ",
+  "connected_crises": [
+   "UGA001"
+  ],
+  "drivers": [
+   "Drought/drier conditions"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "UGA"
+  ],
+  "country": [
+   "Uganda"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.4,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 6.466080569116012,
+  "Geographical Impact": 5.676720362400613,
+  "Human Impact": 6.816662306675701,
+  "Conditions of affected people": 7.303686391029133,
+  "People in need": 8.243008839345546,
+  "Concentration of conditions": 6.364363942712721,
+  "Complexity": 4.997415613819176,
+  "Society and safety": 6.200228575308643,
+  "Operating environment": 3.5,
+  "Last updated": "2026-10-21",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "UKR002",
+  "crisis_name": "Conflict in Ukraine",
+  "connected_crises": [
+   "POL002",
+   "HUN002",
+   "MDA002",
+   "SVK002",
+   "ROU002",
+   "RUS002",
+   "BLR002",
+   "BGR002",
+   "CZE002",
+   "LVA002",
+   "LTU002",
+   "EST002"
+  ],
+  "drivers": [
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "UKR"
+  ],
+  "country": [
+   "Ukraine"
+  ],
+  "regions": [
+   "Europe"
+  ],
+  "INFORM Severity Index": 9.1,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "Very High",
+  "Impact of the crisis": 9.088960901709402,
+  "Geographical Impact": 9.830271333182019,
+  "Human Impact": 8.570298035262866,
+  "Conditions of affected people": 9.709165970164374,
+  "People in need": 10.0,
+  "Concentration of conditions": 9.41833194032875,
+  "Complexity": 8.107609297736037,
+  "Society and safety": 5.51185536721275,
+  "Operating environment": 9.5,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "VEN001",
+  "crisis_name": "Political and Economic crisis in Venezuela",
+  "connected_crises": [
+   "PER002",
+   "BRA002",
+   "TTO002",
+   "COL002",
+   "ECU002"
+  ],
+  "drivers": [
+   "Political/economic crisis",
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "VEN"
+  ],
+  "country": [
+   "Venezuela"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 8.2,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 8.761489035726521,
+  "Geographical Impact": 9.879680500505536,
+  "Human Impact": 7.865533130272862,
+  "Conditions of affected people": 8.404180221578827,
+  "People in need": 9.545202548420809,
+  "Concentration of conditions": 7.2631578947368425,
+  "Complexity": 7.383703866801089,
+  "Society and safety": 7.26366240697531,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "VEN002",
+  "crisis_name": "2026 Earthquake in Venezuela",
+  "connected_crises": null,
+  "drivers": [
+   "Earthquake"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "VEN"
+  ],
+  "country": [
+   "Venezuela"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 6.8,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "High",
+  "Impact of the crisis": 7.036599446980927,
+  "Geographical Impact": 4.767051031158331,
+  "Human Impact": 7.845761366210381,
+  "Conditions of affected people": 6.548945992871643,
+  "People in need": 7.097891985743287,
+  "Concentration of conditions": 6.0,
+  "Complexity": 6.899102864553344,
+  "Society and safety": 7.26366240697531,
+  "Operating environment": 6.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "VEN003",
+  "crisis_name": "Multiple Crises in Venezuela",
+  "connected_crises": null,
+  "drivers": [
+   "Earthquake",
+   "Political/economic crisis",
+   "Conflict/ Violence"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Aggregated",
+  "iso3": [
+   "VEN"
+  ],
+  "country": [
+   "Venezuela"
+  ],
+  "regions": [
+   "Americas"
+  ],
+  "INFORM Severity Index": 8.6,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 9.8012338388048,
+  "Geographical Impact": 9.879680500505536,
+  "Human Impact": 9.760155941163228,
+  "Conditions of affected people": 8.526689467397468,
+  "People in need": 9.790221040058094,
+  "Concentration of conditions": 7.2631578947368425,
+  "Complexity": 7.383703866801089,
+  "Society and safety": 7.26366240697531,
+  "Operating environment": 7.5,
+  "Last updated": "2026-10-26",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "YEM001",
+  "crisis_name": "Complex crisis in Yemen",
+  "connected_crises": [
+   "YEM002"
+  ],
+  "drivers": [
+   "Conflict/ Violence",
+   "Drought/drier conditions",
+   "Political/economic crisis",
+   "Floods"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "YEM"
+  ],
+  "country": [
+   "Yemen"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 9.4,
+  "INFORM Severity category (numeric)": 5,
+  "INFORM Severity category": "Very High",
+  "Reliability": "High",
+  "Impact of the crisis": 9.933670252922159,
+  "Geographical Impact": 9.788895363701613,
+  "Human Impact": 10.0,
+  "Conditions of affected people": 9.0,
+  "People in need": 10.0,
+  "Concentration of conditions": 8.0,
+  "Complexity": 9.34208696849836,
+  "Society and safety": 8.294609335679013,
+  "Operating environment": 10.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "YEM002",
+  "crisis_name": "International Displacement to Yemen",
+  "connected_crises": [
+   "YEM001"
+  ],
+  "drivers": [
+   "Displacement"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "No",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "YEM"
+  ],
+  "country": [
+   "Yemen"
+  ],
+  "regions": [
+   "Middle east"
+  ],
+  "INFORM Severity Index": 6.6,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Very High",
+  "Impact of the crisis": 5.570217034303115,
+  "Geographical Impact": 4.30869572555746,
+  "Human Impact": 6.110325942989234,
+  "Conditions of affected people": 6.655476778367429,
+  "People in need": 5.310953556734859,
+  "Concentration of conditions": 8.0,
+  "Complexity": 7.3169770176880595,
+  "Society and safety": 8.294609335679013,
+  "Operating environment": 6.0,
+  "Last updated": "2026-10-27",
+  "_internal_filter_date": "2026-11-01"
+ },
+ {
+  "crisis_id": "ZMB002",
+  "crisis_name": "Drought in Zambia",
+  "connected_crises": [
+   "MWI002",
+   "NAM002",
+   "TZA003",
+   "SWZ001",
+   "ZWE001",
+   "MDG002"
+  ],
+  "drivers": [
+   "Drought/drier conditions"
+  ],
+  "regional_or_country": "Country",
+  "country_level": "Yes",
+  "individual_aggregated": "Individual",
+  "iso3": [
+   "ZMB"
+  ],
+  "country": [
+   "Zambia"
+  ],
+  "regions": [
+   "Africa"
+  ],
+  "INFORM Severity Index": 6.5,
+  "INFORM Severity category (numeric)": 4,
+  "INFORM Severity category": "High",
+  "Reliability": "Medium",
+  "Impact of the crisis": 7.615353341599938,
+  "Geographical Impact": 9.254174783076753,
+  "Human Impact": 6.314732130809396,
+  "Conditions of affected people": 6.496585118323583,
+  "People in need": 6.993170236647167,
+  "Concentration of conditions": 6.0,
+  "Complexity": 5.583790993380611,
+  "Society and safety": 5.133689172962963,
+  "Operating environment": 6.0,
+  "Last updated": "2026-10-22",
+  "_internal_filter_date": "2026-11-01"
+ }
+]

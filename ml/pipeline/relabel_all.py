@@ -21,6 +21,7 @@ from ml.pipeline.silver_labels import (BATCH_SIZE, PROCESSED, PROMPT_PATH, build
                                        load_events, read_labels, to_prompt_records)
 
 OUT = PROCESSED / "llm_labels_all.jsonl"
+SCORED_CSV = PROCESSED / "access_events_scored_v5.csv"
 COST_PER_CALL = 0.004  # observed with thinking off: ~$0.002-0.004 per 20-25-event call
 
 
@@ -40,7 +41,10 @@ def main() -> None:
     template = PROMPT_PATH.read_text(encoding="utf-8")
     print(f"{len(todo):,} events to label in {len(batches)} calls, ~${len(batches) * COST_PER_CALL:.2f} "
           f"(est.) | spent so far ~${spent_usd():.2f}", flush=True)
-    if args.dry_run or not batches:
+    if args.dry_run:
+        return
+    if not batches:
+        export()
         return
 
     from ml.pipeline.greenpt import GreenPT
@@ -72,6 +76,21 @@ def main() -> None:
                       f"~${spent_usd() - start:.2f}, total ~${spent_usd():.2f} | {time.time() - t0:.0f}s",
                       flush=True)
     print(f"done: {len(read_labels(OUT)):,} events labelled in {OUT.name}")
+    export()
+
+
+def export() -> None:
+    """Write access_events_scored_v5.csv (scores + impact) from the labels file."""
+    from ml.pipeline.impact import impact_from_matrix
+    labels = read_labels(OUT)
+    cols = ["event_id", "country", "iso3", "date", "indicator", "subindicator", "description"]
+    df = load_events()[cols].merge(labels, on="event_id")
+    imp = [impact_from_matrix(int(e), int(i)) for e, i in zip(df["exposure_score"], df["intensity_score"])]
+    df["impact_score"], df["impact_label"] = [a for a, _ in imp], [b for _, b in imp]
+    df = df.rename(columns={"explicit_pin_extracted": "explicit_pin"})
+    df["source"] = "llm_v5"
+    df.to_csv(SCORED_CSV, index=False)
+    print(f"wrote {SCORED_CSV.name}: {len(df):,} events")
 
 
 if __name__ == "__main__":
