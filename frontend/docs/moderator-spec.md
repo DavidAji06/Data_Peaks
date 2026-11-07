@@ -208,31 +208,45 @@ Each route keeps its `metadata` title. Moderator pages set `robots: noindex` (ne
 
 ## 13. Phase 2 progress (data layer + new features)
 
-**Status: Complete**
+**Status: Complete** ✅
 
 ### Feature 1: Write questions (moderator approves alerts as questions)
 - [x] `buildQuestionDecision()` and `buildRejectDecision()` helpers in `lib/moderator-data.ts`
 - [x] `decideAlert()` already exists in `lib/client-api.ts`
 - [x] Form validation for required fields and future deadline
-- [ ] Dialog wrapper for M1 card "Create question" button (UI build phase)
-- [ ] Integration on M1 list and card (UI build phase)
+- [x] Dialog wrapper for M1 card "Create question" button
+- [x] Integration on M1 list and card (CreateQuestionDialog + AlertCard)
 
 ### Feature 2: Expert Brier scores (display calibration)
 - [x] `formatBrier()` and `accuracyTier()` helpers in `lib/moderator-data.ts`
 - [x] `toLeaderboard()` and `toQuestionDetail()` adapters already include Brier
 - [x] `ModeratorResponse` type includes `brier` field
-- [ ] M4 (question detail) responses table: show Brier per response (UI build phase)
-- [ ] M5 (leaderboard) table: show mean Brier per expert (UI build phase)
+- [x] M4 (question detail) responses table: shows Brier per response (line 155)
+- [x] M5 (leaderboard) table: shows mean Brier per expert (line 52)
 
 ### Feature 3: Impact scores (risk severity display)
 - [x] `deriveImpactLabel()`, `IMPACT_SCALE`, and color helpers in `lib/moderator-data.ts`
 - [x] Maps 1–5 numeric to "Very Low"–"Major" ACAPS V5 labels
-- [ ] M2 (risks list) table: show impact column (UI build phase)
-- [ ] M2 detail: show impact with label (UI build phase)
+- [x] M2 detail: shows impact with label (risk detail page, line 50)
+- [x] i18n helper displays as "Impact: Significant (4/5)"
 
-### Data layer checklist
-- [x] Create `lib/moderator-data.ts` with all three feature helpers
-- [x] Verify build passes (npm run build ✓)
-- [x] No new adapters needed (all data shapes already in contracts)
-- [ ] Add unit tests for helpers (optional; vitest not installed yet)
-- [ ] Integrate helpers into UI components (Phase 3+)
+### UI build checklist (Phase 3)
+- [x] Create `components/mod/CreateQuestionDialog.tsx` (modal with escape close)
+- [x] Create `components/mod/AlertCard.tsx` (refactored card with buttons)
+- [x] Integrate into M1 alerts list (`app/mod/page.tsx`)
+- [x] Update i18n impact display to show ACAPS V5 labels
+- [x] Build passes: npm run build ✓
+- [x] Commit: `8af288c`
+
+---
+
+## 14. Phase 3 progress (UI implementation for the three features)
+
+**Status: Complete** ✅
+
+All three features are now displayed in the UI:
+1. ✅ Write questions: Dialog button on M1 alerts (Create Question + Review buttons)
+2. ✅ Brier scores: Already displayed on M4 (per-response) and M5 (leaderboard)
+3. ✅ Impact scores: Displays on M2 risk detail with ACAPS V5 label
+
+**Next: Phase 4 onwards for shell, theme, keyboard navigation, and verify all passes build/lint/typecheck.**

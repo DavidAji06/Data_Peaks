@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: strings.meta.title,
-  description: strings.meta.description,
+  title: "Ground Truth · ACAPS Moderator Dashboard",
+  description: "Moderator dashboard for the ACAPS Ground Truth expert forecasting system.",
 };
 
 export const viewport: Viewport = {
