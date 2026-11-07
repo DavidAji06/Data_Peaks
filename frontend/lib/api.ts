@@ -145,21 +145,40 @@ export function getTrackRecord(token: string): Promise<Loaded<TrackRecord>> {
 export interface SettingsPage {
   /** null = this backend has no settings endpoint yet */
   settings: ExpertSettings | null;
-  questionId: string;
+  /** null = a personal link with no open question yet */
+  questionId: string | null;
 }
 
 /** Privacy settings, reached through the expert's question link. 404 on the link itself = invalid link. */
 export function getSettingsPage(token: string): Promise<Loaded<SettingsPage>> {
   return load(async (call) => {
-    const q = await call<ApiExpertQuestion>('GET', `/q/${enc(token)}`);
+    // A personal link (demo-expert-a) works before any question exists: then only settings answer
+    const q = await call<ApiExpertQuestion>('GET', `/q/${enc(token)}`).catch((e: unknown) => {
+      if (e instanceof ApiError && e.status === 404) return null;
+      throw e;
+    });
     let settings: ExpertSettings | null = null;
     try {
       settings = toExpertSettings(await call<ApiExpertSettings>('GET', `/q/${enc(token)}/settings`));
     } catch (e) {
       if (!(e instanceof ApiError && (e.status === 404 || e.status === 405))) throw e;
+      if (!q) throw e; // Neither a question nor an expert behind this link
     }
-    return { settings, questionId: q.question.id };
+    return { settings, questionId: q ? q.question.id : null };
   });
+}
+
+/** True when the link belongs to an expert, even if no question is open for them yet. */
+export function isKnownLink(token: string): Promise<boolean> {
+  return load(async (call) => {
+    try {
+      await call<ApiExpertSettings>('GET', `/q/${enc(token)}/settings`);
+      return true;
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 404) return false;
+      throw e;
+    }
+  }).then((loaded) => loaded.data);
 }
 
 /** Which backend a page with no data of its own should send actions to (GET /health). */

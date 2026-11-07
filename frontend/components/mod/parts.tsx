@@ -59,16 +59,16 @@ export function StatusTag({ children, tone = 'muted' }: { children: ReactNode; t
   );
 }
 
-/** A thin 0–1 bar with its value written next to it (never bar alone). */
-export function MiniBar({ label, value }: { label: string; value: number }) {
-  const pct = Math.round(Math.min(Math.max(value, 0), 1) * 100);
+/** A thin 0–1 bar with its value written next to it (never bar alone). null = not computed yet. */
+export function MiniBar({ label, value }: { label: string; value: number | null }) {
+  const pct = value === null ? 0 : Math.round(Math.min(Math.max(value, 0), 1) * 100);
   return (
     <div className="grid grid-cols-[5.5rem_1fr_2.25rem] items-center gap-2 text-xs">
       <span className="text-ink-muted">{label}</span>
       <span className="h-1.5 rounded-full bg-surface-muted" aria-hidden="true">
         <span className="block h-1.5 rounded-full bg-accent" style={{ width: `${pct}%` }} />
       </span>
-      <span className="text-right tabular-nums text-ink">{value.toFixed(2)}</span>
+      <span className="text-right tabular-nums text-ink">{value === null ? '—' : value.toFixed(2)}</span>
     </div>
   );
 }

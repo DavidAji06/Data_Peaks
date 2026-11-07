@@ -294,7 +294,7 @@ export interface ApiRankedRisk {
   country: string;
   p_materialise: number;
   priority_score: number;
-  score_breakdown: { signal_strength: number; uncertainty: number; impact: number; review_age: number };
+  score_breakdown: { signal_strength: number; uncertainty: number; impact: number; review_age: number | null };
   risk_level?: string; // curated extras (mock/curated.json), not sent by the API
   acaps_probability?: string;
   last_reviewed?: string | null;
@@ -489,7 +489,7 @@ export interface RankedRisk {
   title: string;
   country: string;
   priorityScore: number;
-  breakdown: { signalStrength: number; uncertainty: number; impact: number; reviewAge: number };
+  breakdown: { signalStrength: number; uncertainty: number; impact: number; reviewAge: number | null };
   modelProbability: number;
   riskLevel: string | null;
   acapsProbability: string | null;

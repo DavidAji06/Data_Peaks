@@ -216,6 +216,12 @@ export const en = {
       'This also applies to answers you’ve already given: ACAPS moderators will see them under the new level. Save to confirm.',
     lessPrivate: 'You’re choosing a less anonymous level.',
   },
+  upToDate: {
+    title: "You're up to date.",
+    help: "We'll let you know when your perspective is needed.",
+    record: 'Your track record',
+    settings: 'Privacy settings',
+  },
   errors: {
     generic: 'Something went wrong.',
     tryAgain: 'Try again',
