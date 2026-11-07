@@ -1,0 +1,93 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ACAPS Brand Style Guide tokens */
+@theme inline {
+  --font-sans: "Roboto", system-ui, sans-serif;
+  --font-display: "Bebas Neue", "Roboto Condensed", sans-serif;
+  --font-condensed: "Roboto Condensed", "Roboto", sans-serif;
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-navy: var(--navy);
+  --color-navy-foreground: var(--navy-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-risk: var(--risk);
+  --color-access: var(--access);
+  --color-severity: var(--severity);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  --radius: 0.375rem;
+  --background: oklch(0.984 0.003 247.9);      /* #f8fafc */
+  --foreground: oklch(0.208 0.04 265.8);       /* #0f172a */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.208 0.04 265.8);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.208 0.04 265.8);
+  --primary: oklch(0.624 0.116 222.7);         /* ACAPS Blue #0096ba */
+  --primary-strong: oklch(0.538 0.101 223.6);  /* text-safe blue */
+  --primary-foreground: oklch(1 0 0);
+  --navy: oklch(0.398 0.099 244.3);            /* ACAPS Dark Blue #004b78 */
+  --navy-foreground: oklch(1 0 0);
+  --highlight: oklch(0.624 0.116 222.7);       /* ACAPS Blue (yellow accent removed) */
+  --highlight-foreground: oklch(1 0 0);
+  --risk: oklch(0.505 0.191 16.6);             /* #b8163c */
+  --access: oklch(0.735 0.16 51.8);            /* #f6883c */
+  --severity: oklch(0.41 0.108 309.5);         /* #5c3776 */
+  --secondary: oklch(0.929 0.013 255.5);
+  --secondary-foreground: oklch(0.398 0.099 244.3);
+  --muted: oklch(0.955 0.006 250);
+  --muted-foreground: oklch(0.446 0.037 257.3);
+  --accent: oklch(0.958 0.016 216.7);
+  --accent-foreground: oklch(0.398 0.099 244.3);
+  --success: oklch(0.5 0.1 165);
+  --destructive: oklch(0.505 0.191 16.6);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.9 0.013 255.5);
+  --input: oklch(0.85 0.015 255);
+  --ring: oklch(0.624 0.116 222.7);
+  /* Globe only (Home). The app palette above is unchanged. */
+  --globe-ocean: #0a2a5e;
+  --globe-land: #134a8e;
+  --globe-border: rgba(170, 205, 245, 0.45);
+  --globe-atmosphere: #8ec5ff;
+  --globe-marker: #e0263c;
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+}
+
+input[type="range"].acaps-range { accent-color: var(--primary); }
