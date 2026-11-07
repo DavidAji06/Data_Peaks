@@ -1,0 +1,124 @@
+risk_id,title,ground_truth,lexicon_score,embedding_score,lex_error,emb_error,lex_bad,emb_bad
+R0990,"Unsafe return of Afghan nationals from Pakistan causes food, shelter and livelih",3,4,3,1,0,0,0
+R1015,La Niña in Afghanistan worsens drought and leads to widespread agricultural loss,4,4,4,0,0,0,0
+R1062,"Continued attacks between Pakistan and Afghanistan increase protection risks, fo",4,4,2,0,2,0,1
+R1067,Escalating clashes between Interim Taliban Authority forces and armed opposition,4,4,5,0,1,0,0
+R1056,Resource-related clashes and political tensions in Tindouf camps restrict humani,3,3,2,0,1,0,0
+R0371,Heavy rains in late August 2022 cause floods that affect previously affected are,3,2,5,1,2,0,1
+R1020,Intensifying political violence approaching the February 2026 election in Bangla,3,4,5,1,2,0,1
+R1039,"Prolonged fuel shortages in Bangladesh worsen food security and disrupt health, ",4,2,4,2,0,1,0
+R0510,High public debt has reduced state capacity to provide public services including,3,4,4,1,1,0,0
+R0204,Increased violence in the capital and borders with Rwanda and DRC,2,3,2,1,0,0,0
+R1043,Escalating cross-border insecurity linked to the Sudan conflict increases protec,4,3,2,1,2,0,1
+R1066,"Escalating insecurity across the Lake Chad Basin increases displacement, protect",4,4,2,0,2,0,1
+R0369,An increase in paramilitary and National Liberation Army violence in areas previ,3,3,2,0,1,0,0
+R1013,Intensified territorial disputes among armed groups over illegal mining corridor,4,3,2,1,2,0,1
+R1019,La Niña-driven above-normal rainfall and flooding in Colombia cause widespread c,3,4,5,1,2,0,1
+R1059,Peace talk end and military offensive against armed groups in Colombia escalate ,4,4,2,0,2,0,1
+R1023,Worsening energy shortages and U.S. pressure lead to essential service disruptio,4,3,4,1,0,0,0
+R0529,Increased intercommunal conflict and militia attacks in southwestern DRC trigger,3,4,2,1,1,0,0
+R0462,The intensification of anti-MONUSCO demonstrations leads to recurrent suspension,2,3,5,1,3,0,1
+R0463,The deployment of the regional military force leads to more displacement and inc,2,3,5,1,3,0,1
+R0365,The expansion of the areas under the control of the March 23 Movement (M23) in N,1,3,5,2,4,1,1
+R0553,The impact of war in Gaza and the Red Sea blockade on Egypt’s economy limits acc,3,4,5,1,2,0,1
+R1026,Potential Red Sea disruptions from a US–Iran conflict reduce foreign currency ea,4,4,5,0,1,0,0
+R0522,"The escalation of conflict in Amhara Region resulting in displacement of people,",4,3,5,1,1,0,0
+R1045,Forecast below-average Kiremt rains in Ethiopia threaten food production and liv,4,2,5,2,1,1,0
+R0349,Election delays contribute to popular unrest and violence in the capital before ,3,2,1,1,2,0,1
+R1018,La Niña-driven above-normal rainfall and tropical cyclone intensification cause ,3,4,5,1,2,0,1
+R1040,El Niño-driven above-average temperatures and below-average precipitation cause ,4,3,5,1,1,0,0
+R1071,Intensifying forest and peatland fires across Indonesia cause prolonged hazardou,4,2,5,2,1,1,0
+R1008,"Rising water scarcity in Iran leads to a deterioration in health, food security,",3,3,5,0,2,0,1
+R1030,Direct US–Iran military confrontation causes mass civilian casualties in Iran an,4,4,2,0,2,0,1
+R0030,Attacks by the Islamic State of Iraq and Syria (ISIS) escalate after the expulsi,3,3,2,0,1,0,0
+R1029,"The US/Israel–Iran escalation affecting the Strait of Hormuz drives conflict, fo",4,3,2,1,2,0,1
+R0996,Contested electoral process ahead of Côte d'Ivoire’s October 2025 elections lead,3,3,5,0,2,0,1
+R0345,"The expansion of armed groups from central Sahel to coastal countries (Benin, Cô",3,3,5,0,2,0,1
+R0305,Electoral violence and increased intercommunal conflict throughout Kenya result ,3,3,5,0,2,0,1
+R0998,Intensifying humanitarian and security crisis in Kenya worsens conditions in ref,3,3,3,0,0,0,0
+R1044,Forecast El Niño conditions threaten crop production and worsen food insecurity ,3,3,5,0,2,0,1
+R0031,A rising number of Syrian refugees opt for an unsafe return to Syria to avoid a ,3,3,3,0,0,0,0
+R0274,Diplomatic tensions between Lebanon and the Gulf states affect Lebanon's economy,3,2,4,1,1,0,0
+R0960,Increased intensity and spread of the conflict between Hezbollah and Israel incr,4,4,5,0,1,0,0
+R0985,Attempts to politically marginalise and militarily weaken Hezbollah in Lebanon l,4,4,2,0,2,0,1
+R1027,Hezbollah–Israel escalation related to Israeli/United States attack on Iran resu,4,3,2,1,2,0,1
+R1034,Intercommunal tensions between IDPs and host communities in Lebanon result in lo,4,4,5,0,1,0,0
+R0970,Economic instability and a threat to the UN-brokered peace deal amid Libya's oil,3,3,4,0,1,0,0
+R0976,Russia's increased military presence in eastern Libya leads to a return to confl,3,3,2,0,1,0,0
+R0995,The consolidation of power by Dbeibeh's forces across Libya provokes counteracti,3,3,5,0,2,0,1
+R1028,A contested April 2026 electoral process in Libya heightens localised armed clas,2,3,4,1,2,0,1
+R1046,"El Niño drives drought conditions, increasing food insecurity and heightening hu",4,4,4,0,0,0,0
+R0242,An increase in security incidents lead to displacement in Niono circle.,2,4,2,2,0,1,0
+R0301,Economic sanctions lead to the loss of livelihoods and increased food insecurity,3,3,4,0,1,0,0
+R1014,Failure of essential services owing to the blockade in Mali leads to civil unres,4,4,5,0,1,0,0
+R1042,"Continued coordinated JNIM–FLA attacks and blockades increase protection risks, ",4,4,2,0,2,0,1
+R1005,Tension over limited resources leads to localised clashes in Hodh Ech Chargui wi,2,3,5,1,3,0,1
+R0296,The implementation of the Migrant Protection Protocol leads to an increased numb,3,3,2,0,1,0,0
+R0335,"Drought across Morocco leads to water shortages, decreased agricultural producti",2,3,5,1,3,0,1
+R0977,Escalating civil unrest leads to increased protection risks and poverty,4,3,5,1,1,0,0
+R1017,La Niña-induced heavy rainfall and enhanced cyclonic activity from October–March,4,3,5,1,1,0,0
+R1047,El Niño-induced dry conditions in southern and central Mozambique and floods in ,4,3,5,1,1,0,0
+R1072,Sustained military pressure in Cabo Delgado drives Islamic State Mozambique atta,4,3,2,1,2,0,1
+R0134,Increased violence around upcoming elections in early 2022 leads to civil war an,3,4,2,1,1,0,0
+R0961,Conscription policies implemented by the Myanmar military junta and some EAOs he,4,4,2,0,2,0,1
+R1012,Escalating armed conflict during the December 2025 election in Myanmar heightens,4,4,2,0,2,0,1
+R1069,Military operations to secure the Dawei Special Economic Zone cause further forc,4,4,1,0,3,0,1
+R0387,Political violence during the November 2022 general elections lead to protection,1,3,5,2,4,1,1
+R1038,Escalation of inter-group conflict between Jama’at Nusrat al-Islam wal-Muslimin ,3,4,2,1,1,0,0
+R1074,Post-mutiny divisions in Niger's army enable JNIM and ISSP expansion across Till,4,4,2,0,2,0,1
+R0207,"Closure of IDP camps and forced returns of IDPs in host communities, as well as ",3,4,3,1,0,0,0
+R0978,Lakurawa armed group resurgence in North West Nigeria and southern Niger heighte,4,3,2,1,2,0,1
+R1021,A return to large‑scale conflict in Gaza stokes a further deterioration of food ,5,4,4,1,1,0,0
+R1041,Escalation of confrontation between Israel forces and Palestinian armed groups i,4,3,4,1,0,0,0
+R1061,Permanent military exclusion zone east of the Yellow Line before the Israeli ele,5,3,2,2,3,1,1
+R1073,"Accelerated implementation of the E1 settlement plan results in demolitions, dis",5,3,1,2,4,1,1
+R0546,"Continued protests across Panama, following the government's approval to exploit",2,4,5,2,3,1,1
+R0957,Deteriorating socioeconomic situation in Papua New Guinea trigger violent incide,3,4,5,1,2,0,1
+R0492,"Continued protests and restrictions on mobility affect the economic security, li",3,2,4,1,1,0,0
+R0303,Political violence and attacks by armed groups in Mindanao around the May presid,1,3,5,2,4,1,1
+R0542,Village and youth council elections in Mindanao islands trigger violence among r,3,3,2,0,1,0,0
+R1016,La Niña-driven above-normal rainfall and enhanced cyclonic activity in the Phili,4,4,5,0,1,0,0
+R1058,El Niño-driven agricultural losses and water shortages in the Philippines increa,3,2,5,1,2,0,1
+R0190,"Conflict in Mogadishu between pro-Government and pro-opposition military forces,",3,3,5,0,2,0,1
+R1007,Escalating tensions around universal suffrage in Somalia heightens conflict and ,4,3,2,1,2,0,1
+R1009,Consecutive below-average rains amid expected La Niña conditions in northern and,4,5,5,1,1,0,0
+R1033,The escalation of political and armed conflict in Southwest state leads to large,3,4,5,1,2,0,1
+R0209,Escalation of violence in Greater Upper Nile. ,2,5,4,3,2,1,1
+R1037,Escalating violence between the Sudan People's Liberation Movement and the Sudan,4,3,4,1,0,0,0
+R0332,The depletion of foreign currency reserves and economic decline affect people's ,3,3,4,0,1,0,0
+R0002,Establishment of military regime leads to increased conflict and spread of viole,3,3,2,0,1,0,0
+R0018,"Economic crisis leads to increased food insecurity, socio-political instability,",3,3,4,0,1,0,0
+R0120,Growing inflation and an economic crisis in Sudan result in high food insecurity,4,4,4,0,0,0,0
+R0073,The declaration of a state of emergency escalates protests that may lead to viol,3,3,2,0,1,0,0
+R0248,Camps and basic services in East Darfur state are stretched beyond capacity foll,5,3,3,2,2,1,1
+R0200,Tensions between the military and political components in Sudan’s transitional g,4,3,5,1,1,0,0
+R1048,RSF expansion in Blue Nile state triggers displacement and protection risks,4,3,1,1,3,0,1
+R1049,"RSF restoration of siege on Al Obeid, North Kordofan drives widescale displaceme",5,4,5,1,0,0,0
+R1051,Interregional trade restrictions disrupt markets and deepen food insecurity in W,4,2,1,2,3,1,1
+R1052,A rift between SAF and allied groups in Khartoum leads to worsening humanitarian,4,2,2,2,2,1,1
+R1053,Long-range RSF drones targeting the eastern supply corridor and Port Sudan disru,3,3,1,0,2,0,1
+R1054,"RSF drone attacks damage the Merowe Dam and power grid in Northern state, disrup",4,2,4,2,0,1,0
+R1055,Mass returns from eastern Chad exacerbate humanitarian needs in West Darfur Stat,3,3,3,0,0,0,0
+R0357,Türkiye's military incursion into northern Syria triggered by the nearing genera,3,3,5,0,2,0,1
+R0999,Escalations between loyalists to former President Bashar Al Assad and Sunni arme,4,4,2,0,2,0,1
+R1000,The escalation of clashes between Druze and Sunni armed groups leads to displace,4,4,2,0,2,0,1
+R1001,"Further Israeli expansion in southern Syria triggers armed group resistance, dis",4,4,5,0,1,0,0
+R1002,A prolonged Syria–Lebanon border conflict results in displacement and increases ,2,4,5,2,3,1,1
+R1003,Severe shortage of services triggers unrest and breakout attempts in Al Hol and ,2,3,2,1,0,0,0
+R1004,"Water scarcity, especially in northeast and northwest Syria result in livelihood",2,3,5,1,3,0,1
+R1068,Renewed violence in As Sweida or settler outpost establishment drives Israeli ex,4,3,2,1,2,0,1
+R0107,Spreading of the violent insurgency of Cabo Delgado into the Tanzanian territory,2,3,2,1,0,0,0
+R0982,"Flooding and landslides in Tanzania kill people, destroy infrastructure, damage ",4,4,5,0,1,0,0
+R0549,"Drought conditions due to the El Nino, high rice prices in the international mar",3,4,4,1,1,0,0
+R0254,The escalation and spread of violence between PKK and government forces in south,3,4,2,1,1,0,0
+R0108,Escalation of violence in the lead-up to national presidential elections due on ,1,3,2,2,1,1,0
+R1022,Post-election civil unrest and state security crackdowns lead to heightened prot,3,3,2,0,1,0,0
+R0954,Protests against agricultural exports from Ukraine intensify across the European,1,3,4,2,3,1,1
+R0993,Resurgence of Russian attacks on Ukraine's energy infrastructure affect essentia,4,4,4,0,0,0,0
+R1011,US military build-up in the Caribbean triggers internal destabilisation in Venez,3,3,2,0,1,0,0
+R0525,The Southern Transitional Council push for an independence of the south results ,3,3,2,0,1,0,0
+R1025,"The US–Iran escalation leads to strikes on Houthi-held ports, crippling infrastr",3,3,4,0,1,0,0
+R1065,"Renewed cross-border strikes collapse the 2022 Houthi–Saudi truce, driving new d",4,4,5,0,1,0,0
+R0106,"Deterioration of food security due to poor agricultural seasons, COVID-19, and e",2,3,4,1,2,0,1
+R0090,Increase of food insecurity,3,3,4,0,1,0,0
+R0512,"El Niño in Zimbabwe increases the needs of those already affected by drought, cy",3,3,5,0,2,0,1
