@@ -1,0 +1,924 @@
+{
+  "labels": [
+    "data\\processed\\llm_labels_all.jsonl"
+  ],
+  "n": {
+    "labelled_non_gold": 14765,
+    "train": 11812,
+    "train_core": 9450,
+    "validation": 2362,
+    "test": 2953
+  },
+  "dates": {
+    "train": [
+      "2005-09-30",
+      "2025-07-08"
+    ],
+    "validation_from": "2024-09-12",
+    "test": [
+      "2025-07-08",
+      "2026-07-28"
+    ]
+  },
+  "label_dist_test": {
+    "intensity": {
+      "1": 177,
+      "2": 948,
+      "3": 1285,
+      "4": 512,
+      "5": 31
+    },
+    "exposure": {
+      "1": 1083,
+      "2": 899,
+      "3": 687,
+      "4": 131,
+      "5": 153
+    }
+  },
+  "validation_variants": {
+    "clf_bal": {
+      "intensity": {
+        "n": 2362,
+        "accuracy": 0.695,
+        "within_1": 0.953,
+        "mae": 0.357,
+        "quadratic_kappa": 0.664
+      },
+      "exposure": {
+        "n": 2362,
+        "accuracy": 0.699,
+        "within_1": 0.954,
+        "mae": 0.354,
+        "quadratic_kappa": 0.814
+      }
+    },
+    "clf": {
+      "intensity": {
+        "n": 2362,
+        "accuracy": 0.705,
+        "within_1": 0.962,
+        "mae": 0.336,
+        "quadratic_kappa": 0.641
+      },
+      "exposure": {
+        "n": 2362,
+        "accuracy": 0.687,
+        "within_1": 0.953,
+        "mae": 0.367,
+        "quadratic_kappa": 0.805
+      }
+    },
+    "ev_bal": {
+      "intensity": {
+        "n": 2362,
+        "accuracy": 0.684,
+        "within_1": 0.977,
+        "mae": 0.34,
+        "quadratic_kappa": 0.684
+      },
+      "exposure": {
+        "n": 2362,
+        "accuracy": 0.683,
+        "within_1": 0.972,
+        "mae": 0.346,
+        "quadratic_kappa": 0.828
+      }
+    },
+    "ordinal": {
+      "intensity": {
+        "n": 2362,
+        "accuracy": 0.699,
+        "within_1": 0.964,
+        "mae": 0.34,
+        "quadratic_kappa": 0.644
+      },
+      "exposure": {
+        "n": 2362,
+        "accuracy": 0.694,
+        "within_1": 0.96,
+        "mae": 0.354,
+        "quadratic_kappa": 0.809
+      }
+    }
+  },
+  "chosen_variant": {
+    "intensity": "ev_bal",
+    "exposure": "ev_bal"
+  },
+  "validation_routing_grid": {
+    "old": {
+      "routing_rate": 0.263,
+      "acc_accepted_mean": 0.732
+    },
+    "pmax@10%": {
+      "threshold": 0.425,
+      "routing_rate": 0.1,
+      "acc_accepted_mean": 0.702,
+      "intensity_acc_accepted": 0.7,
+      "exposure_acc_accepted": 0.704
+    },
+    "pmax@20%": {
+      "threshold": 0.4698,
+      "routing_rate": 0.2,
+      "acc_accepted_mean": 0.721,
+      "intensity_acc_accepted": 0.723,
+      "exposure_acc_accepted": 0.72
+    },
+    "pmax@30%": {
+      "threshold": 0.5091,
+      "routing_rate": 0.3,
+      "acc_accepted_mean": 0.742,
+      "intensity_acc_accepted": 0.743,
+      "exposure_acc_accepted": 0.74
+    },
+    "pmax@40%": {
+      "threshold": 0.5454,
+      "routing_rate": 0.4,
+      "acc_accepted_mean": 0.761,
+      "intensity_acc_accepted": 0.756,
+      "exposure_acc_accepted": 0.767
+    },
+    "severe@10%": {
+      "threshold": -0.0092,
+      "routing_rate": 0.101,
+      "acc_accepted_mean": 0.709,
+      "intensity_acc_accepted": 0.713,
+      "exposure_acc_accepted": 0.704
+    },
+    "severe@20%": {
+      "threshold": 0.052,
+      "routing_rate": 0.201,
+      "acc_accepted_mean": 0.727,
+      "intensity_acc_accepted": 0.736,
+      "exposure_acc_accepted": 0.719
+    },
+    "severe@30%": {
+      "threshold": 0.1678,
+      "routing_rate": 0.3,
+      "acc_accepted_mean": 0.743,
+      "intensity_acc_accepted": 0.755,
+      "exposure_acc_accepted": 0.731
+    },
+    "severe@40%": {
+      "threshold": 0.2904,
+      "routing_rate": 0.4,
+      "acc_accepted_mean": 0.762,
+      "intensity_acc_accepted": 0.773,
+      "exposure_acc_accepted": 0.751
+    },
+    "per_target@10%": {
+      "threshold": 0.0525,
+      "routing_rate": 0.1,
+      "acc_accepted_mean": 0.706,
+      "intensity_acc_accepted": 0.712,
+      "exposure_acc_accepted": 0.701
+    },
+    "per_target@20%": {
+      "threshold": 0.1076,
+      "routing_rate": 0.2,
+      "acc_accepted_mean": 0.727,
+      "intensity_acc_accepted": 0.735,
+      "exposure_acc_accepted": 0.719
+    },
+    "per_target@30%": {
+      "threshold": 0.1655,
+      "routing_rate": 0.301,
+      "acc_accepted_mean": 0.747,
+      "intensity_acc_accepted": 0.755,
+      "exposure_acc_accepted": 0.738
+    },
+    "per_target@40%": {
+      "threshold": 0.2275,
+      "routing_rate": 0.4,
+      "acc_accepted_mean": 0.762,
+      "intensity_acc_accepted": 0.77,
+      "exposure_acc_accepted": 0.754
+    }
+  },
+  "per_target_rules": {
+    "intensity": "severe",
+    "exposure": "pmax"
+  },
+  "chosen_rule": {
+    "rule": "severe",
+    "default_rate": 0.2,
+    "thresholds": {
+      "10%": -0.0092,
+      "20%": 0.052,
+      "30%": 0.1678,
+      "40%": 0.2904
+    }
+  },
+  "test": {
+    "no_routing": {
+      "intensity": {
+        "all": {
+          "n": 2953,
+          "accuracy": 0.673,
+          "within_1": 0.985,
+          "mae": 0.342,
+          "quadratic_kappa": 0.706
+        },
+        "confusion_true_x_pred": [
+          [
+            24,
+            135,
+            18,
+            0,
+            0
+          ],
+          [
+            12,
+            734,
+            202,
+            0,
+            0
+          ],
+          [
+            7,
+            294,
+            884,
+            100,
+            0
+          ],
+          [
+            0,
+            13,
+            156,
+            343,
+            0
+          ],
+          [
+            0,
+            0,
+            5,
+            24,
+            2
+          ]
+        ]
+      },
+      "exposure": {
+        "all": {
+          "n": 2953,
+          "accuracy": 0.69,
+          "within_1": 0.967,
+          "mae": 0.348,
+          "quadratic_kappa": 0.804
+        },
+        "confusion_true_x_pred": [
+          [
+            815,
+            249,
+            18,
+            0,
+            1
+          ],
+          [
+            81,
+            648,
+            166,
+            4,
+            0
+          ],
+          [
+            16,
+            221,
+            429,
+            19,
+            2
+          ],
+          [
+            2,
+            17,
+            52,
+            50,
+            10
+          ],
+          [
+            2,
+            8,
+            26,
+            21,
+            96
+          ]
+        ]
+      }
+    },
+    "severe@10%": {
+      "intensity": {
+        "all": {
+          "n": 2953,
+          "accuracy": 0.673,
+          "within_1": 0.985,
+          "mae": 0.342,
+          "quadratic_kappa": 0.706
+        },
+        "confusion_true_x_pred": [
+          [
+            24,
+            135,
+            18,
+            0,
+            0
+          ],
+          [
+            12,
+            734,
+            202,
+            0,
+            0
+          ],
+          [
+            7,
+            294,
+            884,
+            100,
+            0
+          ],
+          [
+            0,
+            13,
+            156,
+            343,
+            0
+          ],
+          [
+            0,
+            0,
+            5,
+            24,
+            2
+          ]
+        ],
+        "accepted": {
+          "n": 2674,
+          "accuracy": 0.696,
+          "within_1": 0.985,
+          "mae": 0.319,
+          "quadratic_kappa": 0.72
+        },
+        "routed": {
+          "n": 279,
+          "accuracy": 0.452,
+          "within_1": 0.986,
+          "mae": 0.563,
+          "quadratic_kappa": 0.576
+        }
+      },
+      "exposure": {
+        "all": {
+          "n": 2953,
+          "accuracy": 0.69,
+          "within_1": 0.967,
+          "mae": 0.348,
+          "quadratic_kappa": 0.804
+        },
+        "confusion_true_x_pred": [
+          [
+            815,
+            249,
+            18,
+            0,
+            1
+          ],
+          [
+            81,
+            648,
+            166,
+            4,
+            0
+          ],
+          [
+            16,
+            221,
+            429,
+            19,
+            2
+          ],
+          [
+            2,
+            17,
+            52,
+            50,
+            10
+          ],
+          [
+            2,
+            8,
+            26,
+            21,
+            96
+          ]
+        ],
+        "accepted": {
+          "n": 2674,
+          "accuracy": 0.705,
+          "within_1": 0.972,
+          "mae": 0.328,
+          "quadratic_kappa": 0.82
+        },
+        "routed": {
+          "n": 279,
+          "accuracy": 0.548,
+          "within_1": 0.925,
+          "mae": 0.541,
+          "quadratic_kappa": 0.629
+        }
+      },
+      "routing_rate": 0.094
+    },
+    "severe@20%": {
+      "intensity": {
+        "all": {
+          "n": 2953,
+          "accuracy": 0.673,
+          "within_1": 0.985,
+          "mae": 0.342,
+          "quadratic_kappa": 0.706
+        },
+        "confusion_true_x_pred": [
+          [
+            24,
+            135,
+            18,
+            0,
+            0
+          ],
+          [
+            12,
+            734,
+            202,
+            0,
+            0
+          ],
+          [
+            7,
+            294,
+            884,
+            100,
+            0
+          ],
+          [
+            0,
+            13,
+            156,
+            343,
+            0
+          ],
+          [
+            0,
+            0,
+            5,
+            24,
+            2
+          ]
+        ],
+        "accepted": {
+          "n": 2433,
+          "accuracy": 0.715,
+          "within_1": 0.986,
+          "mae": 0.298,
+          "quadratic_kappa": 0.741
+        },
+        "routed": {
+          "n": 520,
+          "accuracy": 0.475,
+          "within_1": 0.981,
+          "mae": 0.544,
+          "quadratic_kappa": 0.553
+        }
+      },
+      "exposure": {
+        "all": {
+          "n": 2953,
+          "accuracy": 0.69,
+          "within_1": 0.967,
+          "mae": 0.348,
+          "quadratic_kappa": 0.804
+        },
+        "confusion_true_x_pred": [
+          [
+            815,
+            249,
+            18,
+            0,
+            1
+          ],
+          [
+            81,
+            648,
+            166,
+            4,
+            0
+          ],
+          [
+            16,
+            221,
+            429,
+            19,
+            2
+          ],
+          [
+            2,
+            17,
+            52,
+            50,
+            10
+          ],
+          [
+            2,
+            8,
+            26,
+            21,
+            96
+          ]
+        ],
+        "accepted": {
+          "n": 2433,
+          "accuracy": 0.721,
+          "within_1": 0.974,
+          "mae": 0.31,
+          "quadratic_kappa": 0.828
+        },
+        "routed": {
+          "n": 520,
+          "accuracy": 0.548,
+          "within_1": 0.938,
+          "mae": 0.523,
+          "quadratic_kappa": 0.689
+        }
+      },
+      "routing_rate": 0.176
+    },
+    "severe@30%": {
+      "intensity": {
+        "all": {
+          "n": 2953,
+          "accuracy": 0.673,
+          "within_1": 0.985,
+          "mae": 0.342,
+          "quadratic_kappa": 0.706
+        },
+        "confusion_true_x_pred": [
+          [
+            24,
+            135,
+            18,
+            0,
+            0
+          ],
+          [
+            12,
+            734,
+            202,
+            0,
+            0
+          ],
+          [
+            7,
+            294,
+            884,
+            100,
+            0
+          ],
+          [
+            0,
+            13,
+            156,
+            343,
+            0
+          ],
+          [
+            0,
+            0,
+            5,
+            24,
+            2
+          ]
+        ],
+        "accepted": {
+          "n": 2118,
+          "accuracy": 0.732,
+          "within_1": 0.987,
+          "mae": 0.28,
+          "quadratic_kappa": 0.757
+        },
+        "routed": {
+          "n": 835,
+          "accuracy": 0.522,
+          "within_1": 0.981,
+          "mae": 0.497,
+          "quadratic_kappa": 0.583
+        }
+      },
+      "exposure": {
+        "all": {
+          "n": 2953,
+          "accuracy": 0.69,
+          "within_1": 0.967,
+          "mae": 0.348,
+          "quadratic_kappa": 0.804
+        },
+        "confusion_true_x_pred": [
+          [
+            815,
+            249,
+            18,
+            0,
+            1
+          ],
+          [
+            81,
+            648,
+            166,
+            4,
+            0
+          ],
+          [
+            16,
+            221,
+            429,
+            19,
+            2
+          ],
+          [
+            2,
+            17,
+            52,
+            50,
+            10
+          ],
+          [
+            2,
+            8,
+            26,
+            21,
+            96
+          ]
+        ],
+        "accepted": {
+          "n": 2118,
+          "accuracy": 0.737,
+          "within_1": 0.979,
+          "mae": 0.288,
+          "quadratic_kappa": 0.846
+        },
+        "routed": {
+          "n": 835,
+          "accuracy": 0.571,
+          "within_1": 0.938,
+          "mae": 0.499,
+          "quadratic_kappa": 0.685
+        }
+      },
+      "routing_rate": 0.283
+    },
+    "severe@40%": {
+      "intensity": {
+        "all": {
+          "n": 2953,
+          "accuracy": 0.673,
+          "within_1": 0.985,
+          "mae": 0.342,
+          "quadratic_kappa": 0.706
+        },
+        "confusion_true_x_pred": [
+          [
+            24,
+            135,
+            18,
+            0,
+            0
+          ],
+          [
+            12,
+            734,
+            202,
+            0,
+            0
+          ],
+          [
+            7,
+            294,
+            884,
+            100,
+            0
+          ],
+          [
+            0,
+            13,
+            156,
+            343,
+            0
+          ],
+          [
+            0,
+            0,
+            5,
+            24,
+            2
+          ]
+        ],
+        "accepted": {
+          "n": 1736,
+          "accuracy": 0.747,
+          "within_1": 0.988,
+          "mae": 0.266,
+          "quadratic_kappa": 0.77
+        },
+        "routed": {
+          "n": 1217,
+          "accuracy": 0.568,
+          "within_1": 0.982,
+          "mae": 0.45,
+          "quadratic_kappa": 0.615
+        }
+      },
+      "exposure": {
+        "all": {
+          "n": 2953,
+          "accuracy": 0.69,
+          "within_1": 0.967,
+          "mae": 0.348,
+          "quadratic_kappa": 0.804
+        },
+        "confusion_true_x_pred": [
+          [
+            815,
+            249,
+            18,
+            0,
+            1
+          ],
+          [
+            81,
+            648,
+            166,
+            4,
+            0
+          ],
+          [
+            16,
+            221,
+            429,
+            19,
+            2
+          ],
+          [
+            2,
+            17,
+            52,
+            50,
+            10
+          ],
+          [
+            2,
+            8,
+            26,
+            21,
+            96
+          ]
+        ],
+        "accepted": {
+          "n": 1736,
+          "accuracy": 0.754,
+          "within_1": 0.98,
+          "mae": 0.271,
+          "quadratic_kappa": 0.856
+        },
+        "routed": {
+          "n": 1217,
+          "accuracy": 0.599,
+          "within_1": 0.95,
+          "mae": 0.458,
+          "quadratic_kappa": 0.72
+        }
+      },
+      "routing_rate": 0.412
+    },
+    "old_rule": {
+      "intensity": {
+        "all": {
+          "n": 2953,
+          "accuracy": 0.673,
+          "within_1": 0.985,
+          "mae": 0.342,
+          "quadratic_kappa": 0.706
+        },
+        "confusion_true_x_pred": [
+          [
+            24,
+            135,
+            18,
+            0,
+            0
+          ],
+          [
+            12,
+            734,
+            202,
+            0,
+            0
+          ],
+          [
+            7,
+            294,
+            884,
+            100,
+            0
+          ],
+          [
+            0,
+            13,
+            156,
+            343,
+            0
+          ],
+          [
+            0,
+            0,
+            5,
+            24,
+            2
+          ]
+        ],
+        "accepted": {
+          "n": 2117,
+          "accuracy": 0.718,
+          "within_1": 0.986,
+          "mae": 0.296,
+          "quadratic_kappa": 0.739
+        },
+        "routed": {
+          "n": 836,
+          "accuracy": 0.559,
+          "within_1": 0.983,
+          "mae": 0.458,
+          "quadratic_kappa": 0.624
+        }
+      },
+      "exposure": {
+        "all": {
+          "n": 2953,
+          "accuracy": 0.69,
+          "within_1": 0.967,
+          "mae": 0.348,
+          "quadratic_kappa": 0.804
+        },
+        "confusion_true_x_pred": [
+          [
+            815,
+            249,
+            18,
+            0,
+            1
+          ],
+          [
+            81,
+            648,
+            166,
+            4,
+            0
+          ],
+          [
+            16,
+            221,
+            429,
+            19,
+            2
+          ],
+          [
+            2,
+            17,
+            52,
+            50,
+            10
+          ],
+          [
+            2,
+            8,
+            26,
+            21,
+            96
+          ]
+        ],
+        "accepted": {
+          "n": 2117,
+          "accuracy": 0.739,
+          "within_1": 0.978,
+          "mae": 0.287,
+          "quadratic_kappa": 0.845
+        },
+        "routed": {
+          "n": 836,
+          "accuracy": 0.566,
+          "within_1": 0.94,
+          "mae": 0.501,
+          "quadratic_kappa": 0.687
+        }
+      },
+      "routing_rate": 0.283
+    }
+  }
+}

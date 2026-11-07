@@ -34,12 +34,13 @@ from lightgbm import LGBMClassifier
 from sklearn.metrics import confusion_matrix
 
 from ml.pipeline.silver_labels import LABELS_JSONL, PROCESSED, load_events, read_labels
-from ml.pipeline.student import TARGETS, Featurizer, accept, make_model, metrics, proba5
+from ml.pipeline.student import TARGETS, Featurizer, accept, make_model, metrics, proba5, rule_floor
 
 FALLBACK_JSONL = PROCESSED / "llm_fallback_labels.jsonl"
 ALL_V5_JSONL = PROCESSED / "llm_labels_all.jsonl"  # full relabel with the frozen v5 prompt
 GOLD_CSV = PROCESSED / "gold_labels.csv"
 REPORT = PROCESSED / "student_timesplit_report.json"
+RULES = True  # v7 rule features in the intensity model (student.rule_features); --no-rules to ablate
 TEST_FRAC, VAL_FRAC = 0.2, 0.2
 RATES = [0.1, 0.2, 0.3, 0.4]
 DEFAULT_RATE = 0.2
@@ -100,12 +101,15 @@ class Variant:
 
 
 def fit_predict(train, other, variants: dict[str, str]) -> dict[str, tuple[np.ndarray, np.ndarray]]:
-    fz = Featurizer().fit(train)
+    fz = Featurizer(rules=RULES).fit(train)
     out = {}
     for t, col in TARGETS.items():
         v = Variant(variants[t]).fit(fz.transform(train, t), train[col])
         p = v.proba(fz.transform(other, t))
-        out[t] = (p, v.predict(p))
+        pred = v.predict(p)
+        if RULES and t == "intensity":  # v7 death-count floor (student.rule_floor)
+            pred = np.maximum(pred, rule_floor(other["description"]))
+        out[t] = (p, pred)
     return out
 
 
@@ -157,7 +161,12 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--labels", type=Path, nargs="*", default=None,
                     help="label files (default: old silver + fallback)")
+    ap.add_argument("--no-rules", action="store_true",
+                    help="ablation: intensity model without the v7 rule features (report *_norules.json)")
     args = ap.parse_args()
+    global RULES, REPORT
+    if args.no_rules:
+        RULES, REPORT = False, REPORT.with_name(REPORT.stem + "_norules.json")
     df = labelled_frame(tuple(args.labels)) if args.labels else labelled_frame()
     train, test = time_split(df, TEST_FRAC)
     core, val = time_split(train, VAL_FRAC)

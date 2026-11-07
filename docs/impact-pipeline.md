@@ -11,21 +11,25 @@ pp. 9–10).
 
 ## Current state (use this)
 
-**Every event is scored directly by the LLM; prompt v6 (= v5 + killing rule) is frozen.**
-File: `data/processed/access_events_scored_v6.csv` (columns: scores, `explicit_pin`,
-`scope_type`, `brief_reasoning`, `impact_score`, `impact_label`, `source`). `source = llm_v6`
-for the 3,833 events that mention deaths/killings (re-scored with v6), `llm_v5` for the other
-11,014 (v6 only changes killing rules, so their v5 label stands). v5 labels are kept in
-`llm_labels_all_v5_backup.jsonl` and `access_events_scored_v5.csv`.
+**Every event is scored directly by the LLM; prompt v7 (= v5 + death-count and food-aid
+rules) is frozen and final.**
+File: `data/processed/access_events_scored_v7.csv` (columns: scores, `explicit_pin`,
+`scope_type`, `brief_reasoning`, `impact_score`, `impact_label`, `source`). `source = llm_v7`
+for the 3,909 events that mention deaths/killings or lost food aid (re-scored with v7),
+`llm_v5` for the other 10,938 (v7 only changes those rules, so their v5 label stands).
+Earlier labels: `llm_labels_all_before_llm_v6.jsonl` (v5), `llm_labels_all_before_llm_v7.jsonl`
+(v6), and `access_events_scored_v5.csv` / `_v6.csv`.
 
 ```
 all 14,847 events ──► GreenPT deepseek-v4.1-flash, prompt v5, thinking OFF ──► I, E
-3,833 mention deaths ──► same model, prompt v6 (killing rule) ───────────────► I, E (replace v5)
+3,909 deaths / food-aid loss ──► same model, prompt v7 ──────────────────────► I, E (replace v5)
                                                                           │
                                        impact = ACAPS chart[exposure, intensity]
 ```
 
-See **v6: killing rule** below for the rule, validation and the changes it made.
+**Final check vs Vlad, 20 realistic news items (H01–H20), v7:** intensity 17/20 exact,
+20/20 within one level; exposure 16/20 exact, 20/20 within one; same impact level 18/20.
+See **v7** below; **v6** is kept as history.
 
 Impact distribution (old pipeline → v5): Very Low 3,667 → 4,081 · Low 8,048 → 8,775 ·
 Moderate 2,185 → 1,376 · Significant 876 → 587 · Major 71 → 28. Half of the events keep
@@ -64,7 +68,82 @@ is only an offline fallback (see below); it is not needed for cost.
    test I 70% / 95%, E 60% / 95% (v5 design saw the test misses, so test2 is the clean one).
    v1 on the same events: E bias +0.4, within-1 80–90%.
 
-## v6: killing rule (2026-11-07)
+## v7: death-count thresholds and food-aid rule (2026-11-07, final)
+
+**Why:** after the v6 hand check Vlad set the thresholds (his rule, ACAPS Severe/Extreme):
+
+| Deaths stated | Intensity |
+|---|---|
+| 1–3, nothing else serious | 3 |
+| 1–3 + homes / village / health facility burned or destroyed, or a community displaced | 4 |
+| 4 to about 300, or an unstated plural ("killings", "several dead") | 4 |
+| about 300+ in one event, thousands over a period or area, famine deaths | 5 |
+
+Deaths from disasters and disease follow the same counts. New food-aid rule: food assistance
+or rations lost by a stated 10,000+ people in a conflict or emergency → 4 (fewer/unstated → 3,
+only delayed → 2). Exposure unchanged. Prompt: `ml/prompts/versions/v7_thresholds.md` =
+`v7_final_frozen.md` = `ml/prompts/silver_labels.md`. No gold label needed changing.
+
+**Tune (40, 2 shuffled runs):** intensity 75 / 68% exact (v6: 78 / 72%), exposure 78 / 60%
+(v6: 70 / 48%): no regression, within the ±7-point run noise. Tune has almost no 2–3-death
+events, so it cannot measure the new threshold; the hand check does. test/test2 had already
+been seen with v6, so they are reported for continuity only: test intensity 65% (v6 75%),
+test2 50% (v6 50%); every killing event in both is right; the drop is on non-killing events.
+
+**Re-scoring:** `relabel_all --subset killings_aid --tag llm_v7` = KILL_REGEX (3,833) or
+AID_REGEX (rations / food assistance suspended, looted warehouses: 76 more) = 3,909 events,
+157 calls, $0.76, 0 failures.
+
+| Intensity (all events) | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|
+| v5 | 1,112 | 4,369 | 7,930 | 1,406 | 30 |
+| v6 | 1,109 | 4,344 | 6,125 | 3,079 | 190 |
+| **v7** | 1,112 | 4,316 | **6,546** | **2,712** | **161** |
+
+v6 → v7 in the subset: 529 events 4 → 3 (2–3 deaths), 127 events 3 → 4 (deaths + destruction/
+displacement), 78 events 5 → 4 and 47 events 4 → 5 (300 threshold). Food-aid events
+(non-killing): intensity 2/3/4 = 44/26/6 → 19/47/10.
+
+| Impact | Very Low | Low | Moderate | Significant | Major |
+|---|---|---|---|---|---|
+| v5 | 4,081 | 8,775 | 1,376 | 587 | 28 |
+| v6 | 4,080 | 7,813 | 2,180 | 642 | 132 |
+| **v7** | 4,072 | 7,982 | 2,048 | 626 | 119 |
+
+**Hand check vs Vlad (scored blind first in `gold_labeler --handcheck`, then live LLM):**
+H01–H10 = `handcheck_v6.csv` (v6 and v7 columns; these items shaped v7, so not clean),
+H11–H20 = `handcheck_v7.csv` (new, written to span 1–5 on both scales; the clean check).
+
+| vs Vlad | Intensity exact / within 1 | Exposure exact / within 1 | Same impact |
+|---|---|---|---|
+| v6, H01–H10 | 6/10 / 9/10 | 5/10 / 10/10 | 6/10 |
+| v7, H01–H10 | 8/10 / 10/10 | 8/10 / 10/10 | 9/10 |
+| **v7, H11–H20 (clean)** | **9/10 / 10/10** | **8/10 / 10/10** | **9/10** |
+| Student, all 20 | 14/20 / 20/20 | 16/20 / 20/20 | 16/20 |
+
+Remaining disagreements: H06 (400+ killed) still 4 in v7 although H18 (350+) got 5, so the
+300 threshold is applied inconsistently; H16 (2 killed + 40 houses burned + 15,000 fled): LLM
+4 by the v7 rule, Vlad 3; H04/H19 vague texts and H08/H11 admin rules: exposure one level off
+(texts give no numbers).
+
+**Student (offline fallback) improved for v7** (`student.py`): intensity model gets rule
+features (death count parsed from the text, 1–3 / 4–299 / 300+ bin, killing-word and plural
+flags, destruction, displacement, food-aid loss and 10k+, famine) and a **rule floor** after
+prediction (300+ dead or famine deaths → at least 5, 4+ dead → at least 4), chosen on the
+validation slice (5s recall 0.21 → 0.43, same QWK). `student_timesplit --no-rules` = ablation.
+
+| Student vs LLM v7, newest 20% (2,953) | Exact | Within 1 | QWK | Recall 4 / 5 |
+|---|---|---|---|---|
+| Intensity, plain retrain | 67.3% | 98.5% | 0.706 | 67% / 6% |
+| Intensity, + rule features | 69.5% | 98.6% | 0.729 | 70% / 6% |
+| **Intensity, + rule floor** | **69.7%** | **98.6%** | **0.740** | 67% / **74%** |
+| Exposure (unchanged model) | 69.0% | 96.7% | 0.804 | — |
+
+Routing 20% of events to the LLM: 74% / 72% exact on the accepted rest (I / E).
+Use: offline fallback, and a second opinion — events where student and LLM differ by 2+
+levels are good candidates for expert review.
+
+## v6: killing rule (2026-11-07, superseded by v7)
 
 **Rule (Vlad, ACAPS Severe = "excess mortality, grave violations of human rights"):** killings
 by anyone (state forces, police, armed groups, gangs, mines/IEDs), and deaths from disasters
@@ -139,7 +218,7 @@ Recall of intensity 4 rose from 39% to 72% (434/603); it still never predicts 5 
 Routing 20% to the LLM: 74% / 70% exact on accepted (I / E).
 
 **Hand check (10 realistic news items, `data/processed/handcheck_v6.csv`).** Vlad scored them
-blind in the scoring page (`python -m ml.pipeline.gold_labeler --handcheck`, port 8766), then
+blind in the scoring page (`HANDCHECK_FILE=handcheck_v6.csv python -m ml.pipeline.gold_labeler --handcheck`, port 8766), then
 each was scored live with `python -m ml.pipeline.score_text --csv ...` (~$0.001 per item).
 
 | vs Vlad | Intensity exact / within 1 | Exposure exact / within 1 | Same impact level |
@@ -189,7 +268,7 @@ is cheap enough for all new events.
 
 ## Cost and safeguards
 
-Total GreenPT spend ≈ **$4.19** after v6 (v6 work: ~$0.03 prompt tests, $0.73 subset relabel, $0.01 hand check; before v6: $3.42) (estimated from tokens at the $0.50/122-call rate; check the
+Total GreenPT spend ≈ **$4.99** (before v6: $3.42; v6: ~$0.03 prompt tests, $0.73 subset relabel, $0.01 hand check; v7: ~$0.02 prompt tests, ~$0.006 test runs, $0.76 subset relabel, $0.02 hand checks) (estimated from tokens at the $0.50/122-call rate; check the
 GreenPT dashboard): $0.50 earlier, ~$0.20 prompt testing, ~$2.72 full relabel (594 calls,
 ~15 min with 6 parallel workers, 0 failures).
 
@@ -206,14 +285,14 @@ GreenPT dashboard): $0.50 earlier, ~$0.20 prompt testing, ~$2.72 full relabel (5
 | File | Role |
 |---|---|
 | `ml/pipeline/gold_set.py` | Build the stratified gold set (never overwrites human scores) |
-| `ml/pipeline/gold_labeler.py` | Local blind scoring page, saves to `gold_labels.csv` (`python -m ml.pipeline.gold_labeler`, port 8765) |
+| `ml/pipeline/gold_labeler.py` | Local blind scoring page, saves to `gold_labels.csv` (`python -m ml.pipeline.gold_labeler`, port 8765); `--handcheck` scores `handcheck_v7.csv` (`HANDCHECK_FILE=` for another) |
 | `ml/pipeline/gold_eval.py` | LLM labels vs gold: exact, within-1, QWK, bias, disagreements |
 | `ml/pipeline/prompt_eval.py` | Run a prompt on a gold split (`--split test*` requires `--final`), `--shuffle` for noise |
 | `ml/pipeline/relabel_all.py` | Label all events with the frozen prompt, parallel, resumable, budget-capped; `--subset killings`, `--export-only` |
-| `ml/pipeline/student_timesplit.py` | Time-split student evaluation and routing |
+| `ml/pipeline/student_timesplit.py` | Time-split student evaluation and routing (v7 rule features + rule floor; `--no-rules` ablation) |
 | `ml/pipeline/greenpt.py` | GreenPT client: cache, usage log, thinking off, budget cap |
-| `ml/prompts/silver_labels.md` | Frozen v6 prompt (history in `ml/prompts/versions/`) |
-| `ml/pipeline/score_text.py` | Live scoring of one text, or `--csv` for a file (hand check: `data/processed/handcheck_v6.csv`) |
+| `ml/prompts/silver_labels.md` | Frozen v7 prompt (history in `ml/prompts/versions/`) |
+| `ml/pipeline/score_text.py` | Live scoring of one text, or `--csv` for a file (hand checks: `data/processed/handcheck_v6.csv`, `handcheck_v7.csv`) |
 
 ```bash
 GREENPT_MODEL=deepseek-v4.1-flash python -m ml.pipeline.prompt_eval ml/prompts/silver_labels.md --dry-run
@@ -228,6 +307,6 @@ reference; `score_events.py` does not yet use the v5 labels.
 
 1. Most gold labels are Claude's: a second human rater (or Vlad on the 20 `test` events
    scored by Claude) would make the evaluation stronger.
-2. Wire `access_events_scored_v5.csv` into ranking/backend; label new events with the LLM.
+2. Wire `access_events_scored_v7.csv` into ranking/backend; label new events with the LLM.
 3. LLM tends to be slightly conservative (bias −0.1 to −0.3): fine for ranking, note it in the pitch.
 4. `pytest` is not installed, so `ml/tests` was not run after this session's changes.

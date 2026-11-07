@@ -76,6 +76,72 @@ def regex_pin(text: str) -> float | None:
 
 
 # --------------------------------------------------------------------------- #
+# Rule features (prompt v7): death counts, destruction, displacement, food-aid loss
+# --------------------------------------------------------------------------- #
+_NUMWORD = {"one": 1, "a": 1, "an": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
+            "eight": 8, "nine": 9, "ten": 10, "dozen": 12, "dozens": 24, "scores": 40,
+            "hundreds": 200, "thousands": 2000}
+_N = r"(\d{1,3}(?:,\d{3})+|\d+|an?|one|two|three|four|five|six|seven|eight|nine|ten|dozens?|scores|hundreds|thousands)"
+_DEAD = r"(?:killed|dead|died|deaths|fatalities|lives)"
+DEATHS_RX = [  # "57 civilians were killed", "killing 57", "claimed the lives of 12"
+    re.compile(rf"\b{_N}\s+(?:[\w'-]+\s+){{0,4}}?(?:were\s+|have\s+been\s+|had\s+been\s+|was\s+)?{_DEAD}\b", re.I),
+    re.compile(rf"\b(?:killed|killing|claimed the lives of|death toll (?:of|rose to|reached))\s+"
+               rf"(?:at least\s+|over\s+|more than\s+|nearly\s+|about\s+|around\s+)?{_N}\b", re.I),
+]
+PLURAL_KILL_RX = re.compile(r"\bkillings\b|\b(?:civilians|people|aid workers|villagers|residents)\s+"
+                            r"(?:were|have been)\s+killed\b|\bseveral (?:people )?(?:dead|killed|deaths)\b", re.I)
+DESTROY_RX = re.compile(r"\b(?:burn\w*|torch\w*|set fire|destroy\w*|razed)\b.{0,60}\b(?:homes?|houses?|village|"
+                        r"health (?:centre|center|facility)|hospital|clinic|granar\w*|market)", re.I)
+DISPLACE_RX = re.compile(r"\b(?:displac\w*|fled|flee\w*|forced to leave)\b", re.I)
+FAMINE_RX = re.compile(r"\b(?:famine|starvation|starving|IPC Phase 5|catastrophic hunger)\b", re.I)
+
+
+def max_deaths(text: str) -> float:
+    """Largest death count stated in the text (0 = none found). Years are skipped."""
+    best = 0.0
+    for rx in DEATHS_RX:
+        for m in rx.finditer(text or ""):
+            tok = m.group(1).lower()
+            if tok in _NUMWORD:
+                n = _NUMWORD[tok]
+            elif _YEAR.fullmatch(tok):
+                continue
+            else:
+                n = float(tok.replace(",", ""))
+            best = max(best, n)
+    return best
+
+
+def rule_floor(text: pd.Series) -> np.ndarray:
+    """Minimum intensity implied by stated deaths (v7): 300+ dead or famine deaths -> 5, 4+ dead -> 4.
+    Applied as max(prediction, floor); chosen on the validation slice (5s recall 0.21 -> 0.43, same QWK)."""
+    t = text.fillna("")
+    d = t.map(max_deaths).to_numpy(float)
+    famine = t.str.contains(FAMINE_RX).to_numpy()
+    return np.select([d >= 300, famine & (d > 0), d >= 4], [5, 5, 4], 0)
+
+
+def rule_features(text: pd.Series) -> np.ndarray:
+    from ml.pipeline.relabel_all import AID_REGEX, KILL_REGEX
+    t = text.fillna("")
+    deaths = t.map(max_deaths).to_numpy(float)
+    death_bin = np.select([deaths >= 300, deaths >= 4, deaths >= 1], [3, 2, 1], 0)  # v7 thresholds
+    destroy = t.str.contains(DESTROY_RX).to_numpy(float)
+    displace = t.str.contains(DISPLACE_RX).to_numpy(float)
+    aid = t.str.contains(AID_REGEX).to_numpy(float)
+    pin = pd.to_numeric(t.map(regex_pin), errors="coerce").fillna(0).to_numpy(float)
+    return np.column_stack([
+        np.log1p(deaths), death_bin,
+        t.str.contains(KILL_REGEX).to_numpy(float),
+        t.str.contains(PLURAL_KILL_RX).to_numpy(float),
+        destroy, displace,
+        ((death_bin == 1) & ((destroy + displace) > 0)).astype(float),  # 1-3 dead + destruction/displacement -> 4
+        aid, aid * (pin >= 10_000),                                      # food aid lost by 10k+ -> 4
+        t.str.contains(FAMINE_RX).to_numpy(float),
+    ])
+
+
+# --------------------------------------------------------------------------- #
 # Features
 # --------------------------------------------------------------------------- #
 def _codes(s: pd.Series, pattern: str) -> list[list[str]]:
@@ -95,6 +161,7 @@ class Featurizer:
     sub: MultiLabelBinarizer = field(default_factory=MultiLabelBinarizer)
     grp: MultiLabelBinarizer = field(default_factory=MultiLabelBinarizer)
     countries: pd.DataFrame | None = None
+    rules: bool = True  # add the v7 rule features (death counts etc.) to the intensity model
 
     def fit(self, df: pd.DataFrame) -> "Featurizer":
         self.tfidf.fit(df["description"].fillna(""))
@@ -120,6 +187,8 @@ class Featurizer:
         c = self._country(df)
         if target == "intensity":
             dense = c[["inform_vu", "inform_cc"]].to_numpy(float)
+            if self.rules:
+                dense = np.column_stack([dense, rule_features(text)])
             return sparse.hstack([tf, ind, sub, sparse.csr_matrix(dense)]).tocsr()
         pins = pd.to_numeric(text.map(regex_pin), errors="coerce")
         n_nums = text.map(lambda t: len(people_numbers(t)))

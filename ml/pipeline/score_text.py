@@ -1,4 +1,4 @@
-"""Score one event live with the frozen prompt, ml/prompts/silver_labels.md (v6; the "online model").
+"""Score one event live with the frozen prompt, ml/prompts/silver_labels.md (v7; the "online model").
 
     python -m ml.pipeline.score_text --event-id 24271                 # re-score an existing event
     python -m ml.pipeline.score_text --country Chad --text "Armed men attacked ..."   # any new text

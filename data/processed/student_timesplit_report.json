@@ -22,17 +22,17 @@
   },
   "label_dist_test": {
     "intensity": {
-      "1": 175,
-      "2": 950,
-      "3": 1188,
-      "4": 603,
-      "5": 37
+      "1": 177,
+      "2": 948,
+      "3": 1285,
+      "4": 512,
+      "5": 31
     },
     "exposure": {
-      "1": 1082,
-      "2": 911,
-      "3": 671,
-      "4": 136,
+      "1": 1083,
+      "2": 899,
+      "3": 687,
+      "4": 131,
       "5": 153
     }
   },
@@ -40,64 +40,64 @@
     "clf_bal": {
       "intensity": {
         "n": 2362,
-        "accuracy": 0.719,
-        "within_1": 0.952,
-        "mae": 0.331,
-        "quadratic_kappa": 0.705
+        "accuracy": 0.713,
+        "within_1": 0.956,
+        "mae": 0.333,
+        "quadratic_kappa": 0.693
       },
       "exposure": {
         "n": 2362,
-        "accuracy": 0.679,
-        "within_1": 0.955,
-        "mae": 0.375,
-        "quadratic_kappa": 0.81
+        "accuracy": 0.699,
+        "within_1": 0.954,
+        "mae": 0.354,
+        "quadratic_kappa": 0.814
       }
     },
     "clf": {
       "intensity": {
         "n": 2362,
-        "accuracy": 0.725,
-        "within_1": 0.961,
-        "mae": 0.314,
-        "quadratic_kappa": 0.692
+        "accuracy": 0.724,
+        "within_1": 0.964,
+        "mae": 0.312,
+        "quadratic_kappa": 0.679
       },
       "exposure": {
         "n": 2362,
-        "accuracy": 0.671,
-        "within_1": 0.949,
-        "mae": 0.387,
-        "quadratic_kappa": 0.796
+        "accuracy": 0.687,
+        "within_1": 0.953,
+        "mae": 0.367,
+        "quadratic_kappa": 0.805
       }
     },
     "ev_bal": {
       "intensity": {
         "n": 2362,
-        "accuracy": 0.706,
-        "within_1": 0.977,
+        "accuracy": 0.708,
+        "within_1": 0.976,
         "mae": 0.317,
-        "quadratic_kappa": 0.725
+        "quadratic_kappa": 0.717
       },
       "exposure": {
         "n": 2362,
-        "accuracy": 0.667,
-        "within_1": 0.97,
-        "mae": 0.366,
-        "quadratic_kappa": 0.818
+        "accuracy": 0.683,
+        "within_1": 0.972,
+        "mae": 0.346,
+        "quadratic_kappa": 0.828
       }
     },
     "ordinal": {
       "intensity": {
         "n": 2362,
-        "accuracy": 0.733,
-        "within_1": 0.961,
-        "mae": 0.307,
-        "quadratic_kappa": 0.699
+        "accuracy": 0.726,
+        "within_1": 0.972,
+        "mae": 0.303,
+        "quadratic_kappa": 0.702
       },
       "exposure": {
         "n": 2362,
-        "accuracy": 0.693,
-        "within_1": 0.956,
-        "mae": 0.359,
+        "accuracy": 0.694,
+        "within_1": 0.96,
+        "mae": 0.354,
         "quadratic_kappa": 0.809
       }
     }
@@ -108,106 +108,106 @@
   },
   "validation_routing_grid": {
     "old": {
-      "routing_rate": 0.256,
-      "acc_accepted_mean": 0.732
+      "routing_rate": 0.232,
+      "acc_accepted_mean": 0.74
     },
     "pmax@10%": {
-      "threshold": 0.4303,
+      "threshold": 0.4357,
       "routing_rate": 0.1,
-      "acc_accepted_mean": 0.703,
-      "intensity_acc_accepted": 0.727,
-      "exposure_acc_accepted": 0.679
+      "acc_accepted_mean": 0.718,
+      "intensity_acc_accepted": 0.728,
+      "exposure_acc_accepted": 0.708
     },
     "pmax@20%": {
-      "threshold": 0.4786,
+      "threshold": 0.4796,
       "routing_rate": 0.2,
-      "acc_accepted_mean": 0.718,
-      "intensity_acc_accepted": 0.746,
-      "exposure_acc_accepted": 0.689
+      "acc_accepted_mean": 0.735,
+      "intensity_acc_accepted": 0.748,
+      "exposure_acc_accepted": 0.722
     },
     "pmax@30%": {
-      "threshold": 0.5158,
+      "threshold": 0.518,
       "routing_rate": 0.3,
-      "acc_accepted_mean": 0.736,
-      "intensity_acc_accepted": 0.766,
-      "exposure_acc_accepted": 0.705
+      "acc_accepted_mean": 0.756,
+      "intensity_acc_accepted": 0.767,
+      "exposure_acc_accepted": 0.745
     },
     "pmax@40%": {
-      "threshold": 0.5561,
-      "routing_rate": 0.4,
-      "acc_accepted_mean": 0.767,
-      "intensity_acc_accepted": 0.802,
-      "exposure_acc_accepted": 0.733
-    },
-    "severe@10%": {
-      "threshold": -0.0041,
-      "routing_rate": 0.1,
-      "acc_accepted_mean": 0.705,
-      "intensity_acc_accepted": 0.731,
-      "exposure_acc_accepted": 0.68
-    },
-    "severe@20%": {
-      "threshold": 0.0715,
-      "routing_rate": 0.2,
-      "acc_accepted_mean": 0.732,
-      "intensity_acc_accepted": 0.764,
-      "exposure_acc_accepted": 0.699
-    },
-    "severe@30%": {
-      "threshold": 0.1954,
-      "routing_rate": 0.3,
-      "acc_accepted_mean": 0.744,
-      "intensity_acc_accepted": 0.785,
-      "exposure_acc_accepted": 0.703
-    },
-    "severe@40%": {
-      "threshold": 0.3087,
+      "threshold": 0.5614,
       "routing_rate": 0.4,
       "acc_accepted_mean": 0.772,
-      "intensity_acc_accepted": 0.817,
-      "exposure_acc_accepted": 0.728
+      "intensity_acc_accepted": 0.788,
+      "exposure_acc_accepted": 0.756
+    },
+    "severe@10%": {
+      "threshold": -0.0057,
+      "routing_rate": 0.1,
+      "acc_accepted_mean": 0.722,
+      "intensity_acc_accepted": 0.736,
+      "exposure_acc_accepted": 0.708
+    },
+    "severe@20%": {
+      "threshold": 0.0733,
+      "routing_rate": 0.2,
+      "acc_accepted_mean": 0.741,
+      "intensity_acc_accepted": 0.76,
+      "exposure_acc_accepted": 0.722
+    },
+    "severe@30%": {
+      "threshold": 0.2005,
+      "routing_rate": 0.3,
+      "acc_accepted_mean": 0.757,
+      "intensity_acc_accepted": 0.78,
+      "exposure_acc_accepted": 0.734
+    },
+    "severe@40%": {
+      "threshold": 0.3175,
+      "routing_rate": 0.4,
+      "acc_accepted_mean": 0.78,
+      "intensity_acc_accepted": 0.805,
+      "exposure_acc_accepted": 0.756
     },
     "per_target@10%": {
-      "threshold": 0.0513,
-      "routing_rate": 0.1,
-      "acc_accepted_mean": 0.705,
-      "intensity_acc_accepted": 0.731,
-      "exposure_acc_accepted": 0.68
+      "threshold": 0.0529,
+      "routing_rate": 0.101,
+      "acc_accepted_mean": 0.719,
+      "intensity_acc_accepted": 0.734,
+      "exposure_acc_accepted": 0.704
     },
     "per_target@20%": {
-      "threshold": 0.1059,
+      "threshold": 0.1076,
       "routing_rate": 0.2,
-      "acc_accepted_mean": 0.732,
-      "intensity_acc_accepted": 0.763,
-      "exposure_acc_accepted": 0.7
+      "acc_accepted_mean": 0.74,
+      "intensity_acc_accepted": 0.761,
+      "exposure_acc_accepted": 0.718
     },
     "per_target@30%": {
-      "threshold": 0.1661,
+      "threshold": 0.1648,
       "routing_rate": 0.3,
-      "acc_accepted_mean": 0.746,
-      "intensity_acc_accepted": 0.786,
-      "exposure_acc_accepted": 0.705
+      "acc_accepted_mean": 0.761,
+      "intensity_acc_accepted": 0.785,
+      "exposure_acc_accepted": 0.737
     },
     "per_target@40%": {
-      "threshold": 0.2296,
+      "threshold": 0.2279,
       "routing_rate": 0.4,
-      "acc_accepted_mean": 0.771,
-      "intensity_acc_accepted": 0.815,
-      "exposure_acc_accepted": 0.728
+      "acc_accepted_mean": 0.779,
+      "intensity_acc_accepted": 0.803,
+      "exposure_acc_accepted": 0.756
     }
   },
   "per_target_rules": {
     "intensity": "severe",
-    "exposure": "severe"
+    "exposure": "pmax"
   },
   "chosen_rule": {
     "rule": "severe",
     "default_rate": 0.2,
     "thresholds": {
-      "10%": -0.0041,
-      "20%": 0.0715,
-      "30%": 0.1954,
-      "40%": 0.3087
+      "10%": -0.0057,
+      "20%": 0.0733,
+      "30%": 0.2005,
+      "40%": 0.3175
     }
   },
   "test": {
@@ -215,92 +215,92 @@
       "intensity": {
         "all": {
           "n": 2953,
-          "accuracy": 0.69,
-          "within_1": 0.983,
-          "mae": 0.327,
-          "quadratic_kappa": 0.732
+          "accuracy": 0.697,
+          "within_1": 0.986,
+          "mae": 0.317,
+          "quadratic_kappa": 0.74
         },
         "confusion_true_x_pred": [
           [
-            29,
-            129,
-            17,
-            0,
-            0
-          ],
-          [
-            12,
-            733,
-            203,
-            2,
-            0
-          ],
-          [
+            30,
+            135,
             11,
-            286,
-            842,
-            49,
+            1,
+            0
+          ],
+          [
+            20,
+            771,
+            152,
+            5,
+            0
+          ],
+          [
+            9,
+            311,
+            891,
+            74,
             0
           ],
           [
             0,
-            18,
-            148,
-            434,
-            3
+            12,
+            137,
+            344,
+            19
           ],
           [
             0,
             0,
-            3,
-            34,
-            0
+            4,
+            4,
+            23
           ]
         ]
       },
       "exposure": {
         "all": {
           "n": 2953,
-          "accuracy": 0.669,
-          "within_1": 0.971,
-          "mae": 0.366,
-          "quadratic_kappa": 0.793
+          "accuracy": 0.69,
+          "within_1": 0.967,
+          "mae": 0.348,
+          "quadratic_kappa": 0.804
         },
         "confusion_true_x_pred": [
           [
-            769,
-            296,
-            15,
+            815,
+            249,
+            18,
             0,
-            2
-          ],
-          [
-            79,
-            669,
-            160,
-            3,
-            0
-          ],
-          [
-            9,
-            239,
-            401,
-            21,
             1
           ],
           [
-            5,
-            15,
-            61,
-            45,
+            81,
+            648,
+            166,
+            4,
+            0
+          ],
+          [
+            16,
+            221,
+            429,
+            19,
+            2
+          ],
+          [
+            2,
+            17,
+            52,
+            50,
             10
           ],
           [
-            1,
+            2,
             8,
-            28,
-            23,
-            93
+            26,
+            21,
+            96
           ]
         ]
       }
@@ -309,616 +309,616 @@
       "intensity": {
         "all": {
           "n": 2953,
-          "accuracy": 0.69,
-          "within_1": 0.983,
-          "mae": 0.327,
-          "quadratic_kappa": 0.732
+          "accuracy": 0.697,
+          "within_1": 0.986,
+          "mae": 0.317,
+          "quadratic_kappa": 0.74
         },
         "confusion_true_x_pred": [
           [
-            29,
-            129,
-            17,
-            0,
-            0
-          ],
-          [
-            12,
-            733,
-            203,
-            2,
-            0
-          ],
-          [
+            30,
+            135,
             11,
-            286,
-            842,
-            49,
+            1,
+            0
+          ],
+          [
+            20,
+            771,
+            152,
+            5,
+            0
+          ],
+          [
+            9,
+            311,
+            891,
+            74,
             0
           ],
           [
             0,
-            18,
-            148,
-            434,
-            3
+            12,
+            137,
+            344,
+            19
           ],
           [
             0,
             0,
-            3,
-            34,
-            0
+            4,
+            4,
+            23
           ]
         ],
         "accepted": {
-          "n": 2662,
-          "accuracy": 0.716,
-          "within_1": 0.985,
-          "mae": 0.3,
-          "quadratic_kappa": 0.757
+          "n": 2665,
+          "accuracy": 0.72,
+          "within_1": 0.986,
+          "mae": 0.295,
+          "quadratic_kappa": 0.752
         },
         "routed": {
-          "n": 291,
-          "accuracy": 0.457,
-          "within_1": 0.966,
-          "mae": 0.577,
-          "quadratic_kappa": 0.486
+          "n": 288,
+          "accuracy": 0.49,
+          "within_1": 0.983,
+          "mae": 0.528,
+          "quadratic_kappa": 0.639
         }
       },
       "exposure": {
         "all": {
           "n": 2953,
-          "accuracy": 0.669,
-          "within_1": 0.971,
-          "mae": 0.366,
-          "quadratic_kappa": 0.793
+          "accuracy": 0.69,
+          "within_1": 0.967,
+          "mae": 0.348,
+          "quadratic_kappa": 0.804
         },
         "confusion_true_x_pred": [
           [
-            769,
-            296,
-            15,
+            815,
+            249,
+            18,
             0,
-            2
-          ],
-          [
-            79,
-            669,
-            160,
-            3,
-            0
-          ],
-          [
-            9,
-            239,
-            401,
-            21,
             1
           ],
           [
-            5,
-            15,
-            61,
-            45,
+            81,
+            648,
+            166,
+            4,
+            0
+          ],
+          [
+            16,
+            221,
+            429,
+            19,
+            2
+          ],
+          [
+            2,
+            17,
+            52,
+            50,
             10
           ],
           [
-            1,
+            2,
             8,
-            28,
-            23,
-            93
+            26,
+            21,
+            96
           ]
         ],
         "accepted": {
-          "n": 2662,
-          "accuracy": 0.68,
+          "n": 2665,
+          "accuracy": 0.704,
           "within_1": 0.973,
-          "mae": 0.354,
-          "quadratic_kappa": 0.804
+          "mae": 0.326,
+          "quadratic_kappa": 0.823
         },
         "routed": {
-          "n": 291,
-          "accuracy": 0.574,
-          "within_1": 0.952,
-          "mae": 0.481,
-          "quadratic_kappa": 0.668
+          "n": 288,
+          "accuracy": 0.559,
+          "within_1": 0.913,
+          "mae": 0.545,
+          "quadratic_kappa": 0.598
         }
       },
-      "routing_rate": 0.099
+      "routing_rate": 0.098
     },
     "severe@20%": {
       "intensity": {
         "all": {
           "n": 2953,
-          "accuracy": 0.69,
-          "within_1": 0.983,
-          "mae": 0.327,
-          "quadratic_kappa": 0.732
+          "accuracy": 0.697,
+          "within_1": 0.986,
+          "mae": 0.317,
+          "quadratic_kappa": 0.74
         },
         "confusion_true_x_pred": [
           [
-            29,
-            129,
-            17,
-            0,
-            0
-          ],
-          [
-            12,
-            733,
-            203,
-            2,
-            0
-          ],
-          [
+            30,
+            135,
             11,
-            286,
-            842,
-            49,
+            1,
+            0
+          ],
+          [
+            20,
+            771,
+            152,
+            5,
+            0
+          ],
+          [
+            9,
+            311,
+            891,
+            74,
             0
           ],
           [
             0,
-            18,
-            148,
-            434,
-            3
+            12,
+            137,
+            344,
+            19
           ],
           [
             0,
             0,
-            3,
-            34,
-            0
+            4,
+            4,
+            23
           ]
         ],
         "accepted": {
-          "n": 2426,
-          "accuracy": 0.737,
-          "within_1": 0.984,
-          "mae": 0.279,
-          "quadratic_kappa": 0.773
+          "n": 2393,
+          "accuracy": 0.738,
+          "within_1": 0.987,
+          "mae": 0.276,
+          "quadratic_kappa": 0.771
         },
         "routed": {
-          "n": 527,
-          "accuracy": 0.474,
-          "within_1": 0.975,
-          "mae": 0.55,
-          "quadratic_kappa": 0.539
+          "n": 560,
+          "accuracy": 0.525,
+          "within_1": 0.98,
+          "mae": 0.495,
+          "quadratic_kappa": 0.612
         }
       },
       "exposure": {
         "all": {
           "n": 2953,
-          "accuracy": 0.669,
-          "within_1": 0.971,
-          "mae": 0.366,
-          "quadratic_kappa": 0.793
+          "accuracy": 0.69,
+          "within_1": 0.967,
+          "mae": 0.348,
+          "quadratic_kappa": 0.804
         },
         "confusion_true_x_pred": [
           [
-            769,
-            296,
-            15,
+            815,
+            249,
+            18,
             0,
-            2
-          ],
-          [
-            79,
-            669,
-            160,
-            3,
-            0
-          ],
-          [
-            9,
-            239,
-            401,
-            21,
             1
           ],
           [
-            5,
-            15,
-            61,
-            45,
+            81,
+            648,
+            166,
+            4,
+            0
+          ],
+          [
+            16,
+            221,
+            429,
+            19,
+            2
+          ],
+          [
+            2,
+            17,
+            52,
+            50,
             10
           ],
           [
-            1,
+            2,
             8,
-            28,
-            23,
-            93
+            26,
+            21,
+            96
           ]
         ],
         "accepted": {
-          "n": 2426,
-          "accuracy": 0.695,
-          "within_1": 0.974,
-          "mae": 0.338,
-          "quadratic_kappa": 0.807
+          "n": 2393,
+          "accuracy": 0.718,
+          "within_1": 0.977,
+          "mae": 0.31,
+          "quadratic_kappa": 0.83
         },
         "routed": {
-          "n": 527,
-          "accuracy": 0.55,
-          "within_1": 0.954,
-          "mae": 0.499,
-          "quadratic_kappa": 0.726
+          "n": 560,
+          "accuracy": 0.571,
+          "within_1": 0.927,
+          "mae": 0.511,
+          "quadratic_kappa": 0.697
         }
       },
-      "routing_rate": 0.178
+      "routing_rate": 0.19
     },
     "severe@30%": {
       "intensity": {
         "all": {
           "n": 2953,
-          "accuracy": 0.69,
-          "within_1": 0.983,
-          "mae": 0.327,
-          "quadratic_kappa": 0.732
+          "accuracy": 0.697,
+          "within_1": 0.986,
+          "mae": 0.317,
+          "quadratic_kappa": 0.74
         },
         "confusion_true_x_pred": [
           [
-            29,
-            129,
-            17,
-            0,
-            0
-          ],
-          [
-            12,
-            733,
-            203,
-            2,
-            0
-          ],
-          [
+            30,
+            135,
             11,
-            286,
-            842,
-            49,
+            1,
+            0
+          ],
+          [
+            20,
+            771,
+            152,
+            5,
+            0
+          ],
+          [
+            9,
+            311,
+            891,
+            74,
             0
           ],
           [
             0,
-            18,
-            148,
-            434,
-            3
+            12,
+            137,
+            344,
+            19
           ],
           [
             0,
             0,
-            3,
-            34,
-            0
+            4,
+            4,
+            23
           ]
         ],
         "accepted": {
-          "n": 2105,
-          "accuracy": 0.76,
-          "within_1": 0.986,
-          "mae": 0.254,
-          "quadratic_kappa": 0.792
+          "n": 2069,
+          "accuracy": 0.752,
+          "within_1": 0.987,
+          "mae": 0.261,
+          "quadratic_kappa": 0.774
         },
         "routed": {
-          "n": 848,
-          "accuracy": 0.517,
-          "within_1": 0.975,
-          "mae": 0.508,
-          "quadratic_kappa": 0.58
+          "n": 884,
+          "accuracy": 0.569,
+          "within_1": 0.982,
+          "mae": 0.449,
+          "quadratic_kappa": 0.667
         }
       },
       "exposure": {
         "all": {
           "n": 2953,
-          "accuracy": 0.669,
-          "within_1": 0.971,
-          "mae": 0.366,
-          "quadratic_kappa": 0.793
+          "accuracy": 0.69,
+          "within_1": 0.967,
+          "mae": 0.348,
+          "quadratic_kappa": 0.804
         },
         "confusion_true_x_pred": [
           [
-            769,
-            296,
-            15,
+            815,
+            249,
+            18,
             0,
-            2
-          ],
-          [
-            79,
-            669,
-            160,
-            3,
-            0
-          ],
-          [
-            9,
-            239,
-            401,
-            21,
             1
           ],
           [
-            5,
-            15,
-            61,
-            45,
+            81,
+            648,
+            166,
+            4,
+            0
+          ],
+          [
+            16,
+            221,
+            429,
+            19,
+            2
+          ],
+          [
+            2,
+            17,
+            52,
+            50,
             10
           ],
           [
-            1,
+            2,
             8,
-            28,
-            23,
-            93
+            26,
+            21,
+            96
           ]
         ],
         "accepted": {
-          "n": 2105,
-          "accuracy": 0.706,
-          "within_1": 0.976,
-          "mae": 0.323,
-          "quadratic_kappa": 0.823
+          "n": 2069,
+          "accuracy": 0.735,
+          "within_1": 0.979,
+          "mae": 0.291,
+          "quadratic_kappa": 0.843
         },
         "routed": {
-          "n": 848,
-          "accuracy": 0.578,
-          "within_1": 0.956,
-          "mae": 0.474,
-          "quadratic_kappa": 0.711
+          "n": 884,
+          "accuracy": 0.586,
+          "within_1": 0.94,
+          "mae": 0.481,
+          "quadratic_kappa": 0.708
         }
       },
-      "routing_rate": 0.287
+      "routing_rate": 0.299
     },
     "severe@40%": {
       "intensity": {
         "all": {
           "n": 2953,
-          "accuracy": 0.69,
-          "within_1": 0.983,
-          "mae": 0.327,
-          "quadratic_kappa": 0.732
+          "accuracy": 0.697,
+          "within_1": 0.986,
+          "mae": 0.317,
+          "quadratic_kappa": 0.74
         },
         "confusion_true_x_pred": [
           [
-            29,
-            129,
-            17,
-            0,
-            0
-          ],
-          [
-            12,
-            733,
-            203,
-            2,
-            0
-          ],
-          [
+            30,
+            135,
             11,
-            286,
-            842,
-            49,
+            1,
+            0
+          ],
+          [
+            20,
+            771,
+            152,
+            5,
+            0
+          ],
+          [
+            9,
+            311,
+            891,
+            74,
             0
           ],
           [
             0,
-            18,
-            148,
-            434,
-            3
+            12,
+            137,
+            344,
+            19
           ],
           [
             0,
             0,
-            3,
-            34,
-            0
+            4,
+            4,
+            23
           ]
         ],
         "accepted": {
-          "n": 1750,
-          "accuracy": 0.769,
-          "within_1": 0.986,
-          "mae": 0.245,
-          "quadratic_kappa": 0.797
+          "n": 1727,
+          "accuracy": 0.772,
+          "within_1": 0.99,
+          "mae": 0.239,
+          "quadratic_kappa": 0.791
         },
         "routed": {
-          "n": 1203,
-          "accuracy": 0.576,
-          "within_1": 0.978,
-          "mae": 0.446,
-          "quadratic_kappa": 0.625
+          "n": 1226,
+          "accuracy": 0.591,
+          "within_1": 0.98,
+          "mae": 0.428,
+          "quadratic_kappa": 0.67
         }
       },
       "exposure": {
         "all": {
           "n": 2953,
-          "accuracy": 0.669,
-          "within_1": 0.971,
-          "mae": 0.366,
-          "quadratic_kappa": 0.793
+          "accuracy": 0.69,
+          "within_1": 0.967,
+          "mae": 0.348,
+          "quadratic_kappa": 0.804
         },
         "confusion_true_x_pred": [
           [
-            769,
-            296,
-            15,
+            815,
+            249,
+            18,
             0,
-            2
-          ],
-          [
-            79,
-            669,
-            160,
-            3,
-            0
-          ],
-          [
-            9,
-            239,
-            401,
-            21,
             1
           ],
           [
-            5,
-            15,
-            61,
-            45,
+            81,
+            648,
+            166,
+            4,
+            0
+          ],
+          [
+            16,
+            221,
+            429,
+            19,
+            2
+          ],
+          [
+            2,
+            17,
+            52,
+            50,
             10
           ],
           [
-            1,
+            2,
             8,
-            28,
-            23,
-            93
+            26,
+            21,
+            96
           ]
         ],
         "accepted": {
-          "n": 1750,
-          "accuracy": 0.725,
-          "within_1": 0.978,
-          "mae": 0.303,
-          "quadratic_kappa": 0.84
+          "n": 1727,
+          "accuracy": 0.758,
+          "within_1": 0.981,
+          "mae": 0.266,
+          "quadratic_kappa": 0.862
         },
         "routed": {
-          "n": 1203,
-          "accuracy": 0.589,
-          "within_1": 0.96,
-          "mae": 0.459,
-          "quadratic_kappa": 0.712
+          "n": 1226,
+          "accuracy": 0.595,
+          "within_1": 0.948,
+          "mae": 0.463,
+          "quadratic_kappa": 0.706
         }
       },
-      "routing_rate": 0.407
+      "routing_rate": 0.415
     },
     "old_rule": {
       "intensity": {
         "all": {
           "n": 2953,
-          "accuracy": 0.69,
-          "within_1": 0.983,
-          "mae": 0.327,
-          "quadratic_kappa": 0.732
+          "accuracy": 0.697,
+          "within_1": 0.986,
+          "mae": 0.317,
+          "quadratic_kappa": 0.74
         },
         "confusion_true_x_pred": [
           [
-            29,
-            129,
-            17,
-            0,
-            0
-          ],
-          [
-            12,
-            733,
-            203,
-            2,
-            0
-          ],
-          [
+            30,
+            135,
             11,
-            286,
-            842,
-            49,
+            1,
+            0
+          ],
+          [
+            20,
+            771,
+            152,
+            5,
+            0
+          ],
+          [
+            9,
+            311,
+            891,
+            74,
             0
           ],
           [
             0,
-            18,
-            148,
-            434,
-            3
+            12,
+            137,
+            344,
+            19
           ],
           [
             0,
             0,
-            3,
-            34,
-            0
+            4,
+            4,
+            23
           ]
         ],
         "accepted": {
-          "n": 2177,
-          "accuracy": 0.735,
-          "within_1": 0.983,
-          "mae": 0.282,
-          "quadratic_kappa": 0.771
+          "n": 2258,
+          "accuracy": 0.725,
+          "within_1": 0.986,
+          "mae": 0.289,
+          "quadratic_kappa": 0.746
         },
         "routed": {
-          "n": 776,
-          "accuracy": 0.564,
-          "within_1": 0.981,
-          "mae": 0.455,
-          "quadratic_kappa": 0.605
+          "n": 695,
+          "accuracy": 0.606,
+          "within_1": 0.986,
+          "mae": 0.409,
+          "quadratic_kappa": 0.723
         }
       },
       "exposure": {
         "all": {
           "n": 2953,
-          "accuracy": 0.669,
-          "within_1": 0.971,
-          "mae": 0.366,
-          "quadratic_kappa": 0.793
+          "accuracy": 0.69,
+          "within_1": 0.967,
+          "mae": 0.348,
+          "quadratic_kappa": 0.804
         },
         "confusion_true_x_pred": [
           [
-            769,
-            296,
-            15,
+            815,
+            249,
+            18,
             0,
-            2
-          ],
-          [
-            79,
-            669,
-            160,
-            3,
-            0
-          ],
-          [
-            9,
-            239,
-            401,
-            21,
             1
           ],
           [
-            5,
-            15,
-            61,
-            45,
+            81,
+            648,
+            166,
+            4,
+            0
+          ],
+          [
+            16,
+            221,
+            429,
+            19,
+            2
+          ],
+          [
+            2,
+            17,
+            52,
+            50,
             10
           ],
           [
-            1,
+            2,
             8,
-            28,
-            23,
-            93
+            26,
+            21,
+            96
           ]
         ],
         "accepted": {
-          "n": 2177,
-          "accuracy": 0.709,
-          "within_1": 0.977,
-          "mae": 0.32,
-          "quadratic_kappa": 0.828
+          "n": 2258,
+          "accuracy": 0.733,
+          "within_1": 0.98,
+          "mae": 0.292,
+          "quadratic_kappa": 0.845
         },
         "routed": {
-          "n": 776,
-          "accuracy": 0.558,
-          "within_1": 0.954,
-          "mae": 0.496,
-          "quadratic_kappa": 0.671
+          "n": 695,
+          "accuracy": 0.55,
+          "within_1": 0.927,
+          "mae": 0.529,
+          "quadratic_kappa": 0.646
         }
       },
-      "routing_rate": 0.263
+      "routing_rate": 0.235
     }
   }
 }

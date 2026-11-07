@@ -1,7 +1,7 @@
 """Local scoring page for the gold set. Every click saves straight into gold_labels.csv.
 
     python -m ml.pipeline.gold_labeler            # then open http://localhost:8765
-    python -m ml.pipeline.gold_labeler --handcheck   # score data/processed/handcheck_v6.csv instead
+    python -m ml.pipeline.gold_labeler --handcheck   # score data/processed/handcheck_v7.csv (HANDCHECK_FILE=...)
 
 Keys: 1-5 set intensity then exposure, arrow keys / J K move between events.
 Shows no model scores (blind labelling). Binds to 127.0.0.1 only.
@@ -25,13 +25,15 @@ LOCK = threading.Lock()
 
 # --handcheck: same page on the hand-check file; page field -> file column. Hides llm_* columns.
 HANDCHECK = "--handcheck" in sys.argv
-CSV_PATH = PROCESSED / "handcheck_v6.csv" if HANDCHECK else GOLD_CSV
+CSV_PATH = PROCESSED / os.environ.get("HANDCHECK_FILE", "handcheck_v7.csv") if HANDCHECK else GOLD_CSV
 COLMAP = ({"gold_id": "id", "description": "text", "my_intensity": "vlad_intensity",
            "my_exposure": "vlad_exposure", "notes": "vlad_notes"} if HANDCHECK else {})
 HIDDEN = "llm_" if HANDCHECK else "claude_"
 if HANDCHECK:
-    RUBRIC += ("\nKilling rule (v6): one death and nothing else serious = 3; two or more deaths "
-               "(incl. disasters) or an unstated plural = 4+; mass killings, thousands dead, famine = 5.\n")
+    RUBRIC += ("\nKilling rule (v7): 1-3 deaths and nothing else serious = 3; 1-3 deaths + homes/health "
+               "facility destroyed or community displaced = 4; 4 to ~300 deaths (incl. disasters) or an "
+               "unstated plural = 4; ~300+ in one event, thousands over a period, famine = 5.\n"
+               "Food aid lost by 10,000+ people in a crisis = 4.\n")
 
 
 def read() -> pd.DataFrame:
