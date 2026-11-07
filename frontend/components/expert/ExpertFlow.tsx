@@ -48,11 +48,19 @@ export function ExpertFlow({ token, data, source }: { token: string; data: Exper
   const loadGroup = useCallback(async () => {
     setNotice(null);
     try {
+      // Set a timeout warning after 3 seconds if the fetch is still pending
+      const timeoutId = setTimeout(() => {
+        setNotice({ text: s.errors.slowNetwork, tone: 'info' });
+      }, 3000);
+
       const g = await fetchGroupView(source, token);
+      clearTimeout(timeoutId);
+
       if (g === 'locked') {
         setStep('estimate'); // the server says this expert hasn't answered yet
         return;
       }
+      setNotice(null); // clear any timeout warning
       setGroup(g);
     } catch (e) {
       const network = e instanceof ApiError && e.kind === 'network';
@@ -214,7 +222,7 @@ export function ExpertFlow({ token, data, source }: { token: string; data: Exper
                   placeholder={step === 'estimate' ? s.estimate.reasonPlaceholder : ''}
                   onChange={(e) => setReason(e.target.value)}
                   aria-describedby={`${reasonId}-count`}
-                  className="mt-2 w-full rounded-lg border border-line-strong bg-surface p-3 text-ink"
+                  className="mt-2 min-h-44 w-full rounded-lg border border-border-default bg-surface-white p-3 text-ink placeholder-ink-500 focus:border-primary-600 focus:outline-none focus:ring-1 focus:ring-primary-600"
                 />
                 <p id={`${reasonId}-count`} className="text-right text-xs text-ink-muted">
                   {s.estimate.reasonCount(reason.length, MAX_REASON)}
