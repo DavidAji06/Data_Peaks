@@ -5,7 +5,9 @@ import { useEffect, useState } from 'react';
 import { Chip } from '@/components/ui/primitives';
 import { toPercent } from '@/lib/probability';
 import { strings as s } from '@/lib/strings';
+import { toPublicOutcome } from '@/lib/adapters';
 import type { PublicOutcome } from '@/lib/types';
+import type { ApiPublicQuestion } from '@/lib/types';
 
 const p = s.public;
 
@@ -19,8 +21,9 @@ export function PublicOutcomesClient({ initialItems }: { initialItems: PublicOut
       try {
         const res = await fetch('/api/demo/public/questions');
         if (!res.ok) return;
-        const data = (await res.json()) as PublicOutcome[];
-        const refreshed = data.sort((a, b) => Number(a.simulated) - Number(b.simulated));
+        const data = (await res.json()) as ApiPublicQuestion[];
+        const transformed = data.map(toPublicOutcome);
+        const refreshed = transformed.sort((a, b) => Number(a.simulated) - Number(b.simulated));
         setItems(refreshed);
         setLastRefresh(new Date());
       } catch (e) {
