@@ -50,3 +50,8 @@ yarn.lock
 *.db
 ml/artifacts/
 __pycache__/
+
+# Impact pipeline: large or re-downloadable data
+data/raw/acaps/humanitarian_access_events.*
+data/processed/llm_cache/
+~$*
