@@ -247,8 +247,8 @@ export const en = {
   },
   decisions: {
     keep: 'Keep the current rating',
-    raise_probability: 'Raise the probability',
-    lower_probability: 'Lower the probability',
+    raise: 'Raise the probability',
+    lower: 'Lower the probability',
     update_trigger: 'Update a trigger',
     add_trigger: 'Add a trigger',
   } satisfies Record<DecisionKind, string>,

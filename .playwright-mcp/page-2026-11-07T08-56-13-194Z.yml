@@ -1,0 +1,43 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e3]:
+      - generic [ref=f1e4]:
+        - generic [ref=f1e5]:
+          - link "Ground Truth · ACAPS moderator" [ref=f1e6] [cursor=pointer]:
+            - /url: /
+            - text: Ground Truth
+            - generic [ref=f1e7]: · ACAPS moderator
+          - paragraph [ref=f1e8]: "Demo: no sign-in yet. A real deployment needs moderator accounts."
+        - navigation "Moderator sections" [ref=f1e10]:
+          - link "Alerts" [ref=f1e11] [cursor=pointer]:
+            - /url: /mod
+          - link "Questions" [ref=f1e12] [cursor=pointer]:
+            - /url: /mod/questions
+          - link "Risks" [ref=f1e13] [cursor=pointer]:
+            - /url: /mod/risks
+          - link "Calibration" [ref=f1e14] [cursor=pointer]:
+            - /url: /mod/leaderboard
+          - link "Panel" [ref=f1e15] [cursor=pointer]:
+            - /url: /mod/panel
+    - main [ref=f1e16]:
+      - generic [ref=f1e17]:
+        - heading "Expert panel" [level=1] [ref=f1e19]
+        - paragraph [ref=f1e20]: Invite an expert to join. They choose their own anonymity level when they sign up.
+      - generic [ref=f1e23]:
+        - generic [ref=f1e24]:
+          - text: Email address
+          - generic [ref=f1e25]: Used only to send the invite. Never shown to other experts or the public.
+          - textbox "Email address Used only to send the invite. Never shown to other experts or the public." [ref=f1e26]:
+            - /placeholder: name@example.org
+        - generic [ref=f1e27]:
+          - text: Country they follow
+          - textbox "Country they follow" [ref=f1e28]:
+            - /placeholder: e.g. Chad
+            - text: Chad
+        - paragraph [ref=f1e29]: "Demo: use a made-up address (e.g. analyst@example.org). No email is sent."
+        - button "Create invite" [ref=f1e31]
+  - generic [ref=f1e36] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=f1e37]
+    - generic [ref=f1e41]:
+      - button "Open Next.js Dev Tools" [ref=f1e42]: Cache disabled
+      - button "Collapse Cache disabled badge" [ref=f1e43]

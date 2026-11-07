@@ -1,0 +1,62 @@
+- main [ref=f48e2]:
+  - generic [ref=f48e3]:
+    - generic [ref=f48e4]:
+      - generic [ref=f48e5]: Ground Truth
+      - generic [ref=f48e6]: Demo data (offline)
+    - paragraph [ref=f48e7]: Step 1 of 4 · Context
+    - generic [ref=f48e8]:
+      - paragraph [ref=f48e9]: Chad · R1043
+      - heading "Escalating cross-border insecurity linked to the Sudan conflict increases protection risks and humanitarian needs in eastern Chad" [level=1] [ref=f48e10]
+      - generic [ref=f48e11]: "ACAPS risk level: High"
+      - heading "The question" [level=2] [ref=f48e13]
+      - paragraph [ref=f48e14]: "Sample: Will a defined cross-border event occur in eastern Chad by 6 May 2027?"
+      - paragraph [ref=f48e15]: Resolves by 6 May 2027
+      - group [ref=f48e16]:
+        - generic "How this resolves" [ref=f48e17] [cursor=pointer]
+    - generic [ref=f48e18]:
+      - heading "What changed" [level=2] [ref=f48e19]
+      - generic [ref=f48e20]:
+        - link "Sample report on clashes near the Chad-Sudan border (opens in a new tab)" [ref=f48e21] [cursor=pointer]:
+          - /url: https://example.org/sample-report
+          - text: Sample report on clashes near the Chad-Sudan border
+          - generic [ref=f48e22]: (opens in a new tab)
+        - paragraph [ref=f48e23]: Sample source · 5 November 2026
+        - generic [ref=f48e24]:
+          - generic [ref=f48e25]: Escalating
+          - generic [ref=f48e26]: Strong signal
+          - generic [ref=f48e27]: Matched to trigger T0001
+        - paragraph [ref=f48e28]:
+          - generic [ref=f48e29]: "Why it was flagged:"
+          - text: Sample sentence explaining why the report matches the trigger.
+    - generic [ref=f48e30]:
+      - generic [ref=f48e31]:
+        - heading "How similar past risks played out" [level=2] [ref=f48e32]
+        - generic [ref=f48e33]: Demo data until the ML pipeline lands
+      - list [ref=f48e34]:
+        - listitem [ref=f48e35]:
+          - paragraph [ref=f48e36]: Sudan · R0248
+          - paragraph [ref=f48e37]: Camps and basic services in East Darfur state are stretched beyond capacity following the influx of up to 100,000 South Sudanese refugees by June 2016
+          - generic [ref=f48e38]:
+            - generic [ref=f48e39]: Materialised
+            - generic [ref=f48e40]: ACAPS rated it High
+          - paragraph [ref=f48e41]: The refugee population in East Darfur state had dramatically increased by 2016, with numbers rising from 164 individuals in December 2015 to over 47,000 by June.
+        - listitem [ref=f48e42]:
+          - paragraph [ref=f48e43]: Kenya · R0998
+          - paragraph [ref=f48e44]: Intensifying humanitarian and security crisis in Kenya worsens conditions in refugee camps
+          - generic [ref=f48e45]:
+            - generic [ref=f48e46]: Materialised
+            - generic [ref=f48e47]: ACAPS rated it High
+          - paragraph [ref=f48e48]: Kenya’s humanitarian and security situation deteriorates, particularly in refugee-hosting areas such as Garissa and Turkana counties.
+        - listitem [ref=f48e49]:
+          - paragraph [ref=f48e50]: Syria · R1002
+          - paragraph [ref=f48e51]: A prolonged Syria–Lebanon border conflict results in displacement and increases shelter and livelihood needs
+          - generic [ref=f48e52]:
+            - generic [ref=f48e53]: Did not materialise
+            - generic [ref=f48e54]: ACAPS rated it Medium
+          - paragraph [ref=f48e55]: The risk improved slightly in April 2026 after tensions rose in March with an escalation between Hezbollah and Israel.
+    - button "Give my estimate" [ref=f48e56]
+    - generic [ref=f48e57]:
+      - link "My track record" [ref=f48e58] [cursor=pointer]:
+        - /url: /q/demo-expert-a/record
+      - link "Privacy settings" [ref=f48e59] [cursor=pointer]:
+        - /url: /q/demo-expert-a/settings

@@ -1,0 +1,11 @@
+- generic [active] [ref=f44e1]:
+  - main [ref=f44e2]:
+    - generic [ref=f44e21]:
+      - generic [ref=f44e22]: Ground Truth
+      - heading "Privacy settings" [level=1] [ref=f44e24]
+      - generic [ref=f44e25]:
+        - alert [ref=f44e26]: Privacy settings aren’t available on this server yet.
+        - link "Back to the question" [ref=f44e27] [cursor=pointer]:
+          - /url: /q/demo-expert-a
+  - button "Open Next.js Dev Tools" [ref=f44e16] [cursor=pointer]
+  - alert [ref=f44e20]

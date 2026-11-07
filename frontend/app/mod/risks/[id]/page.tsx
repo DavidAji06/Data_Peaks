@@ -63,7 +63,7 @@ async function RiskView({ params }: { params: PageProps<'/mod/risks/[id]'>['para
                   <li key={q.id}>
                     <Link
                       href={`/mod/questions/${encodeURIComponent(q.id)}`}
-                      className="block rounded-lg border border-line p-3 hover:border-line-strong"
+                      className="block rounded-lg border border-border-default p-3 hover:border-border-strong"
                     >
                       <p className="text-sm text-ink-muted">
                         {q.id} · {mod.questions.status[q.status] ?? q.status} · {mod.questions.answered(q.answered, q.invited)}
@@ -100,7 +100,7 @@ async function RiskView({ params }: { params: PageProps<'/mod/risks/[id]'>['para
           )}
         </div>
 
-        <RiskDecisionPanel triggers={risk.triggers} />
+        <RiskDecisionPanel riskId={risk.id} source={source} triggers={risk.triggers} />
       </div>
     </>
   );

@@ -118,6 +118,40 @@ export type ApiDecisionOut =
   | { alert_id: string; status: 'rejected' }
   | { alert_id: string; status: 'approved'; question_id: string; experts_invited: number };
 
+/** Body of POST /risks/{id}/decide. decision is one of: keep, raise, lower, update_trigger, add_trigger. */
+export interface ApiRiskDecisionIn {
+  decision: 'keep' | 'raise' | 'lower' | 'update_trigger' | 'add_trigger';
+  question_id: string;
+  note: string;
+  trigger_id?: string; // required for update_trigger, add_trigger
+}
+
+/** GET /risks/{id}/decisions: list of past decisions. */
+export interface ApiRiskDecision {
+  id: string;
+  decision: 'keep' | 'raise' | 'lower' | 'update_trigger' | 'add_trigger';
+  question_id: string;
+  note: string;
+  trigger_id?: string;
+  created_at: string; // ISO timestamp
+}
+
+/** GET /public/questions/{id}: single public question. */
+export interface ApiPublicQuestionDetail {
+  id: string;
+  text: string;
+  country: string;
+  risk_title: string;
+  risk_id: string;
+  deadline: string;
+  outcome: Outcome | null;
+  expert_count: number | null;
+  group_median: number | null;
+  group_median_brier: number | null;
+  themes: ApiThemes;
+  simulated: boolean;
+}
+
 /** One item of GET /moderator/questions */
 export interface ApiQuestionListItem {
   id: string;
@@ -497,5 +531,14 @@ export interface PublicOutcome {
   group: { expertCount: number; median: number; medianBrier: number | null } | null;
 }
 
-/** Moderator's risk decision. No backend endpoint yet: kept in client state only. */
-export type DecisionKind = 'keep' | 'raise_probability' | 'lower_probability' | 'update_trigger' | 'add_trigger';
+/** Moderator's risk decision. Maps to POST /risks/{id}/decide decision field. */
+export type DecisionKind = 'keep' | 'raise' | 'lower' | 'update_trigger' | 'add_trigger';
+
+export interface RiskDecision {
+  id: string;
+  decision: DecisionKind;
+  questionId: string;
+  note: string;
+  triggerId?: string;
+  createdAt: string;
+}

@@ -1,0 +1,44 @@
+- generic [active] [ref=f4e1]:
+  - main [ref=f4e2]:
+    - paragraph [ref=f4e3]: "Hackathon for Good #8 · ACAPS challenge"
+    - heading "Ground Truth" [level=1] [ref=f4e4]
+    - paragraph [ref=f4e5]: A trusted expert loop for humanitarian risk analysis. New reports are matched to ACAPS triggers, a moderator turns the strong ones into short questions, experts answer blind under the anonymity level they choose, then see the group and can revise. ACAPS decides, the public sees aggregates, and Brier scores build each expert’s track record as questions resolve.
+    - list [ref=f4e6]:
+      - listitem [ref=f4e7]:
+        - 'link "Expert: answer a question → A synthetic Chad panel expert who hasn’t answered yet. Context, blind estimate, group view, revise. Try it at phone width." [ref=f4e8] [cursor=pointer]':
+          - /url: /q/demo-expert-a
+          - generic [ref=f4e9]: "Expert: answer a question →"
+          - generic [ref=f4e10]: A synthetic Chad panel expert who hasn’t answered yet. Context, blind estimate, group view, revise. Try it at phone width.
+      - listitem [ref=f4e11]:
+        - 'link "Expert: already answered → Same question for an expert who already answered: opens on the group view." [ref=f4e12] [cursor=pointer]':
+          - /url: /q/demo-expert-b
+          - generic [ref=f4e13]: "Expert: already answered →"
+          - generic [ref=f4e14]: "Same question for an expert who already answered: opens on the group view."
+      - listitem [ref=f4e15]:
+        - link "ACAPS moderator → Approve or reject pipeline alerts, follow participation, resolve questions, record decisions on risks." [ref=f4e16] [cursor=pointer]:
+          - /url: /mod
+          - generic [ref=f4e17]: ACAPS moderator →
+          - generic [ref=f4e18]: Approve or reject pipeline alerts, follow participation, resolve questions, record decisions on risks.
+      - listitem [ref=f4e19]:
+        - link "Invite an expert → Create a one-time sign-up link. The new expert picks their own anonymity level, country and how many questions they want." [ref=f4e20] [cursor=pointer]:
+          - /url: /mod/panel
+          - generic [ref=f4e21]: Invite an expert →
+          - generic [ref=f4e22]: Create a one-time sign-up link. The new expert picks their own anonymity level, country and how many questions they want.
+      - listitem [ref=f4e23]:
+        - link "Calibration → Whose forecasts hold up, by Brier score. Anonymous experts are never ranked." [ref=f4e24] [cursor=pointer]:
+          - /url: /mod/leaderboard
+          - generic [ref=f4e25]: Calibration →
+          - generic [ref=f4e26]: Whose forecasts hold up, by Brier score. Anonymous experts are never ranked.
+      - listitem [ref=f4e27]:
+        - 'link "Public results → What the public sees once questions resolve: group figures only, never individual answers or names." [ref=f4e28] [cursor=pointer]':
+          - /url: /outcomes
+          - generic [ref=f4e29]: Public results →
+          - generic [ref=f4e30]: "What the public sees once questions resolve: group figures only, never individual answers or names."
+    - paragraph [ref=f4e31]:
+      - text: All experts, answers and reports in this demo are synthetic. Risks, triggers and past outcomes come from the ACAPS Risk Radar export. To reset the demo, run
+      - code [ref=f4e32]: python -m app.seed
+      - text: in
+      - code [ref=f4e33]: backend/
+      - text: .
+  - button "Open Next.js Dev Tools" [ref=f4e39] [cursor=pointer]
+  - alert [ref=f4e43]

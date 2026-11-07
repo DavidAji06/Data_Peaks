@@ -1,0 +1,80 @@
+- generic [active] [ref=f7e1]:
+  - main [ref=f7e2]:
+    - generic [ref=f7e3]:
+      - generic [ref=f7e4]:
+        - link "Ground Truth" [ref=f7e5] [cursor=pointer]:
+          - /url: /outcomes
+        - generic [ref=f7e6]: Demo data (offline)
+      - heading "Resolved expert forecasts" [level=1] [ref=f7e7]
+      - paragraph [ref=f7e8]:
+        - text: How the expert group’s forecasts compared with what happened. Group figures only.
+        - generic [ref=f7e9]: Auto-refreshes every 60 seconds to show new resolved questions.
+      - list [ref=f7e10]:
+        - listitem [ref=f7e11]:
+          - 'link "Sudan Practice Establishment of military regime leads to increased conflict and spread of violence across Sudan Outcome: it happened · Group median forecast 73%" [ref=f7e12] [cursor=pointer]':
+            - /url: /outcomes/H001
+            - generic [ref=f7e13]:
+              - generic [ref=f7e14]: Sudan
+              - generic [ref=f7e15]: Practice
+            - paragraph [ref=f7e16]: Establishment of military regime leads to increased conflict and spread of violence across Sudan
+            - paragraph [ref=f7e17]: "Outcome: it happened · Group median forecast 73%"
+        - listitem [ref=f7e18]:
+          - 'link "Yemen Practice Breakdown in the peace process leads to escalation of conflict in Al Hodeidah, worsening food insecurity and increasing the spread of cholera Outcome: it happened · Group median forecast 81%" [ref=f7e19] [cursor=pointer]':
+            - /url: /outcomes/H002
+            - generic [ref=f7e20]:
+              - generic [ref=f7e21]: Yemen
+              - generic [ref=f7e22]: Practice
+            - paragraph [ref=f7e23]: Breakdown in the peace process leads to escalation of conflict in Al Hodeidah, worsening food insecurity and increasing the spread of cholera
+            - paragraph [ref=f7e24]: "Outcome: it happened · Group median forecast 81%"
+        - listitem [ref=f7e25]:
+          - 'link "Sudan Practice Economic crisis leads to increased food insecurity, socio-political instability, and protection concerns amid protest Outcome: it happened · Group median forecast 78%" [ref=f7e26] [cursor=pointer]':
+            - /url: /outcomes/H003
+            - generic [ref=f7e27]:
+              - generic [ref=f7e28]: Sudan
+              - generic [ref=f7e29]: Practice
+            - paragraph [ref=f7e30]: Economic crisis leads to increased food insecurity, socio-political instability, and protection concerns amid protest
+            - paragraph [ref=f7e31]: "Outcome: it happened · Group median forecast 78%"
+        - listitem [ref=f7e32]:
+          - 'link "Iraq Practice Attacks by the Islamic State of Iraq and Syria (ISIS) escalate after the expulsion of anti-ISIS coalition forces Outcome: it didn''t happen · Group median forecast 24%" [ref=f7e33] [cursor=pointer]':
+            - /url: /outcomes/H004
+            - generic [ref=f7e34]:
+              - generic [ref=f7e35]: Iraq
+              - generic [ref=f7e36]: Practice
+            - paragraph [ref=f7e37]: Attacks by the Islamic State of Iraq and Syria (ISIS) escalate after the expulsion of anti-ISIS coalition forces
+            - paragraph [ref=f7e38]: "Outcome: it didn't happen · Group median forecast 24%"
+        - listitem [ref=f7e39]:
+          - 'link "Lebanon Practice A rising number of Syrian refugees opt for an unsafe return to Syria to avoid a deepening economic crisis in Lebanon and the repercussions of the 2020 Beirut explosion Outcome: it didn''t happen · Group median forecast 18%" [ref=f7e40] [cursor=pointer]':
+            - /url: /outcomes/H005
+            - generic [ref=f7e41]:
+              - generic [ref=f7e42]: Lebanon
+              - generic [ref=f7e43]: Practice
+            - paragraph [ref=f7e44]: A rising number of Syrian refugees opt for an unsafe return to Syria to avoid a deepening economic crisis in Lebanon and the repercussions of the 2020 Beirut explosion
+            - paragraph [ref=f7e45]: "Outcome: it didn't happen · Group median forecast 18%"
+        - listitem [ref=f7e46]:
+          - 'link "Mali Practice Rise of inter-communal violence in central Mali leads to increased internal displacement Outcome: it happened · Group median forecast 72%" [ref=f7e47] [cursor=pointer]':
+            - /url: /outcomes/H006
+            - generic [ref=f7e48]:
+              - generic [ref=f7e49]: Mali
+              - generic [ref=f7e50]: Practice
+            - paragraph [ref=f7e51]: Rise of inter-communal violence in central Mali leads to increased internal displacement
+            - paragraph [ref=f7e52]: "Outcome: it happened · Group median forecast 72%"
+        - listitem [ref=f7e53]:
+          - 'link "Sudan Practice The declaration of a state of emergency escalates protests that may lead to violence and further displacement in the Darfur region Outcome: it happened · Group median forecast 73%" [ref=f7e54] [cursor=pointer]':
+            - /url: /outcomes/H007
+            - generic [ref=f7e55]:
+              - generic [ref=f7e56]: Sudan
+              - generic [ref=f7e57]: Practice
+            - paragraph [ref=f7e58]: The declaration of a state of emergency escalates protests that may lead to violence and further displacement in the Darfur region
+            - paragraph [ref=f7e59]: "Outcome: it happened · Group median forecast 73%"
+        - listitem [ref=f7e60]:
+          - 'link "Tunisia Practice COVID-19 and related restrictions worsen the Tunisian socioeconomic crisis, especially in the south, leading to increased migration across the Central Mediterranean route and growing protection needs Outcome: it didn''t happen · Group median forecast 29%" [ref=f7e61] [cursor=pointer]':
+            - /url: /outcomes/H008
+            - generic [ref=f7e62]:
+              - generic [ref=f7e63]: Tunisia
+              - generic [ref=f7e64]: Practice
+            - paragraph [ref=f7e65]: COVID-19 and related restrictions worsen the Tunisian socioeconomic crisis, especially in the south, leading to increased migration across the Central Mediterranean route and growing protection needs
+            - paragraph [ref=f7e66]: "Outcome: it didn't happen · Group median forecast 29%"
+      - paragraph [ref=f7e67]: "Last refreshed: 11:34:19 AM"
+      - paragraph [ref=f7e68]: Individual answers and names are never published. This page shows group figures only.
+  - button "Open Next.js Dev Tools" [ref=f7e74] [cursor=pointer]
+  - alert [ref=f7e78]

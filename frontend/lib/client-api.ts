@@ -22,6 +22,7 @@ import type {
   ApiSettingsUpdate,
   ApiGroupView,
   ApiResolveOut,
+  ApiRiskDecisionIn,
   ApiSummariseOut,
   DataSource,
   DecisionResult,
@@ -119,4 +120,9 @@ export async function updateSettings(source: DataSource, token: string, body: Ap
 export async function createPanelInvite(source: DataSource, body: ApiPanelInviteIn): Promise<{ joinLink: string }> {
   const r = await request<ApiPanelInviteOut>(source, 'POST', '/moderator/panel-invites', body, moderatorBaseFor(source));
   return { joinLink: r.join_link };
+}
+
+/** Moderator: submit a risk decision (keep, raise, lower, update_trigger, add_trigger). */
+export async function submitRiskDecision(source: DataSource, riskId: string, decision: ApiRiskDecisionIn): Promise<{ status: 'recorded' }> {
+  return request<{ status: 'recorded' }>(source, 'POST', `/risks/${enc(riskId)}/decide`, decision, moderatorBaseFor(source));
 }

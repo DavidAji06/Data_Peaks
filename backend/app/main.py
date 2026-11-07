@@ -23,6 +23,7 @@ from .services.scoring import BASELINE_BRIER, expert_scores, summarise_scores
 
 CONTRACTS = Path(__file__).resolve().parents[2] / "contracts"
 FRONTEND_URL = "http://localhost:3000"
+MIN_GROUP_SIZE = 3  # smallest group whose figures an expert may see
 
 Base.metadata.create_all(engine)
 
@@ -267,6 +268,19 @@ def group_view(token: str, db: Session = Depends(get_db)):
             latest[response.expert_id] = response
 
     probabilities = [r.probability for r in latest.values()]
+    themes = {"agreement": [], "disagreement": [], "new_information": []}
+
+    # With fewer than 3 answers the figures would let one expert work out another's
+    # exact answer (e.g. with 2 answers, min and max are both answers), so withhold them.
+    if len(probabilities) < MIN_GROUP_SIZE:
+        return {
+            "question_id": invite.question_id,
+            "response_count": len(probabilities),
+            "median": None,
+            "min": None,
+            "max": None,
+            "themes": themes,
+        }
 
     return {
         "question_id": invite.question_id,
@@ -274,7 +288,7 @@ def group_view(token: str, db: Session = Depends(get_db)):
         "median": round(statistics.median(probabilities), 2),
         "min": min(probabilities),
         "max": max(probabilities),
-        "themes": {"agreement": [], "disagreement": [], "new_information": []},
+        "themes": themes,
     }
 
 @app.get("/q/{token}/track-record")

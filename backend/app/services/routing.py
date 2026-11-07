@@ -25,8 +25,11 @@ def open_invite_count(db: Session, expert_id: str) -> int:
 
 
 def route_question(db: Session, question: Question, country: str) -> list[Invite]:
+    # Multi-country risks list several countries ("Chad, Niger, Cameroon, Nigeria"),
+    # so match experts from any of them, not only an exact match on the whole string.
+    countries = {c.strip().lower() for c in country.split(",") if c.strip()}
     experts = db.scalars(
-        select(Expert).where(func.lower(Expert.country) == country.lower())
+        select(Expert).where(func.lower(Expert.country).in_(countries))
     ).all()
 
     candidates = []
