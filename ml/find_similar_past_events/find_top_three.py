@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from pathlib import Path
 
 """
 The assumed structure for the event input is a standard Python dictionary containing these four specific string keys:
@@ -17,9 +18,12 @@ The assumed structure for the event input is a standard Python dictionary contai
 
 
 # 1. Configuration
-MAIN_CSV = "risk-radar-export_2.csv"
-EMBEDDINGS_CSV = "risk_radar_embeddings.csv"
+ROOT = Path(__file__).resolve().parents[2]
+MAIN_CSV = ROOT / "data" / "risk-radar-export.csv"
+EMBEDDINGS_CSV = ROOT / "data" / "processed" / "risk_radar_embeddings.csv"
+OUTPUT_JSON = ROOT / "data" / "processed" / "similar_risks.json"
 MODEL_NAME = "all-MiniLM-L6-v2"
+RESOLVED = {"Materialised", "Not materialised"}
 
 print(f"Loading embedding model '{MODEL_NAME}'...")
 model = SentenceTransformer(MODEL_NAME)
@@ -131,6 +135,46 @@ def search_similar_risks(new_event_dict, main_df, emb_df, k=3):
         snippet_evo = evolution[:250] + "..." if len(evolution) > 250 else evolution
         print(f"  >> How it Evolved: {snippet_evo}")
 
+
+def short(text, limit=250):
+    text = "" if pd.isna(text) else str(text).strip()
+    return text[:limit] + "..." if len(text) > limit else text
+
+
+def export_similar_risks(main_df, emb_df, k=3, path=OUTPUT_JSON):
+    """For each ACTIVE risk, save its k most similar RESOLVED risks for the API."""
+    vectors = dict(zip(emb_df["Risk ID"].astype(str), emb_df["embedding_array"]))
+    df = main_df.assign(**{"Risk ID": main_df["Risk ID"].astype(str)})
+    has_vector = df["Risk ID"].isin(set(vectors))
+
+    # Only resolved risks can be matches, so experts see what actually happened
+    resolved = df[df["Status"].isin(RESOLVED) & has_vector].reset_index(drop=True)
+    active = df[(df["Status"] == "Active") & has_vector]
+    past = np.stack([vectors[risk_id] for risk_id in resolved["Risk ID"]])
+
+    result = {}
+    for _, risk in active.iterrows():
+        scores = cosine_similarity(vectors[risk["Risk ID"]].reshape(1, -1), past).flatten()
+        matches = []
+        for i in scores.argsort()[::-1][:k]:
+            row = resolved.iloc[i]
+            what = row.get("Impact materialisation description")
+            if pd.isna(what) or not str(what).strip():
+                what = row.get("Hazard materialisation")
+            matches.append({
+                "risk_id": row["Risk ID"],
+                "title": row["Risk Title"],
+                "country": row["Country"],
+                "similarity": round(float(scores[i]), 3),
+                "outcome": row["Status"],
+                "what_happened": short(what) or "No description recorded.",
+            })
+        result[risk["Risk ID"]] = matches
+
+    Path(path).write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"Wrote similar risks for {len(result)} active risks to {path}")
+
+
 # ==========================================
 # Execution
 # ==========================================
@@ -145,6 +189,8 @@ if __name__ == "__main__":
         
     # 2. Sync embeddings into the separate CSV cache
     embeddings_df = sync_embeddings(main_df, EMBEDDINGS_CSV)
+
+    export_similar_risks(main_df, embeddings_df)
     
     # 3. Define a new incoming event situation
     incoming_event = {
