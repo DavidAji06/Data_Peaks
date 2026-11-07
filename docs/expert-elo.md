@@ -41,7 +41,8 @@ plus that expert's bias and noise. The base-rate expert only sees earlier events
 ```bash
 venv/Scripts/python.exe -m ml.ranking.run_elo                                  # Chad, last 40 events
 venv/Scripts/python.exe -m ml.ranking.run_elo --country Sudan --events 80 --show-round 12
-venv/Scripts/python.exe -m pytest ml/tests/test_expert_elo.py
+venv/Scripts/python.exe -m ml.ranking.run_elo --significance                   # + skill-vs-luck checks
+venv/Scripts/python.exe -m pytest ml/tests/test_expert_elo.py ml/tests/test_elo_significance.py
 ```
 
 Outputs in `data/processed/elo/`: `mock_expert_forecasts.csv` (every answer and the
@@ -51,6 +52,48 @@ after) and `leaderboard.csv`.
 Result for Chad, 40 events, seed 8: the sharp analyst comes first (1215, 87% exact
 hits), the strong alarmist (955) and the random guesser (889) come last, and the
 improving newcomer keeps climbing (1012 after round 1, 1109 after round 40, 5th place).
+
+## Skill or luck? (statistical significance)
+
+A rating gap can come from a few lucky events. `ml/ranking/significance.py` runs two
+simple checks. Turn them on with `--significance`, which also writes
+`leaderboard_significance.csv`.
+
+1. **Bootstrap intervals.** The season is replayed 500 times. Each replay draws the
+   same number of events with replacement, in a random order, and recomputes every
+   rating. The result is a 90% interval for each expert's rating and rank, plus how
+   often they finish in the top 3 (`p_top3`). A rank interval of "3-7" means the data
+   cannot yet place that expert.
+2. **Paired permutation test.** For two experts, take the difference in total error on
+   each event. If they were equally good, each difference would be as likely to be
+   positive as negative. Flipping the signs at random 10,000 times gives the chance
+   that a gap this big appears by luck (the p-value). It makes no assumption about the
+   shape of the errors.
+
+These feed into:
+
+- **Tiers.** Walk down the board. An expert joins the current tier unless the tier's
+  top expert is significantly better (p < 0.05). Experts in one tier should be shown as
+  equal. Comparing with the tier's top expert, not the neighbour, stops many small gaps
+  from merging the whole board into one tier.
+- **Beats baseline.** Is each expert better than the random guesser and better than
+  "always say the usual" (the base-rate expert)? An expert who can't beat the base rate
+  is adding no information, however high their rating.
+
+Chad, 40 events: the sharp analyst is alone in tier 1 (rank interval 1-1). Ranks 2-4
+form tier 2 and ranks 5-8 form tier 3. The improving newcomer and the expert who plays
+things down are not yet significantly better than the base rate (p = 0.10 and 0.16).
+With only 10 events the top 6 share tier 1, so the ranking needs time to mean
+something.
+
+Limits, kept simple on purpose:
+
+- The bootstrap shuffles event order, so it ignores trends such as an expert who
+  improves.
+- The tests use raw error, not rating.
+- Running many pairwise tests turns up some false "differences" by chance. Treat
+  p-values near 0.05 as weak, or use a Holm correction if you test every pair.
+- Show "provisional" until an expert has about 20 resolved events.
 
 ## Using it in the app
 

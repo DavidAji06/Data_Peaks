@@ -19,6 +19,7 @@ import pandas as pd
 
 from ml.ranking.elo import EloLeague
 from ml.ranking.mock_experts import PANEL, predict
+from ml.ranking.significance import bootstrap_ratings, tiers, vs_baseline
 
 ROOT = Path(__file__).resolve().parents[2]
 EVENTS_CSV = ROOT / "data" / "processed" / "access_events_scored_v7.csv"
@@ -73,6 +74,31 @@ def run_season(events: pd.DataFrame, seed: int = 8):
     return pd.DataFrame(forecasts), pd.DataFrame(history_rows), pd.DataFrame(board)
 
 
+def significance_report(forecasts, history, board, n_boot, seed) -> pd.DataFrame:
+    names = dict(zip(board["expert_id"], board["pseudonym"]))
+    boot = bootstrap_ratings(forecasts, n_boot=n_boot, seed=seed)
+    tiered = tiers(board, history)
+    rand = vs_baseline(history, "EXP-10").rename(columns={"p_beats_baseline": "p_beats_random"})
+    base = vs_baseline(history, "EXP-09").rename(columns={"p_beats_baseline": "p_beats_base_rate"})
+    out = (tiered[["rank", "tier", "expert_id", "rating", "mean_error", "p_leader_better",
+                   "p_vs_next"]]
+           .merge(boot, on="expert_id")
+           .merge(rand[["expert_id", "p_beats_random"]], on="expert_id", how="left")
+           .merge(base[["expert_id", "p_beats_base_rate"]], on="expert_id", how="left"))
+    out.insert(3, "pseudonym", out["expert_id"].map(names))
+    out["rating_90ci"] = out.apply(lambda r: f"{r.rating_lo90:.0f}-{r.rating_hi90:.0f}", axis=1)
+    out["rank_90ci"] = out.apply(lambda r: f"{r.rank_lo90}-{r.rank_hi90}", axis=1)
+
+    print(f"\n=== Is the ranking skill or luck? ({n_boot} bootstrap replays, "
+          f"paired permutation tests, alpha 0.05) ===")
+    print(out[["rank", "tier", "pseudonym", "rating", "rating_90ci", "rank_90ci", "p_top3",
+               "mean_error", "p_leader_better", "p_beats_random", "p_beats_base_rate"]]
+          .to_string(index=False, na_rep="-"))
+    print("tier: cannot be told apart from the tier's top expert yet. "
+          "p_*: chance of a gap this big by luck alone (< 0.05 = real difference).")
+    return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--country", default="Chad")
@@ -81,6 +107,9 @@ def main(argv=None):
     ap.add_argument("--show-round", type=int, default=None,
                     help="print the full ranking of this round (default: last round)")
     ap.add_argument("--no-write", action="store_true")
+    ap.add_argument("--significance", action="store_true",
+                    help="bootstrap rating intervals, tiers and tests vs baselines")
+    ap.add_argument("--n-boot", type=int, default=500)
     args = ap.parse_args(argv)
 
     events = load_events(args.country, args.events)
@@ -102,11 +131,17 @@ def main(argv=None):
     print(board[["rank", "pseudonym", "style", "rating", "peak", "hit_rate",
                  "miss_rate", "events"]].to_string(index=False))
 
+    sig = None
+    if args.significance:
+        sig = significance_report(forecasts, history, board, args.n_boot, args.seed)
+
     if not args.no_write:
         OUT_DIR.mkdir(parents=True, exist_ok=True)
         forecasts.to_csv(OUT_DIR / "mock_expert_forecasts.csv", index=False)
         history.to_csv(OUT_DIR / "elo_history.csv", index=False)
         board.to_csv(OUT_DIR / "leaderboard.csv", index=False)
+        if sig is not None:
+            sig.to_csv(OUT_DIR / "leaderboard_significance.csv", index=False)
         print(f"\nWrote {OUT_DIR.relative_to(ROOT)}/*.csv")
 
 
