@@ -503,3 +503,70 @@ def test_demo_answers_refuses_missing_question(client):
     with pytest.raises(DemoError):
         add_demo_answers(db, "Q999")
     db.close()
+
+
+# ---------------------------------------------------------------- following
+
+def test_follows_default_to_own_country_and_persist(client):
+    assert client.get("/q/tok-a/settings").json()["followed"] == ["Chad"]
+    saved = client.patch("/q/tok-a/settings", json={"followed": ["Sudan", " sudan ", "Chad"]}).json()
+    assert saved["followed"] == ["Sudan", "Chad"]  # Trimmed, no duplicates
+    assert client.get("/q/tok-a/settings").json()["followed"] == ["Sudan", "Chad"]
+    assert client.patch("/q/tok-a/settings", json={"followed": []}).json()["followed"] == []
+    assert client.patch("/q/tok-a/settings", json={"followed": ["Chad, Niger"]}).status_code == 422
+
+
+def test_questions_route_by_follows(client):
+    client.patch("/q/tok-a/settings", json={"followed": ["Sudan"]})  # Unfollows Chad
+    db = app.state.session_factory()
+    db.add(Risk(id="R3", title="Sudan risk", country="Sudan", iso="SDN"))
+    db.add(Alert(id="A12", risk_id="R3", report_title="Test report"))
+    db.add(Alert(id="A13", risk_id="R1", report_title="Test report"))
+    db.commit()
+    db.close()
+    assert approve(client, "A12")["experts_invited"] == 1  # Only expert-a follows Sudan
+    assert approve(client, "A13")["experts_invited"] == 2  # expert-a no longer gets Chad
+
+
+def test_joined_expert_follows_join_country(client):
+    body = {"anonymity_level": "pseudonymous", "country": "Chad", "topics": [], "max_open_questions": 3}
+    link = client.post("/join/join-1", json=body).json()["app_link"]
+    token = link.split("token=")[1]
+    assert client.get(f"/q/{token}/settings").json()["followed"] == ["Chad"]
+
+
+# ---------------------------------------------------------------- several questions per expert
+
+def personal_link_with_two_questions(client):
+    """expert-a gets a personal link and a second, newer question on another risk."""
+    db = app.state.session_factory()
+    db.get(Expert, "expert-a").link_token = "me-a"
+    db.get(Expert, "expert-a").followed = "Chad,Sudan"
+    db.add(Risk(id="R3", title="Sudan risk", country="Sudan", iso="SDN"))
+    db.add(Alert(id="A20", risk_id="R3", report_title="Test report"))
+    db.commit()
+    db.close()
+    return approve(client, "A20", "Newer Sudan question?")["question_id"]
+
+
+def test_older_question_stays_listed_when_a_new_one_arrives(client):
+    newer = personal_link_with_two_questions(client)
+    listed = client.get("/q/me-a/questions").json()
+    assert [q["question_id"] for q in listed] == [newer, "Q001"]
+    assert client.get("/q/me-a", params={"question_id": "Q001"}).json()["question"]["id"] == "Q001"
+
+
+def test_answer_lands_on_the_question_shown(client):
+    newer = personal_link_with_two_questions(client)
+    # The expert was looking at Q001 when the newer question arrived
+    assert client.post("/q/me-a/responses", params={"question_id": "Q001"}, json=ANSWER).status_code == 200
+    listed = {q["question_id"]: q["answered"] for q in client.get("/q/me-a/questions").json()}
+    assert listed == {"Q001": True, newer: False}
+
+
+def test_cannot_open_a_question_you_were_not_invited_to(client):
+    personal_link_with_two_questions(client)
+    # expert-b only follows Chad (its country), so it was not invited to the Sudan question
+    newer = client.get("/q/me-a/questions").json()[0]["question_id"]
+    assert client.get("/q/tok-b", params={"question_id": newer}).status_code == 404
+    assert client.post("/q/tok-b/responses", params={"question_id": newer}, json=ANSWER).status_code == 404

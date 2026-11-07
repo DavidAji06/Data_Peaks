@@ -5,6 +5,7 @@ import {
   getToken,
   type ApiExpertQuestion,
   type ApiGroupView,
+  type ApiQuestionSummary,
   type ApiSettings,
   type ApiTrackRecord,
 } from "@/lib/api";
@@ -20,6 +21,21 @@ export interface OwnAnswer {
 }
 
 const ownKey = (questionId: string) => `dp-own-${questionId}`;
+const SELECTED_KEY = "dp-selected-question";
+
+function readSelected(): string | null {
+  try {
+    return sessionStorage.getItem(SELECTED_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/** The question to show: the one already picked if still there, else the first open unanswered, else the newest. */
+function pickQuestion(list: ApiQuestionSummary[], wanted: string | null): string | null {
+  if (wanted && list.some((q) => q.question_id === wanted)) return wanted;
+  return (list.find((q) => q.status === "open" && !q.answered) ?? list[0])?.question_id ?? null;
+}
 
 function readOwn(questionId: string): OwnAnswer {
   try {
@@ -43,6 +59,9 @@ export function useExpert() {
   const [token, setToken] = useState<string | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [data, setData] = useState<ApiExpertQuestion | null>(null);
+  /** Every question this expert was invited to. A new question never hides an older one. */
+  const [questions, setQuestions] = useState<ApiQuestionSummary[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [group, setGroup] = useState<ApiGroupView | null>(null);
   const [groupLocked, setGroupLocked] = useState(true);
   const [settings, setSettings] = useState<ApiSettings | null>(null);
@@ -50,11 +69,14 @@ export function useExpert() {
   const [own, setOwn] = useState<OwnAnswer>({ first: null, latest: null, firstReason: "" });
 
   // Token is read on the client only (SSR has no window).
-  useEffect(() => setToken(getToken()), []);
+  useEffect(() => {
+    setToken(getToken());
+    setSelectedId(readSelected());
+  }, []);
 
-  const loadGroup = useCallback(async (tk: string) => {
+  const loadGroup = useCallback(async (tk: string, questionId: string) => {
     try {
-      setGroup(await api.getGroup(tk));
+      setGroup(await api.getGroup(tk, questionId));
       setGroupLocked(false);
     } catch (e) {
       if (e instanceof ApiError && e.status === 403) {
@@ -67,31 +89,28 @@ export function useExpert() {
   const refresh = useCallback(async () => {
     if (!token) return;
     try {
-      let q: ApiExpertQuestion;
-      try {
-        q = await api.getQuestion(token);
-      } catch (e) {
-        if (!(e instanceof ApiError && e.status === 404)) throw e;
-        // A personal link with no question yet: the expert exists, so show "You're up to date".
-        // If the settings call also 404s, the link itself is unknown ("invalid").
-        const [s, t] = await Promise.all([api.getSettings(token), api.getTrackRecord(token).catch(() => null)]);
+      // Settings first: a 404 here means the link itself is unknown ("invalid").
+      const [s, list, t] = await Promise.all([
+        api.getSettings(token),
+        api.getQuestions(token),
+        api.getTrackRecord(token).catch(() => null),
+      ]);
+      setSettings(s);
+      setQuestions(list);
+      setTrack(t);
+      const id = pickQuestion(list, selectedId);
+      if (!id) {
+        // No question yet: the expert exists, so show "You're up to date".
         setData(null);
-        setSettings(s);
-        setTrack(t);
         setGroup(null);
         setGroupLocked(true);
         setState("ready");
         return;
       }
+      const q = await api.getQuestion(token, id);
       setData(q);
       setOwn(readOwn(q.question.id));
-      const [s, t] = await Promise.all([
-        api.getSettings(token).catch(() => null),
-        api.getTrackRecord(token).catch(() => null),
-      ]);
-      setSettings(s);
-      setTrack(t);
-      if (q.answered) await loadGroup(token);
+      if (q.answered) await loadGroup(token, id);
       else {
         setGroup(null);
         setGroupLocked(true);
@@ -100,7 +119,17 @@ export function useExpert() {
     } catch (e) {
       setState(e instanceof ApiError && e.status === 404 ? "invalid" : "offline");
     }
-  }, [token, loadGroup]);
+  }, [token, selectedId, loadGroup]);
+
+  /** Show another of the expert's questions. */
+  const selectQuestion = useCallback((questionId: string) => {
+    try {
+      sessionStorage.setItem(SELECTED_KEY, questionId);
+    } catch {
+      /* storage unavailable */
+    }
+    setSelectedId(questionId);
+  }, []);
 
   useEffect(() => {
     void refresh();
@@ -111,7 +140,7 @@ export function useExpert() {
     async (answer: number, reason: string) => {
       if (!token || !data) return;
       try {
-        await api.submitAnswer(token, answer / 100, reason.trim());
+        await api.submitAnswer(token, data.question.id, answer / 100, reason.trim());
         const next = { first: answer, latest: answer, firstReason: reason.trim() };
         writeOwn(data.question.id, next);
         setOwn(next);
@@ -121,7 +150,7 @@ export function useExpert() {
       await refresh();
       // The backend writes the AI summary of reasons in the background; look again shortly.
       for (const delay of [8000, 20000]) {
-        setTimeout(() => void loadGroup(token).catch(() => undefined), delay);
+        setTimeout(() => void loadGroup(token, data.question.id).catch(() => undefined), delay);
       }
     },
     [token, data, refresh, loadGroup],
@@ -133,7 +162,7 @@ export function useExpert() {
       // The backend requires a reason; reuse the original one rather than inventing text.
       const why = reason.trim() || own.firstReason || "No change in reasoning";
       try {
-        await api.submitRevision(token, answer / 100, why);
+        await api.submitRevision(token, data.question.id, answer / 100, why);
         const next = { ...own, latest: answer };
         writeOwn(data.question.id, next);
         setOwn(next);
@@ -154,8 +183,8 @@ export function useExpert() {
   );
 
   return useMemo(
-    () => ({ token, state, data, group, groupLocked, settings, track, own, refresh, submitAnswer, submitRevision, saveSettings }),
-    [token, state, data, group, groupLocked, settings, track, own, refresh, submitAnswer, submitRevision, saveSettings],
+    () => ({ token, state, data, questions, group, groupLocked, settings, track, own, refresh, selectQuestion, submitAnswer, submitRevision, saveSettings }),
+    [token, state, data, questions, group, groupLocked, settings, track, own, refresh, selectQuestion, submitAnswer, submitRevision, saveSettings],
   );
 }
 

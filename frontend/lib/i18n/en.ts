@@ -195,6 +195,8 @@ export const en = {
     donePseudonym: (p: string) => `Your pseudonym is ${p}.`,
     doneNext:
       'When ACAPS has a question for you, you’ll get a private link. You can change your anonymity level from any question.',
+    doneLinkHelp: 'This is your personal link to the expert app. Bookmark it: it always opens your newest question.',
+    doneOpenApp: 'Open the expert app',
     invalidTitle: 'This invite link isn’t valid.',
     invalidHelp: 'Ask ACAPS for a new invite.',
     usedTitle: 'This invite has already been used.',

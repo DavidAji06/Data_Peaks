@@ -106,9 +106,9 @@ export async function summariseQuestion(source: DataSource, questionId: string):
 }
 
 /** Join the panel from an invite link. 404 unknown invite, 409 already used, 422 invalid. */
-export async function joinPanel(source: DataSource, token: string, body: ApiJoinIn): Promise<{ pseudonym: string }> {
+export async function joinPanel(source: DataSource, token: string, body: ApiJoinIn): Promise<{ pseudonym: string; appLink: string | null }> {
   const r = await request<ApiJoinOut>(source, 'POST', `/join/${enc(token)}`, body);
-  return { pseudonym: r.pseudonym };
+  return { pseudonym: r.pseudonym, appLink: r.app_link ?? null };
 }
 
 /** Change privacy settings. Only the fields sent change. */

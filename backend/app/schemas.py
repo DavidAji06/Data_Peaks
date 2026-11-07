@@ -79,6 +79,15 @@ class SettingsUpdate(BaseModel):
     topics: list[str] | None = Field(default=None, max_length=10)
     language: str | None = Field(default=None, min_length=2, max_length=10)
     max_open_questions: int | None = Field(default=None, ge=1, le=5)
+    # Countries followed on the Home map; questions are routed by these. [] = follow nothing.
+    followed: list[str] | None = Field(default=None, max_length=60)
+
+    @field_validator("followed")
+    @classmethod
+    def check_followed(cls, value: list[str] | None) -> list[str] | None:
+        if value is not None and any(not 2 <= len(v.strip()) <= 80 or "," in v for v in value):
+            raise ValueError("Each followed country must be 2-80 characters, without commas")
+        return value
 
     @field_validator("pseudonym")
     @classmethod
