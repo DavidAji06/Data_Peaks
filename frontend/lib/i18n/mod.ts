@@ -8,8 +8,8 @@ export const mod = {
     alerts: 'Alerts',
     questions: 'Questions',
     risks: 'Risks',
-    leaderboard: 'Calibration',
-    panel: 'Panel',
+    leaderboard: 'Expert overview',
+    panel: 'Expert management',
   },
   title: 'ACAPS moderator',
   noAuth: 'ACAPS staff only',
@@ -22,7 +22,7 @@ export const mod = {
   backTo: (where: string) => `Back to ${where}`,
 
   panel: {
-    title: 'Expert panel',
+    title: 'Expert management',
     email: 'Email address',
     emailHelp: 'Used only to send the invite and their personal link. Never shown to other experts or the public.',
     emailPlaceholder: 'name@example.org',
@@ -224,7 +224,7 @@ export const mod = {
   },
 
   leaderboard: {
-    title: 'Calibration',
+    title: 'Expert overview',
     intro: (n: number) =>
       `Everyone on the panel: how much they take part and how well their forecasts matched what happened. Ranking needs at least ${n} resolved questions. Lower Brier is better.`,
     baseline: (b: string) => `Always saying 50% scores ${b}.`,

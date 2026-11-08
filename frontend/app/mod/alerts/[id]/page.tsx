@@ -154,6 +154,7 @@ async function AlertDetailView({ params }: { params: PageProps<'/mod/alerts/[id]
                 countries={splitCountries(risk?.country ?? alert.country)}
                 focusText={risk?.title}
                 reportText={[alert.matchedPlace, alert.report.title, alert.description].filter(Boolean).join(' · ')}
+                impactScore={alert.impactScore}
               />
             </Card>
           )}

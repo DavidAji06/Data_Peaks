@@ -11,7 +11,7 @@ import { mod } from '@/lib/i18n/mod';
 import type { DataSource, Panels } from '@/lib/types';
 import { ModSkeleton } from '../loading';
 
-export const metadata: Metadata = { title: 'Panel' };
+export const metadata: Metadata = { title: 'Expert management' };
 
 const t = mod.panel;
 const TABS = ['panels', 'requests', 'invitations'] as const;

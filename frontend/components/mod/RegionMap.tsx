@@ -58,6 +58,15 @@ const COLOURS = {
   sea: '#f8fafc',
 };
 
+/** Color scale based on impact score (1: Blue, 2: Green, 3: Lime, 4: Yellow, 5: Red). */
+export function getImpactColor(score: number | null | undefined): string {
+  if (!score || score <= 1) return '#2563eb'; // Blue (very low)
+  if (score === 2) return '#10b981';          // Green (low)
+  if (score === 3) return '#84cc16';          // Lime/Yellow-green (medium)
+  if (score === 4) return '#eab308';          // Yellow (high)
+  return '#e0263c';                           // Red (critical)
+}
+
 type Zone = 'affected' | 'ring1' | 'ring2';
 
 const noop = () => () => {};
@@ -72,6 +81,8 @@ interface Props {
   focusText?: string | null;
   /** Report text on alert pages: known places in it are marked too. */
   reportText?: string | null;
+  /** Impact score 1-5 to color event markers. */
+  impactScore?: number | null;
 }
 
 export function RegionMap(props: Props) {
@@ -80,7 +91,7 @@ export function RegionMap(props: Props) {
   return <RegionMapInner {...props} />;
 }
 
-function RegionMapInner({ countries, focusText, reportText }: Props) {
+function RegionMapInner({ countries, focusText, reportText, impactScore }: Props) {
   const [hover, setHover] = useState<number | null>(null);
   const [zoom, setZoom] = useState(1);
   const [show, setShow] = useState({ ring1: true, ring2: true, distance: true });
@@ -214,32 +225,35 @@ function RegionMapInner({ countries, focusText, reportText }: Props) {
               </text>
             ) : null,
           )}
-          {model.paths.markers.map(({ place, main, xy }) => (
-            <g key={place.name} style={{ pointerEvents: 'none' }}>
-              <circle
-                cx={xy[0]}
-                cy={xy[1]}
-                r={(main ? 5.5 : 4) / zoom}
-                style={{ fill: main ? COLOURS.ring : 'var(--acaps-ink, #0f172a)', stroke: '#ffffff', strokeWidth: 1.75 / zoom }}
-              />
-              <text
-                x={xy[0] + 8 / zoom}
-                y={xy[1]}
-                dominantBaseline="middle"
-                style={{
-                  fill: 'var(--acaps-ink, #0f172a)',
-                  stroke: '#ffffff',
-                  strokeWidth: 3 / zoom,
-                  paintOrder: 'stroke',
-                  fontFamily: 'var(--font-condensed)',
-                  fontWeight: 700,
-                  fontSize: (main ? 12 : 11) / zoom,
-                }}
-              >
-                {place.name}
-              </text>
-            </g>
-          ))}
+          {model.paths.markers.map(({ place, main, xy }) => {
+            const markerColor = impactScore ? getImpactColor(impactScore) : main ? COLOURS.ring : 'var(--acaps-ink, #0f172a)';
+            return (
+              <g key={place.name} style={{ pointerEvents: 'none' }}>
+                <circle
+                  cx={xy[0]}
+                  cy={xy[1]}
+                  r={(main ? 6 : 4.5) / zoom}
+                  style={{ fill: markerColor, stroke: '#ffffff', strokeWidth: 1.75 / zoom }}
+                />
+                <text
+                  x={xy[0] + 8 / zoom}
+                  y={xy[1]}
+                  dominantBaseline="middle"
+                  style={{
+                    fill: 'var(--acaps-ink, #0f172a)',
+                    stroke: '#ffffff',
+                    strokeWidth: 3 / zoom,
+                    paintOrder: 'stroke',
+                    fontFamily: 'var(--font-condensed)',
+                    fontWeight: 700,
+                    fontSize: (main ? 12 : 11) / zoom,
+                  }}
+                >
+                  {place.name}
+                </text>
+              </g>
+            );
+          })}
         </svg>
 
         {hover !== null && (
@@ -262,6 +276,12 @@ function RegionMapInner({ countries, focusText, reportText }: Props) {
           <span className="inline-block h-3 w-4 rounded-sm" style={{ background: COLOURS.affected }} aria-hidden="true" />
           {t.affected}
         </span>
+        {impactScore != null && (
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-3 w-3 rounded-full border border-white" style={{ background: getImpactColor(impactScore) }} aria-hidden="true" />
+            Impact {impactScore}/5
+          </span>
+        )}
         <Toggle on={show.ring1} onChange={(v) => setShow((s) => ({ ...s, ring1: v }))} swatch={COLOURS.ring1} label={t.ring1} />
         <Toggle on={show.ring2} onChange={(v) => setShow((s) => ({ ...s, ring2: v }))} swatch={COLOURS.ring2} label={t.ring2} />
         <Toggle on={show.distance} onChange={(v) => setShow((s) => ({ ...s, distance: v }))} dashed label={t.distance} />

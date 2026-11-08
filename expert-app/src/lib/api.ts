@@ -127,7 +127,8 @@ export interface ApiContext {
   country: string;
   lat: number;
   lng: number;
-  risks: { id: string; title: string; risk_level: string | null; priority_score: number | null }[];
+  risks: { id: string; title: string; risk_level: string | null; priority_score: number | null; impact?: number | null }[];
+  impact_score?: number | null;
   has_question: boolean;
 }
 

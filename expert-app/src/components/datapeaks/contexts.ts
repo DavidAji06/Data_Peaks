@@ -12,6 +12,7 @@ export interface ContextRisk {
   title: string;
   riskLevel: string;
   priority: number | null;
+  impact?: number | null;
 }
 
 export interface ConflictContext {
@@ -23,10 +24,21 @@ export interface ConflictContext {
   /** Highest-priority risk in this country. */
   riskTitle: string;
   riskLevel: string;
+  /** Impact score (1–5) based on severity. */
+  impactScore: number | null;
   /** Up to three ranked risks, highest priority first. */
   risks: ContextRisk[];
   /** True when the expert behind this link has an open question here. */
   hasQuestion: boolean;
+}
+
+/** Color scale based on impact score (1: Blue, 2: Green, 3: Lime, 4: Yellow, 5: Red). */
+export function getImpactColor(score: number | null | undefined): string {
+  if (!score || score <= 1) return "#2563EB"; // Blue (very low)
+  if (score === 2) return "#10B981";          // Green (low)
+  if (score === 3) return "#84CC16";          // Lime/Yellow-green (medium)
+  if (score === 4) return "#EAB308";          // Yellow (high)
+  return "#E0263C";                           // Red (critical / high)
 }
 
 // French country names for the UI only; the data comes from the backend.
@@ -38,7 +50,15 @@ const FR: Record<string, string> = {
 };
 
 function toContext(c: ApiContext): ConflictContext {
-  const risks = c.risks.map((r) => ({ id: r.id, title: r.title, riskLevel: r.risk_level ?? "—", priority: r.priority_score }));
+  const risks = c.risks.map((r) => ({ id: r.id, title: r.title, riskLevel: r.risk_level ?? "—", priority: r.priority_score, impact: r.impact }));
+  let score = c.impact_score ?? risks.find((r) => r.impact != null)?.impact ?? null;
+  if (score == null) {
+    const lvl = (risks[0]?.riskLevel ?? "").toLowerCase();
+    if (lvl.includes("very high") || lvl.includes("critical")) score = 5;
+    else if (lvl.includes("high")) score = 4;
+    else if (lvl.includes("medium") || lvl.includes("moderate")) score = 3;
+    else if (lvl.includes("low")) score = 2;
+  }
   return {
     id: c.iso3.toLowerCase(),
     name: { en: c.country, fr: FR[c.iso3] ?? c.country },
@@ -47,6 +67,7 @@ function toContext(c: ApiContext): ConflictContext {
     lng: c.lng,
     riskTitle: risks[0]?.title ?? "",
     riskLevel: risks[0]?.riskLevel ?? "—",
+    impactScore: score,
     risks,
     hasQuestion: c.has_question,
   };

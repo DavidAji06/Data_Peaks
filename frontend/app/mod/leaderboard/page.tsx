@@ -7,7 +7,7 @@ import { mod } from '@/lib/i18n/mod';
 import type { Participation } from '@/lib/types';
 import { ModSkeleton } from '../loading';
 
-export const metadata: Metadata = { title: 'Calibration' };
+export const metadata: Metadata = { title: 'Expert overview' };
 
 const t = mod.leaderboard;
 
