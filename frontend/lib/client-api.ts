@@ -66,6 +66,16 @@ export async function resolveQuestion(source: DataSource, questionId: string, ou
   );
 }
 
+/** Moderator action: advance question to Delphi Round 2 earlier. */
+export async function advanceQuestionRound(source: DataSource, questionId: string): Promise<{ action: string; delphi_round: number }> {
+  return request(source, 'POST', `/moderator/questions/${enc(questionId)}/advance`, {}, moderatorBaseFor(source));
+}
+
+/** Moderator action: close question to finalize Delphi results. */
+export async function closeQuestion(source: DataSource, questionId: string): Promise<{ action: string; status: string }> {
+  return request(source, 'POST', `/moderator/questions/${enc(questionId)}/close`, {}, moderatorBaseFor(source));
+}
+
 /** Ask the backend for an AI summary of the reasons (moderator only). Empty themes = the ML code isn't connected. */
 export async function summariseQuestion(source: DataSource, questionId: string): Promise<{ reasonCount: number; themes: Themes }> {
   const r = await request<ApiSummariseOut>(source, 'POST', `/moderator/questions/${enc(questionId)}/summarise`, undefined, moderatorBaseFor(source));

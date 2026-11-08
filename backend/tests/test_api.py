@@ -778,3 +778,258 @@ def test_brevo_payload_from_message():
     assert payload["sender"] == {"email": "panel@example.org", "name": "ACAPS panel"}
     assert payload["to"] == [{"email": "x@example.org"}]
     assert "https://app/?token=t" in payload["textContent"] and "https://app/?token=t" in payload["htmlContent"]
+
+
+# ---------------------------------------------------------------- Delphi Consensus & Convergence Tests
+
+def test_delphi_round_2_storage_and_separation(client):
+    # Initial state: expert-b (0.8) and expert-c (0.4) have answered round 1.
+    # expert-a submits round 1 answer (tentative)
+    r1_payload = {"probability": 0.6, "reason": "Initial tentative assessment based on troop movements"}
+    assert client.post("/q/tok-a/responses", json=r1_payload).status_code == 200
+
+    mod_view = client.get("/moderator/questions/Q001", headers=MOD).json()
+    assert mod_view["phase"] == "Phase 2: Delphi Consensus"  # 3 of 3 answers (100% >= 80% auto-advances to Round 2)
+    assert len(mod_view["tentative_responses"]) == 3
+    assert len(mod_view["finalised_responses"]) == 0
+
+    exp_a_resp = next(r for r in mod_view["responses"] if r["label"] == "Analyst A")
+    assert exp_a_resp["status"] == "tentative"
+    assert exp_a_resp["decision"] == "pending_round_2"
+    assert exp_a_resp["is_tentative"] is True
+    assert exp_a_resp["is_finalised"] is False
+    assert exp_a_resp["first_probability"] == 0.6
+    assert exp_a_resp["round_1"]["probability"] == 0.6
+
+    # expert-a submits round 2 revision (finalised)
+    r2_payload = {"probability": 0.7, "reason": "Adjusted higher after reviewing peer consensus and supply constraints"}
+    assert client.post("/q/tok-a/revision", json=r2_payload).status_code == 200
+
+    mod_view_2 = client.get("/moderator/questions/Q001", headers=MOD).json()
+    assert len(mod_view_2["tentative_responses"]) == 2  # expert-b and expert-c
+    assert len(mod_view_2["finalised_responses"]) == 1  # expert-a
+
+    exp_a_resp_2 = next(r for r in mod_view_2["responses"] if r["label"] == "Analyst A")
+    assert exp_a_resp_2["status"] == "finalised"
+    assert exp_a_resp_2["decision"] == "adjusted"
+    assert exp_a_resp_2["is_tentative"] is False
+    assert exp_a_resp_2["is_finalised"] is True
+    assert exp_a_resp_2["first_probability"] == 0.6
+    assert exp_a_resp_2["latest_probability"] == 0.7
+    assert exp_a_resp_2["round_2"]["probability"] == 0.7
+    assert exp_a_resp_2["shift"] == pytest.approx(0.1)
+
+
+def test_delphi_consensus_metrics_calculation(client):
+    # Add expert-a answer and revision to test convergence
+    client.post("/q/tok-a/responses", json={"probability": 0.60, "reason": "R1 reason"})
+    client.post("/q/tok-a/revision", json={"probability": 0.65, "reason": "Adjusted upward"})
+
+    # Check moderator detail
+    d = client.get("/moderator/questions/Q001", headers=MOD).json()
+    metrics = d["consensus_metrics"]
+    assert metrics is not None
+    assert metrics["round_1"]["count"] == 3
+    assert metrics["round_2"]["count"] == 1
+    assert metrics["latest"]["count"] == 3
+    assert metrics["adjusted_count"] == 1
+    assert metrics["retained_count"] == 0
+    assert metrics["round_1"]["spread"] == pytest.approx(0.4)  # 0.8 - 0.4
+
+
+def test_nlp_theme_detection_agreement_and_disagreement():
+    from ml.pipeline.nlp_themes import extract_themes_nlp
+    reasons = [
+        "RSF units continue to position along primary road networks surrounding Al Obeid.",
+        "Severe market shortages and fuel price spikes in Al Obeid indicate active access constraints.",
+        "Heavy troop concentrations near western access corridors; contacts report increasing interdictions on commercial transit.",
+        "SAF retook Bara in March, which widens the defensive buffer north of Al Obeid to prevent encirclement.",
+        "Fighting has shifted to South Kordofan. Armed groups lack capacity to besiege the town.",
+        "Drone strikes and attacks on the El Obeid-Kosti road suggest armed groups are testing supply routes.",
+    ]
+    themes = extract_themes_nlp(reasons)
+    assert len(themes["agreement"]) > 0
+    assert len(themes["disagreement"]) > 0
+    assert len(themes["new_information"]) > 0
+    assert any("buffer" in d.lower() or "bara" in d.lower() or "defensive" in d.lower() for d in themes["disagreement"])
+
+
+def test_group_view_delphi_stats(client):
+    add_answers("de")  # reaches 5 answers
+    client.post("/q/tok-a/responses", json={"probability": 0.55, "reason": "First"})
+    client.post("/q/tok-a/revision", json={"probability": 0.60, "reason": "Revised"})
+
+    group = client.get("/q/tok-a/group").json()
+    assert group["response_count"] >= 5
+    assert group["round_1_count"] >= 5
+    assert group["round_2_count"] == 1
+    assert group["round_1_median"] is not None
+    assert group["median"] is not None
+
+
+def test_delphi_single_user_transition_workflow(client):
+    # Setup single-user question
+    override = app.dependency_overrides[get_db]
+    db = next(override())
+    q = Question(
+        id="Q_TEST_SINGLE",
+        risk_id="R1",
+        text="Single user test question?",
+        resolution_criteria="Criteria",
+        deadline=date(2030, 1, 1),
+        status="open",
+        delphi_round=1,
+    )
+    db.add(q)
+    db.add(Invite(token="tok-single-expert", question_id="Q_TEST_SINGLE", expert_id="expert-a"))
+    db.commit()
+    db.close()
+
+    # Step 1: Initial state before answers
+    mod_0 = client.get("/moderator/questions/Q_TEST_SINGLE", headers=MOD).json()
+    assert mod_0["phase"] == "Phase 1: Initial Elicitation"
+    assert mod_0["question"]["status"] == "open"
+    assert mod_0["question"]["delphi_round"] == 1
+    assert mod_0["participation"]["answered"] == 0
+
+    exp_0 = client.get("/q/tok-single-expert", params={"question_id": "Q_TEST_SINGLE"}).json()
+    assert exp_0["answered"] is False
+    assert exp_0["revised"] is False
+    assert exp_0["question"]["delphi_round"] == 1
+
+    # Step 2: Expert submits Round 1 answer
+    r1 = client.post("/q/tok-single-expert/responses", params={"question_id": "Q_TEST_SINGLE"}, json={
+        "probability": 0.65,
+        "reason": "Tentative forecast based on local information."
+    })
+    assert r1.status_code == 200
+    assert r1.json()["delphi_round"] == 2
+    assert r1.json()["transition"] == "advanced_to_round_2"
+
+    # Step 3: Check status after Round 1 answer
+    mod_1 = client.get("/moderator/questions/Q_TEST_SINGLE", headers=MOD).json()
+    assert mod_1["phase"] == "Phase 2: Delphi Consensus"
+    assert mod_1["question"]["status"] == "open"
+    assert mod_1["question"]["delphi_round"] == 2
+    assert mod_1["participation"]["answered"] == 1
+    assert mod_1["participation"]["revised"] == 0
+    assert len(mod_1["tentative_responses"]) == 1
+    assert len(mod_1["finalised_responses"]) == 0
+
+    exp_1 = client.get("/q/tok-single-expert", params={"question_id": "Q_TEST_SINGLE"}).json()
+    assert exp_1["answered"] is True
+    assert exp_1["revised"] is False
+    assert exp_1["question"]["delphi_round"] == 2
+
+    # Step 4: Expert submits Round 2 revision
+    r2 = client.post("/q/tok-single-expert/revision", params={"question_id": "Q_TEST_SINGLE"}, json={
+        "probability": 0.65,
+        "reason": "Maintained estimate at 65% in Delphi round 2."
+    })
+    assert r2.status_code == 200
+    assert r2.json()["question_status"] == "closed"
+    assert r2.json()["transition"] == "closed_with_final_results"
+
+    # Step 5: Check status after Round 2 answer (closed with final results)
+    mod_2 = client.get("/moderator/questions/Q_TEST_SINGLE", headers=MOD).json()
+    assert mod_2["phase"] == "Delphi Completed (Final Results)"
+    assert mod_2["question"]["status"] == "closed"
+    assert mod_2["participation"]["answered"] == 1
+    assert mod_2["participation"]["revised"] == 1
+    assert len(mod_2["tentative_responses"]) == 0
+    assert len(mod_2["finalised_responses"]) == 1
+    assert mod_2["finalised_responses"][0]["decision"] == "kept"
+
+    exp_2 = client.get("/q/tok-single-expert", params={"question_id": "Q_TEST_SINGLE"}).json()
+    assert exp_2["answered"] is True
+    assert exp_2["revised"] is True
+    assert exp_2["question"]["status"] == "closed"
+
+
+def test_delphi_admin_manual_advance_and_close(client):
+    override = app.dependency_overrides[get_db]
+    db = next(override())
+    q = Question(
+        id="Q_TEST_MANUAL",
+        risk_id="R1",
+        text="Manual advance test question?",
+        resolution_criteria="Criteria",
+        deadline=date(2030, 1, 1),
+        status="open",
+        delphi_round=1,
+    )
+    db.add(q)
+    db.add(Invite(token="tok-manual-a", question_id="Q_TEST_MANUAL", expert_id="expert-a"))
+    db.add(Invite(token="tok-manual-b", question_id="Q_TEST_MANUAL", expert_id="expert-b"))
+    db.commit()
+    db.close()
+
+    # Admin advances before any responses
+    adv = client.post("/moderator/questions/Q_TEST_MANUAL/advance", headers=MOD)
+    assert adv.status_code == 200
+    assert adv.json()["delphi_round"] == 2
+
+    mod_1 = client.get("/moderator/questions/Q_TEST_MANUAL", headers=MOD).json()
+    assert mod_1["phase"] == "Phase 2: Delphi Consensus"
+
+    # Admin closes question to finalize
+    cls = client.post("/moderator/questions/Q_TEST_MANUAL/close", headers=MOD)
+    assert cls.status_code == 200
+    assert cls.json()["status"] == "closed"
+
+    mod_2 = client.get("/moderator/questions/Q_TEST_MANUAL", headers=MOD).json()
+    assert mod_2["phase"] == "Delphi Completed (Final Results)"
+    assert mod_2["question"]["status"] == "closed"
+
+
+def test_moderator_questions_list_delphi_phase_and_rounds(client):
+    override = app.dependency_overrides[get_db]
+    db = next(override())
+    # Create Q_P1 (Phase 1, round 1, open)
+    q1 = Question(
+        id="Q_P1",
+        risk_id="R1",
+        text="Phase 1 test question?",
+        resolution_criteria="Criteria",
+        deadline=date(2030, 1, 1),
+        status="open",
+        delphi_round=1,
+    )
+    # Create Q_P2 (Phase 2, round 2, open)
+    q2 = Question(
+        id="Q_P2",
+        risk_id="R1",
+        text="Phase 2 test question?",
+        resolution_criteria="Criteria",
+        deadline=date(2030, 1, 1),
+        status="open",
+        delphi_round=2,
+    )
+    # Create Q_CLOSED (Delphi completed, closed)
+    q3 = Question(
+        id="Q_P3_CLOSED",
+        risk_id="R1",
+        text="Delphi completed test question?",
+        resolution_criteria="Criteria",
+        deadline=date(2030, 1, 1),
+        status="closed",
+        delphi_round=2,
+    )
+    db.add_all([q1, q2, q3])
+    db.commit()
+    db.close()
+
+    res = client.get("/moderator/questions", headers=MOD)
+    assert res.status_code == 200
+    by_id = {item["id"]: item for item in res.json()}
+
+    assert by_id["Q_P1"]["delphi_round"] == 1
+    assert by_id["Q_P1"]["phase"] == "Phase 1: Initial Elicitation"
+
+    assert by_id["Q_P2"]["delphi_round"] == 2
+    assert by_id["Q_P2"]["phase"] == "Phase 2: Delphi Consensus"
+
+    assert by_id["Q_P3_CLOSED"]["delphi_round"] == 2
+    assert by_id["Q_P3_CLOSED"]["status"] == "closed"
+    assert by_id["Q_P3_CLOSED"]["phase"] == "Delphi Completed (Final Results)"
+

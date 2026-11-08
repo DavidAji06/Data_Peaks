@@ -50,7 +50,7 @@ export interface ApiSimilarRisk {
 }
 
 export interface ApiExpertQuestion {
-  question: { id: string; text: string; resolution_criteria: string; deadline: string; status: QuestionStatus };
+  question: { id: string; text: string; resolution_criteria: string; deadline: string; status: QuestionStatus; delphi_round?: number };
   risk: { id: string; title: string; country: string; risk_level: string | null };
   trigger_update: ApiAlert | null;
   similar_risks: ApiSimilarRisk[];
@@ -58,6 +58,10 @@ export interface ApiExpertQuestion {
   revised: boolean;
   /** The expert's own answers, probabilities 0–1 (older backends omit this). */
   own?: { first: number | null; latest: number | null; first_reason: string };
+  own_response?: {
+    round_1?: { probability: number; reason: string } | null;
+    round_2?: { probability: number; reason: string } | null;
+  } | null;
 }
 
 /** GET /q/{token}/questions: every question the expert was invited to, open ones first. */
@@ -66,6 +70,7 @@ export interface ApiQuestionSummary {
   text: string;
   deadline: string;
   status: QuestionStatus;
+  delphi_round?: number;
   risk: { id: string; title: string; country: string };
   answered: boolean;
   revised: boolean;

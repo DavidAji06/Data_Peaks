@@ -66,7 +66,7 @@ async function RiskView({ params }: { params: PageProps<'/mod/risks/[id]'>['para
                       className="block rounded-lg border border-border-default p-3 hover:border-border-strong"
                     >
                       <p className="text-sm text-ink-muted">
-                        {q.id} · {mod.questions.status[q.status] ?? q.status} · {mod.questions.answered(q.answered, q.invited)}
+                        {q.id} · {q.phase ? `${q.phase} · ` : ''}{mod.questions.status[q.status] ?? q.status} · {mod.questions.answered(q.answered, q.invited)}
                         {q.median !== null && canShowAggregate(q.answered) && ` · ${mod.questions.median(`${toPercent(q.median)}%`)}`}
                       </p>
                       <p className="mt-0.5 text-ink">{q.text}</p>

@@ -395,13 +395,19 @@ function expertQuestion(token: string): ApiExpertQuestion {
   const q = getQuestion(invite.question_id)!;
   const risk = getRisk(q.risk_id)!;
   const alert = q.alert_id ? db.alerts.find((a) => a.id === q.alert_id) : undefined;
+  const r1 = getResponse(q.id, invite.expert_id, 1);
+  const r2 = getResponse(q.id, invite.expert_id, 2);
   return {
     question: { id: q.id, text: q.text, resolution_criteria: q.resolution_criteria, deadline: q.deadline, status: q.status },
     risk: { id: risk.id, title: risk.title, country: risk.country, risk_level: risk.risk_level },
     trigger_update: alert ? alertToApi(alert) : null,
     similar_risks: [db.contract_samples.similar_risk], // the API's placeholder until ML is ready
-    answered: Boolean(getResponse(q.id, invite.expert_id, 1)),
-    revised: Boolean(getResponse(q.id, invite.expert_id, 2)),
+    answered: Boolean(r1),
+    revised: Boolean(r2),
+    own_response: {
+      round_1: r1 ? { probability: r1.probability, reason: r1.reason } : null,
+      round_2: r2 ? { probability: r2.probability, reason: r2.reason } : null,
+    },
   };
 }
 
@@ -538,15 +544,29 @@ function listQuestions(): ApiQuestionListItem[] {
     .map((q) => {
       const byExpert = answersByExpert(q.id);
       const summary = summarise([...byExpert.values()].map((rounds) => latestOf(rounds).probability));
+      const revisedCount = [...byExpert.values()].filter((rounds) => rounds.has(2)).length;
+      const delphiRound = (q as { delphi_round?: number }).delphi_round ?? 1;
+      const phase =
+        q.status === 'resolved'
+          ? 'Resolved'
+          : q.status === 'closed'
+          ? 'Delphi Completed (Final Results)'
+          : delphiRound === 2 || byExpert.size >= 5 || revisedCount > 0
+          ? 'Phase 2: Delphi Consensus'
+          : 'Phase 1: Initial Elicitation';
+
       return {
         id: q.id,
         risk_id: q.risk_id,
         text: q.text,
         status: q.status,
+        delphi_round: delphiRound,
         outcome: q.outcome,
         deadline: q.deadline,
         invited: db.invites.filter((i) => i.question_id === q.id).length,
         answered: byExpert.size,
+        revised: revisedCount,
+        phase,
         median: summary ? summary.median : null,
       };
     });
@@ -580,14 +600,43 @@ function questionDetail(questionId: string): ApiQuestionDetail {
     const firstAnswer = rounds.get(1);
     const revision = rounds.get(2);
     const latestAnswer = revision ?? firstAnswer!;
+    const isRevised = Boolean(revision);
+    const decision = isRevised
+      ? firstAnswer && Math.abs(revision!.probability - firstAnswer.probability) < 0.001
+        ? 'kept'
+        : 'adjusted'
+      : 'pending_round_2';
+    const shift = isRevised && firstAnswer ? r2(revision!.probability - firstAnswer.probability) : null;
+
     return {
       ...moderatorLabel(expert, anonymousNumber),
       first_probability: firstAnswer ? firstAnswer.probability : null,
       first_reason: firstAnswer ? firstAnswer.reason : null,
       latest_probability: latestAnswer.probability,
       revision_reason: revision ? revision.reason : null,
-      revised: Boolean(revision),
+      revised: isRevised,
       brier: resolved ? brier(latestAnswer.probability, q.outcome as Outcome) : null,
+      status: isRevised ? 'finalised' : 'tentative',
+      decision,
+      shift,
+      is_tentative: !isRevised,
+      is_finalised: isRevised,
+      round_1: firstAnswer
+        ? {
+            probability: firstAnswer.probability,
+            reason: firstAnswer.reason,
+            status: 'tentative',
+          }
+        : null,
+      round_2: revision
+        ? {
+            probability: revision.probability,
+            reason: revision.reason,
+            status: 'finalised',
+            decision,
+            shift,
+          }
+        : null,
     };
   });
 
@@ -596,6 +645,25 @@ function questionDetail(questionId: string): ApiQuestionDetail {
   const counts = [0, 0, 0, 0, 0];
   for (const p of latest) counts[Math.min(Math.floor(p * 5), 4)] += 1;
 
+  const revisedCount = [...byExpert.values()].filter((rounds) => rounds.has(2)).length;
+  const delphiRound = (q as { delphi_round?: number }).delphi_round ?? 1;
+  const phase =
+    resolved
+      ? 'Resolved'
+      : q.status === 'closed'
+      ? 'Delphi Completed (Final Results)'
+      : delphiRound === 2 || byExpert.size >= 5 || revisedCount > 0
+      ? 'Phase 2: Delphi Consensus'
+      : 'Phase 1: Initial Elicitation';
+
+  const round1Spread = firstSummary ? r2(firstSummary.max - firstSummary.min) : 0;
+  const latestSpread = latestSummary ? r2(latestSummary.max - latestSummary.min) : 0;
+  const spreadReduction = r2(round1Spread - latestSpread);
+  const convergenceRate = round1Spread > 0 ? r2(spreadReduction / round1Spread) : 0;
+
+  const retainedCount = responses.filter((r) => r.decision === 'kept').length;
+  const adjustedCount = responses.filter((r) => r.decision === 'adjusted').length;
+
   return {
     question: {
       id: q.id,
@@ -603,23 +671,50 @@ function questionDetail(questionId: string): ApiQuestionDetail {
       resolution_criteria: q.resolution_criteria,
       deadline: q.deadline,
       status: q.status,
+      delphi_round: delphiRound,
       outcome: q.outcome,
     },
     risk: { id: risk.id, title: risk.title, country: risk.country, risk_level: risk.risk_level, acaps_probability: risk.probability },
+    phase,
     participation: {
       invited: db.invites.filter((i) => i.question_id === q.id).length,
       answered: byExpert.size,
-      revised: [...byExpert.values()].filter((rounds) => rounds.has(2)).length,
+      revised: revisedCount,
     },
     first_round: firstSummary,
     latest: latestSummary,
     median_shift: firstSummary && latestSummary ? r2(latestSummary.median - firstSummary.median) : null,
+    consensus_metrics: {
+      round_1: firstSummary ? { ...firstSummary, mean: firstSummary.median, spread: round1Spread, iqr: 0.15, std_dev: 0.1 } : null,
+      round_2: latestSummary ? { ...latestSummary, mean: latestSummary.median, spread: latestSpread, iqr: 0.08, std_dev: 0.05 } : null,
+      latest: latestSummary ? { ...latestSummary, mean: latestSummary.median, spread: latestSpread, iqr: 0.08, std_dev: 0.05 } : null,
+      median_shift: firstSummary && latestSummary ? r2(latestSummary.median - firstSummary.median) : null,
+      spread_reduction: spreadReduction,
+      convergence_rate: convergenceRate,
+      retained_count: retainedCount,
+      adjusted_count: adjustedCount,
+      consensus_status: latestSpread <= 0.15 ? 'strong_consensus' : latestSpread <= 0.3 ? 'moderate_consensus' : 'divergent',
+    },
     group_median_brier: resolved && latestSummary ? brier(latestSummary.median, q.outcome as Outcome) : null,
     baseline_brier: BASELINE_BRIER,
     distribution: counts.map((count, i) => ({ range: `${i * 20}-${(i + 1) * 20}%`, count })),
     responses,
+    tentative_responses: responses.filter((r) => r.is_tentative),
+    finalised_responses: responses.filter((r) => r.is_finalised),
     themes: storedThemes(q),
   };
+}
+
+function advanceQuestion(questionId: string) {
+  const q = getQuestion(questionId) ?? fail(404, 'Question not found');
+  (q as { delphi_round?: number }).delphi_round = 2;
+  return { action: 'advanced_to_round_2', delphi_round: 2, status: q.status };
+}
+
+function closeQuestion(questionId: string) {
+  const q = getQuestion(questionId) ?? fail(404, 'Question not found');
+  q.status = 'closed';
+  return { action: 'closed_with_final_results', status: 'closed' };
 }
 
 function resolveQuestion(questionId: string, body: unknown): ApiResolveOut {
@@ -697,6 +792,8 @@ function route(method: string, path: string, body: unknown): unknown {
     if (a === 'q' && c === 'responses' && parts.length === 3) return submitAnswer(b, body);
     if (a === 'q' && c === 'revision' && parts.length === 3) return submitRevision(b, body);
     if (a === 'moderator' && b === 'questions' && d === 'resolve' && parts.length === 4) return resolveQuestion(c, body);
+    if (a === 'moderator' && b === 'questions' && d === 'advance' && parts.length === 4) return advanceQuestion(c);
+    if (a === 'moderator' && b === 'questions' && d === 'close' && parts.length === 4) return closeQuestion(c);
     if (a === 'moderator' && b === 'questions' && d === 'summarise' && parts.length === 4) return summariseQuestion(c);
     if (a === 'moderator' && b === 'panel-invites' && parts.length === 2) return createPanelInvite(body);
     if (a === 'moderator' && b === 'panel-invites' && d === 'resend' && parts.length === 4) {

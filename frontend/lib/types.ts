@@ -64,6 +64,10 @@ export interface ApiExpertQuestion {
   similar_risks: ApiSimilarRisk[];
   answered: boolean;
   revised: boolean;
+  own_response?: {
+    round_1?: { probability: number; reason: string } | null;
+    round_2?: { probability: number; reason: string } | null;
+  } | null;
 }
 
 /** GET /q/{token}/settings (backend commit 3220fc0). Not on older backends: then 404. */
@@ -169,6 +173,9 @@ export interface ApiQuestionListItem {
   answered: number;
   median: number | null;
   weighted_mean?: number | null; // Brier-weighted, moderators only
+  delphi_round?: number;
+  revised?: number;
+  phase?: string;
 }
 
 export interface ApiRoundSummary {
@@ -189,6 +196,37 @@ export interface ApiModeratorResponse {
   revised: boolean;
   brier: number | null; // once resolved
   weight?: number | null; // Brier-based weight; null for anonymous answers
+  status?: 'tentative' | 'finalised';
+  decision?: 'kept' | 'adjusted' | 'pending_round_2';
+  shift?: number | null;
+  is_tentative?: boolean;
+  is_finalised?: boolean;
+  round_1?: { probability: number; reason: string; status: string; created_at?: string } | null;
+  round_2?: { probability: number; reason: string; status: string; decision: string; shift?: number | null; created_at?: string } | null;
+}
+
+export interface ApiRoundStats {
+  count: number;
+  median: number;
+  mean: number;
+  min: number;
+  max: number;
+  spread: number;
+  iqr: number;
+  std_dev: number;
+}
+
+export interface ApiConsensusMetrics {
+  round_1: ApiRoundStats | null;
+  round_2: ApiRoundStats | null;
+  latest: ApiRoundStats | null;
+  median_shift: number | null;
+  spread_reduction: number | null;
+  convergence_rate: number | null;
+  retained_count: number;
+  adjusted_count: number;
+  consensus_status: string;
+  mean_shift?: number;
 }
 
 /** Brier-weighted group estimate (moderators only). */
@@ -208,18 +246,23 @@ export interface ApiQuestionDetail {
     resolution_criteria: string;
     deadline: string;
     status: QuestionStatus;
+    delphi_round?: number;
     outcome: Outcome | null;
   };
   risk: { id: string; title: string; country: string; risk_level: string | null; acaps_probability: string | null };
   participation: { invited: number; answered: number; revised: number };
+  phase?: string;
   first_round: ApiRoundSummary | null;
   latest: ApiRoundSummary | null;
   median_shift: number | null;
+  consensus_metrics?: ApiConsensusMetrics | null;
   weighted?: ApiWeighted | null;
   group_median_brier: number | null;
   baseline_brier: number;
   distribution: { range: string; count: number }[]; // 5 bands of 20%
   responses: ApiModeratorResponse[];
+  tentative_responses?: ApiModeratorResponse[];
+  finalised_responses?: ApiModeratorResponse[];
   themes: ApiThemes;
 }
 
@@ -491,6 +534,9 @@ export interface QuestionListItem {
   answered: number;
   median: number | null;
   weightedMean: number | null;
+  delphiRound?: number;
+  revised?: number;
+  phase?: string;
 }
 
 export interface RoundSummary {
@@ -511,6 +557,37 @@ export interface ModeratorResponse {
   revised: boolean;
   brier: number | null;
   weight: number | null;
+  status?: 'tentative' | 'finalised';
+  decision?: 'kept' | 'adjusted' | 'pending_round_2';
+  shift?: number | null;
+  isTentative?: boolean;
+  isFinalised?: boolean;
+  round1?: { probability: number; reason: string; status: string; createdAt?: string } | null;
+  round2?: { probability: number; reason: string; status: string; decision: string; shift?: number | null; createdAt?: string } | null;
+}
+
+export interface RoundStats {
+  count: number;
+  median: number;
+  mean: number;
+  min: number;
+  max: number;
+  spread: number;
+  iqr: number;
+  stdDev: number;
+}
+
+export interface ConsensusMetrics {
+  round1: RoundStats | null;
+  round2: RoundStats | null;
+  latest: RoundStats | null;
+  medianShift: number | null;
+  spreadReduction: number | null;
+  convergenceRate: number | null;
+  retainedCount: number;
+  adjustedCount: number;
+  consensusStatus: string;
+  meanShift?: number;
 }
 
 export interface QuestionDetail {
@@ -524,14 +601,19 @@ export interface QuestionDetail {
   };
   risk: { id: string; title: string; country: string; riskLevel: string | null; acapsProbability: string | null };
   participation: { invited: number; answered: number; revised: number };
+  phase?: string;
+  delphiRound?: number;
   firstRound: RoundSummary | null;
   latest: RoundSummary | null;
   medianShift: number | null;
+  consensusMetrics?: ConsensusMetrics | null;
   weighted: { mean: number; median: number; count: number; label: string; expertsWithHistory: number } | null;
   groupMedianBrier: number | null;
   baselineBrier: number;
   distribution: { range: string; count: number }[];
   responses: ModeratorResponse[];
+  tentativeResponses?: ModeratorResponse[];
+  finalisedResponses?: ModeratorResponse[];
   themes: Themes;
 }
 

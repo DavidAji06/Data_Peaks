@@ -46,14 +46,14 @@ export function Card({ children, className = "" }: { children: ReactNode; classN
   return <div className={cn("rounded-lg border border-l-4 border-l-primary bg-card p-4 shadow-sm", className)}>{children}</div>;
 }
 
-export function Button({ children, onClick, variant = "primary", className = "" }: { children: ReactNode; onClick?: (() => void) | undefined; variant?: "primary" | "outline" | "navy" | "ghost"; className?: string }) {
+export function Button({ children, onClick, variant = "primary", className = "", disabled = false }: { children: ReactNode; onClick?: (() => void) | undefined; variant?: "primary" | "outline" | "navy" | "ghost"; className?: string; disabled?: boolean }) {
   const v = {
     primary: "bg-navy text-navy-foreground hover:opacity-90 font-display text-xl font-normal uppercase tracking-wide",
     navy: "bg-navy text-navy-foreground hover:opacity-90",
     outline: "border-2 border-navy text-navy hover:bg-accent font-display text-xl font-normal uppercase tracking-wide",
     ghost: "text-primary-strong hover:bg-accent",
   };
-  return <button onClick={onClick} className={cn("min-h-12 rounded-md px-4 font-bold transition-colors", v[variant], className)}>{children}</button>;
+  return <button onClick={onClick} disabled={disabled} className={cn("min-h-12 rounded-md px-4 font-bold transition-colors disabled:opacity-50", v[variant], className)}>{children}</button>;
 }
 
 export function LangToggle({ lang, setLang, dark = false }: { lang: Lang; setLang: (l: Lang) => void; dark?: boolean }) {

@@ -15,6 +15,8 @@ const ALLOWED = [
   /^alerts\/[^/]+\/decision$/,
   /^moderator\/questions\/[^/]+\/resolve$/,
   /^moderator\/questions\/[^/]+\/summarise$/,
+  /^moderator\/questions\/[^/]+\/advance$/,
+  /^moderator\/questions\/[^/]+\/close$/,
   /^moderator\/panel-invites$/,
   /^moderator\/panel-invites\/[^/]+\/resend$/,
   /^moderator\/panel-memberships\/\d+\/decision$/,

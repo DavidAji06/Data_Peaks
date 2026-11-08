@@ -102,8 +102,8 @@ _summarising: set[str] = set()  # Questions with a theme summary in progress
 _summary_lock = threading.Lock()
 
 
-def summarise_question(question_id: str, session_factory=SessionLocal):
-    """Background job: ask the LLM once for themes in the experts' reasons and store them."""
+def summarise_question(question_id: str, session_factory=SessionLocal, force: bool = False):
+    """Background job: ask the LLM for themes in the experts' reasons and store them."""
     with _summary_lock:
         if question_id in _summarising:
             return
@@ -111,9 +111,11 @@ def summarise_question(question_id: str, session_factory=SessionLocal):
     db = session_factory()
     try:
         question = db.get(Question, question_id)
-        if question is None or question.themes:
+        if question is None or (question.themes and not force):
             return
         reasons = [r.reason for r in latest_answers(db, question_id).values()]
+        if len(reasons) < MIN_GROUP_SIZE:  # Themes from a smaller group could point at one person
+            return
         themes = ml_outputs.summarise_reasons(reasons)
         if any(themes.values()):  # On failure nothing is stored, so the app keeps its fallback text
             question.themes = json.dumps(themes)
@@ -484,6 +486,7 @@ def expert_questions(token: str, db: Session = Depends(get_db)):
             "text": question.text,
             "deadline": question.deadline,
             "status": question.status,
+            "delphi_round": getattr(question, "delphi_round", 1),
             "risk": {"id": risk.id, "title": risk.title, "country": risk.country},
             "answered": get_response(db, question.id, expert.id, 1) is not None,
             "revised": get_response(db, question.id, expert.id, 2) is not None,
@@ -513,6 +516,7 @@ def expert_question(token: str, question_id: str | None = None, db: Session = De
             "resolution_criteria": question.resolution_criteria,
             "deadline": question.deadline,
             "status": question.status,
+            "delphi_round": getattr(question, "delphi_round", 1),
         },
         "risk": {
             "id": risk.id,
@@ -524,6 +528,22 @@ def expert_question(token: str, question_id: str | None = None, db: Session = De
         "similar_risks": ml_outputs.similar_risks(risk.id),
         "answered": first is not None,
         "revised": revision is not None,
+        # Both Delphi rounds of the expert's own answer, for the round-2 keep/adjust screen
+        "own_response": {
+            "round_1": {
+                "probability": first.probability,
+                "reason": first.reason,
+                "status": "tentative",
+                "created_at": first.created_at.isoformat() if first.created_at else None,
+            } if first else None,
+            "round_2": {
+                "probability": revision.probability,
+                "reason": revision.reason,
+                "status": "finalised",
+                "decision": "kept" if (first and abs(revision.probability - first.probability) < 0.001) else "adjusted",
+                "created_at": revision.created_at.isoformat() if revision.created_at else None,
+            } if revision else None,
+        },
     }
 
 
@@ -536,9 +556,12 @@ def submit_answer(
     db: Session = Depends(get_db),
 ):
     invite = get_invite(db, token, question_id)
-    require_open(db.get(Question, invite.question_id))
+    question = db.get(Question, invite.question_id)
+    require_open(question)
     if get_response(db, invite.question_id, invite.expert_id, 1):
         raise HTTPException(status_code=409, detail="Already answered")
+    if getattr(question, "delphi_round", 1) != 1:
+        raise HTTPException(status_code=400, detail="Round 1 elicitation is closed for this question")
 
     db.add(Response(
         question_id=invite.question_id,
@@ -550,20 +573,40 @@ def submit_answer(
     ))
     commit_once(db, "Already answered")
 
-    question = db.get(Question, invite.question_id)
-    if not question.themes and len(latest_answers(db, question.id)) >= MIN_GROUP_SIZE:
+    # Round 2 opens automatically once 80% of the invited experts have answered
+    from .services.delphi_transition import check_and_advance_delphi_stage
+    transition = check_and_advance_delphi_stage(db, question, summarise=False)
+
+    if transition.get("action") == "advanced_to_round_2":
+        # Round 2 shows the group's themes, so refresh them from every round-1 reason
+        background.add_task(summarise_question, question.id, app.state.session_factory, True)
+    elif not question.themes and len(latest_answers(db, question.id)) >= MIN_GROUP_SIZE:
         background.add_task(summarise_question, question.id, app.state.session_factory)
-    return {"status": "received"}
+
+    return {
+        "status": "received",
+        "delphi_round": getattr(question, "delphi_round", 1),
+        "transition": transition.get("action", "none"),
+    }
 
 
 @app.post("/q/{token}/revision")
-def submit_revision(token: str, body: AnswerIn, question_id: str | None = None, db: Session = Depends(get_db)):
+def submit_revision(
+    token: str,
+    body: AnswerIn,
+    background: BackgroundTasks,
+    question_id: str | None = None,
+    db: Session = Depends(get_db),
+):
     invite = get_invite(db, token, question_id)
-    require_open(db.get(Question, invite.question_id))
+    question = db.get(Question, invite.question_id)
+    require_open(question)
     if not get_response(db, invite.question_id, invite.expert_id, 1):
         raise HTTPException(status_code=403, detail="Submit your first answer before revising")
     if get_response(db, invite.question_id, invite.expert_id, 2):
         raise HTTPException(status_code=409, detail="Already revised")
+    if getattr(question, "delphi_round", 1) < 2:
+        raise HTTPException(status_code=400, detail="Delphi Round 2 is not open yet")
 
     db.add(Response(
         question_id=invite.question_id,
@@ -574,7 +617,17 @@ def submit_revision(token: str, body: AnswerIn, question_id: str | None = None, 
         **answer_labels(db.get(Expert, invite.expert_id)),
     ))
     commit_once(db, "Already revised")
-    return {"status": "revised"}
+
+    # The question closes with final results once 80% of round-1 respondents have revised
+    from .services.delphi_transition import check_and_advance_delphi_stage
+    transition = check_and_advance_delphi_stage(db, question, summarise=False)
+    background.add_task(summarise_question, invite.question_id, app.state.session_factory, True)
+
+    return {
+        "status": "revised",
+        "question_status": question.status,
+        "transition": transition.get("action", "none"),
+    }
 
 
 @app.get("/q/{token}/group")
@@ -586,6 +639,9 @@ def group_view(token: str, question_id: str | None = None, db: Session = Depends
     responses = db.scalars(
         select(Response).where(Response.question_id == invite.question_id)
     ).all()
+
+    r1_answers = [r for r in responses if r.round == 1]
+    r2_answers = [r for r in responses if r.round == 2]
 
     latest = {}
     for response in responses:
@@ -606,10 +662,21 @@ def group_view(token: str, question_id: str | None = None, db: Session = Depends
             "themes": ml_outputs.empty_themes(),
         }
 
+    r1_probs = [r.probability for r in r1_answers]
+    r2_probs = [r.probability for r in r2_answers]
+
+    r1_median = round(statistics.median(r1_probs), 2) if r1_probs else None
+    current_median = round(statistics.median(probabilities), 2)
+    median_shift = round(current_median - r1_median, 2) if r1_median is not None else None
+
     return {
         "question_id": invite.question_id,
         "response_count": len(probabilities),
-        "median": round(statistics.median(probabilities), 2),
+        "round_1_count": len(r1_probs),
+        "round_2_count": len(r2_probs),
+        "median": current_median,
+        "round_1_median": r1_median,
+        "median_shift": median_shift,
         "min": min(probabilities),
         "max": max(probabilities),
         "themes": ml_outputs.stored_themes(db.get(Question, invite.question_id)),

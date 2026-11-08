@@ -46,13 +46,16 @@ class Base(DeclarativeBase):
 
 
 def add_missing_columns(bind=engine):
-    """create_all never alters existing tables, so columns added later are added here (SQLite).
-    Postgres databases are new, so create_all already made every column."""
+    """create_all never alters existing tables, so columns added later are added here."""
     if bind.dialect.name != "sqlite":
+        # The hosted Postgres already exists, so columns added after it was created go in here
+        with bind.begin() as conn:
+            conn.exec_driver_sql("ALTER TABLE questions ADD COLUMN IF NOT EXISTS delphi_round INTEGER DEFAULT 1")
         return
     added = {
         "experts": {"followed": "TEXT"},
         "panel_invites": {"email_sent": "BOOLEAN", "expert_id": "VARCHAR", "joined_at": "DATETIME"},
+        "questions": {"delphi_round": "INTEGER DEFAULT 1"},
     }
     with bind.begin() as conn:
         for table, wanted in added.items():

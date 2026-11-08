@@ -9,6 +9,7 @@ so expert A can demo the blind-answer lock.
 Each synthetic expert has a fixed personal link, demo-expert-a ... demo-expert-f, which opens
 the expert app before and after the moderator creates a question.
 """
+import json
 import random
 import secrets
 from datetime import date
@@ -120,10 +121,138 @@ def seed():
                 pseudonym=f"Analyst {letter.upper()}",
             ))
 
+    # --- OPEN QUESTION 1 (STAGE 2: Delphi Consensus Round) ---
+    # Risk R1049 (Sudan - Al Obeid)
+    # Experts A-F have answered Round 1 with varied estimates and rationale.
+    # Group themes and median are available. Awaiting Stage 2 Delphi revision/decision.
+    q1_alert = "A-R1049-22992" if "A-R1049-22992" in alerts else None
+    if q1_alert and q1_alert in alerts:
+        alerts[q1_alert].status = "approved"
+
+    themes_q1 = {
+        "agreement": [
+            "RSF units continue to position along primary road networks surrounding Al Obeid",
+            "Severe market shortages and fuel price spikes in Al Obeid indicate active access constraints"
+        ],
+        "disagreement": [
+            "Whether SAF defensive reinforcement around Bara can prevent a sustained encirclement",
+            "Whether troop redeployments toward South Kordofan divert offensive capacity away from North Kordofan"
+        ],
+        "new_information": [
+            "Commercial transport reports localized drone interdictions on the Kosti-El Obeid logistical axis"
+        ]
+    }
+    db.add(Question(
+        id="Q001",
+        risk_id="R1049",
+        alert_id=q1_alert,
+        text="By 30 November 2026, will armed group assaults cut off primary humanitarian supply corridors into Al Obeid, North Kordofan for more than 14 consecutive days?",
+        resolution_criteria="Trigger T0634: Sustained interdiction or blockade of transit corridors connecting Kosti/Bara to Al Obeid for more than 14 consecutive days.",
+        deadline=date(2026, 11, 30),
+        status="open",
+        delphi_round=2,
+        outcome=None,
+        themes=json.dumps(themes_q1),
+    ))
+
+    for letter in "abcdef":
+        db.add(Invite(
+            token=f"invite-q001-{letter}",
+            question_id="Q001",
+            expert_id=f"expert-{letter}",
+        ))
+
+    # Round 1 answers for Q001 (all 6 experts completed Round 1; Stage 2 Delphi Consensus is active):
+    q1_answers = [
+        ("expert-a", 0.75, "Heavy troop concentrations near western access corridors; contacts report increasing interdictions on commercial transit."),
+        ("expert-b", 0.70, "RSF units have held positions on the roads west of Al Obeid before; a new push from Bara or the west seems likely before the rains."),
+        ("expert-c", 0.55, "SAF retook Bara in March, which widens the buffer north of Al Obeid. A full encirclement is harder now, but road attacks are still plausible."),
+        ("expert-d", 0.80, "Drone strikes and attacks on the El Obeid-Kosti road suggest the RSF is testing supply routes again. Interdiction of one route would count."),
+        ("expert-e", 0.45, "Fighting has shifted to South Kordofan and Darfur. The RSF may lack the forces to besiege Al Obeid again within six months."),
+        ("expert-f", 0.65, "Traders report fuel and market shortages in Al Obeid, an early sign that access routes are being squeezed."),
+    ]
+    for exp_id, prob, rsn in q1_answers:
+        letter = exp_id.split("-")[1]
+        db.add(Response(
+            question_id="Q001",
+            expert_id=exp_id,
+            probability=prob,
+            reason=rsn,
+            round=1,
+            anonymity_level=LEVELS[letter],
+            pseudonym=f"Analyst {letter.upper()}",
+        ))
+
+    # Round 2 finalised responses for Q001 (Experts B and C finalised; Expert A is open to test):
+    q1_revisions = [
+        ("expert-b", 0.70, "Maintained at 70%. Peer consensus at 68% aligns with my assessment; troop deployments along western axes remain active."),
+        ("expert-c", 0.60, "Adjusted upward from 55% to 60%. While SAF control of Bara provides a northern buffer, peer reports of market fuel shortages and drone interdictions indicate supply disruption is more probable."),
+    ]
+    for exp_id, prob, rsn in q1_revisions:
+        letter = exp_id.split("-")[1]
+        db.add(Response(
+            question_id="Q001",
+            expert_id=exp_id,
+            probability=prob,
+            reason=rsn,
+            round=2,
+            anonymity_level=LEVELS[letter],
+            pseudonym=f"Analyst {letter.upper()}",
+        ))
+
+    # --- OPEN QUESTION 2 (STAGE 1: Single-Expert Elicitation & Delphi Transition Test) ---
+    # Risk R1048 (Sudan - Blue Nile State)
+    # Exactly 1 regional expert invited (Expert A) to test the 80% Delphi progression:
+    # Round 1 submission -> auto-advance to Round 2 (1/1 >= 80%) -> Round 2 submission -> auto-close (1/1 >= 80%)
+    db.add(Question(
+        id="Q002",
+        risk_id="R1048",
+        alert_id=None,
+        text="By 15 December 2026, will conflict expansion in Blue Nile state trigger verified displacement exceeding 50,000 individuals and halt humanitarian transit along the Sennar-Damazine corridor?",
+        resolution_criteria="Verified displacement exceeding 50,000 individuals reported by OCHA/IOM and suspension of aid convoys along the Sennar-Damazine corridor for more than 10 consecutive days.",
+        deadline=date(2026, 12, 15),
+        status="open",
+        delphi_round=1,
+        outcome=None,
+        themes=None,
+    ))
+
+    db.add(Invite(
+        token="invite-q002-a",
+        question_id="Q002",
+        expert_id="expert-a",
+    ))
+
+    # --- OPEN QUESTION 3 (STAGE 1: Single-Expert Elicitation & Delphi Transition Test) ---
+    # Risk R1053 (Sudan - Eastern Supply Corridor / Port Sudan)
+    # Exactly 1 regional expert invited (Expert A) to test the 80% Delphi progression:
+    # Round 1 submission -> auto-advance to Round 2 (1/1 >= 80%) -> Round 2 submission -> auto-close (1/1 >= 80%)
+    db.add(Question(
+        id="Q003",
+        risk_id="R1053",
+        alert_id=None,
+        text="By 31 January 2027, will long-range drone strikes or interdictions on the eastern supply corridor disrupt Port Sudan terminal operations or fuel distribution for more than 7 consecutive days?",
+        resolution_criteria="Trigger T0643: Verified disruption of port terminal operations, fuel depot closures, or convoy route halts exceeding 7 consecutive days reported by port authorities, UN OCHA, or verified maritime alerts.",
+        deadline=date(2027, 1, 31),
+        status="open",
+        delphi_round=1,
+        outcome=None,
+        themes=None,
+    ))
+
+    db.add(Invite(
+        token="invite-q003-a",
+        question_id="Q003",
+        expert_id="expert-a",
+    ))
+
     db.commit()
     db.close()
-    print(f"Seeded {len(df)} risks, 6 experts, {len(alerts)} real pending alerts and {len(resolved)} practice questions. "
-          "No open question yet: approve an alert at http://localhost:3000/mod")
+    print(f"Seeded {len(df)} risks, 6 experts, {len(alerts)} alerts, and practice questions H001-H008.")
+    print("Seeded open test questions:")
+    print("  - Q001: OPEN in Stage 2 (Delphi Consensus Round) with 6 peer Round 1 answers & synthesized themes")
+    print("  - Q002: OPEN in Stage 1 (Initial Independent Assessment Round) awaiting Expert A's initial response")
+    print("  - Q003: OPEN in Stage 1 (Initial Independent Assessment Round) for single-expert Delphi test")
 
 
 def is_empty() -> bool:
