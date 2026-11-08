@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { LevelTag, PageHeader, StatusTag, fmtBrier, fmtDate } from '@/components/mod/parts';
 import { AiThemes } from '@/components/mod/AiThemes';
+import { DelphiStageControl } from '@/components/mod/DelphiStageControl';
 import { ResolvePanel } from '@/components/mod/ResolvePanel';
 import { ShiftAxis } from '@/components/mod/ShiftAxis';
 import { Card } from '@/components/ui/primitives';
@@ -44,7 +45,12 @@ async function QuestionView({ params }: { params: PageProps<'/mod/questions/[id]
         <div className="grid gap-4">
           <Card>
             <div className="flex flex-wrap items-center gap-2">
-              <StatusTag tone={q.status === 'open' ? 'accent' : 'muted'}>{mod.questions.status[q.status] ?? q.status}</StatusTag>
+              <StatusTag tone={q.status === 'open' ? 'accent' : q.status === 'closed' ? 'accent' : 'muted'}>
+                {q.status === 'closed' ? 'Closed' : mod.questions.status[q.status] ?? q.status}
+              </StatusTag>
+              <StatusTag tone={d.phase?.includes('Phase 2') || d.phase?.includes('Completed') ? 'accent' : 'muted'}>
+                {d.phase ?? (q.status === 'resolved' ? 'Resolved' : 'Phase 1: Initial Elicitation')}
+              </StatusTag>
               <span className="text-sm text-ink-muted">{mod.questions.deadline(fmtDate(q.deadline))}</span>
             </div>
             <p className="mt-2 text-lg font-medium text-ink">{q.text}</p>
@@ -72,16 +78,71 @@ async function QuestionView({ params }: { params: PageProps<'/mod/questions/[id]
             <dl className="mt-2 grid grid-cols-3 gap-3">
               {[
                 [t.invited, d.participation.invited],
-                [t.answered, d.participation.answered],
-                [t.revised, d.participation.revised],
+                [t.answered, `${d.participation.answered} (Tentative)`],
+                [t.revised, `${d.participation.revised} (Finalised)`],
               ].map(([label, n]) => (
                 <div key={label}>
                   <dt className="text-sm text-ink-muted">{label}</dt>
-                  <dd className="text-2xl font-semibold text-ink">{n}</dd>
+                  <dd className="text-xl font-semibold text-ink">{n}</dd>
                 </div>
               ))}
             </dl>
           </Card>
+
+          {showFigures && d.consensusMetrics && (
+            <Card>
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-semibold text-ink">Delphi Consensus & Convergence</h2>
+                <span className="rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-medium text-accent">
+                  {d.consensusMetrics.consensusStatus.replace('_', ' ').toUpperCase()}
+                </span>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="rounded-md border border-line bg-surface-muted/30 p-2.5">
+                  <span className="text-xs text-ink-muted">Round 1 Median (Tentative)</span>
+                  <p className="mt-1 text-lg font-bold text-ink">
+                    {d.consensusMetrics.round1 ? `${toPercent(d.consensusMetrics.round1.median)}%` : '—'}
+                  </p>
+                  <span className="text-xs text-ink-muted">
+                    Spread: {d.consensusMetrics.round1 ? `${toPercent(d.consensusMetrics.round1.spread)}%` : '—'}
+                  </span>
+                </div>
+                <div className="rounded-md border border-line bg-surface-muted/30 p-2.5">
+                  <span className="text-xs text-ink-muted">Round 2 Median (Finalised)</span>
+                  <p className="mt-1 text-lg font-bold text-ink">
+                    {d.consensusMetrics.round2 ? `${toPercent(d.consensusMetrics.round2.median)}%` : '—'}
+                  </p>
+                  <span className="text-xs text-ink-muted">
+                    Spread: {d.consensusMetrics.round2 ? `${toPercent(d.consensusMetrics.round2.spread)}%` : '—'}
+                  </span>
+                </div>
+                <div className="rounded-md border border-line bg-surface-muted/30 p-2.5">
+                  <span className="text-xs text-ink-muted">Median Shift</span>
+                  <p className="mt-1 text-lg font-bold text-ink">
+                    {d.consensusMetrics.medianShift !== null
+                      ? `${d.consensusMetrics.medianShift > 0 ? '+' : ''}${Math.round(d.consensusMetrics.medianShift * 100)}%`
+                      : '—'}
+                  </p>
+                  <span className="text-xs text-ink-muted">
+                    {d.consensusMetrics.retainedCount} kept · {d.consensusMetrics.adjustedCount} adjusted
+                  </span>
+                </div>
+                <div className="rounded-md border border-line bg-surface-muted/30 p-2.5">
+                  <span className="text-xs text-ink-muted">Spread Reduction</span>
+                  <p className="mt-1 text-lg font-bold text-accent">
+                    {d.consensusMetrics.spreadReduction !== null
+                      ? `${d.consensusMetrics.spreadReduction >= 0 ? '−' : '+'}${Math.abs(Math.round(d.consensusMetrics.spreadReduction * 100))}%`
+                      : '—'}
+                  </p>
+                  <span className="text-xs text-ink-muted">
+                    {d.consensusMetrics.convergenceRate !== null && d.consensusMetrics.convergenceRate > 0
+                      ? `${Math.round(d.consensusMetrics.convergenceRate * 100)}% narrowed`
+                      : 'initial spread'}
+                  </span>
+                </div>
+              </div>
+            </Card>
+          )}
 
           <Card>
             <h2 className="text-base font-semibold text-ink">{t.shiftTitle}</h2>
@@ -122,6 +183,15 @@ async function QuestionView({ params }: { params: PageProps<'/mod/questions/[id]
         </div>
 
         <div className="grid gap-4">
+          <DelphiStageControl
+            questionId={q.id}
+            status={q.status}
+            phase={d.phase}
+            delphiRound={d.delphiRound ?? (d.phase?.includes('Phase 2') ? 2 : 1)}
+            answeredCount={d.participation.answered}
+            invitedCount={d.participation.invited}
+            source={source}
+          />
           <ResolvePanel questionId={q.id} status={q.status} source={source} />
           {q.outcome !== null && d.groupMedianBrier !== null && (
             <Card>
@@ -161,7 +231,17 @@ function Distribution({ d }: { d: QuestionDetail }) {
 function Responses({ d }: { d: QuestionDetail }) {
   return (
     <Card>
-      <h2 className="text-base font-semibold text-ink">{t.responses}</h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-base font-semibold text-ink">{t.responses}</h2>
+        <div className="flex items-center gap-2 text-xs">
+          <span className="inline-flex items-center gap-1 rounded bg-accent/10 px-2 py-0.5 font-medium text-accent">
+            Finalised: {d.participation.revised}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded bg-surface-muted px-2 py-0.5 font-medium text-ink-muted">
+            Tentative: {d.participation.answered - d.participation.revised}
+          </span>
+        </div>
+      </div>
       <p className="mt-1 text-sm text-ink-muted">{t.responsesHelp}</p>
       {d.responses.length === 0 ? (
         <p className="mt-3 text-ink-muted">{t.noResponses}</p>
@@ -172,28 +252,46 @@ function Responses({ d }: { d: QuestionDetail }) {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium text-ink">{r.label}</span>
                 <LevelTag level={r.anonymityLevel} />
-                {r.revised && <StatusTag tone="accent">{t.revisedTag}</StatusTag>}
+                {r.isFinalised || r.revised ? (
+                  <StatusTag tone="accent">Round 2: Finalised</StatusTag>
+                ) : (
+                  <StatusTag tone="muted">Round 1: Tentative</StatusTag>
+                )}
+                {r.decision === 'kept' && (
+                  <span className="rounded bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800 dark:bg-sky-950 dark:text-sky-300">
+                    Maintained Stance
+                  </span>
+                )}
+                {r.decision === 'adjusted' && r.shift !== null && r.shift !== undefined && (
+                  <span className="rounded bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">
+                    Adjusted ({r.shift > 0 ? '+' : ''}{Math.round(r.shift * 100)}%)
+                  </span>
+                )}
                 {r.brier !== null && <span className="text-sm text-ink-muted">{t.brier(fmtBrier(r.brier))}</span>}
                 {r.weight !== null && <span className="text-sm text-ink-muted">{t.weight(r.weight)}</span>}
               </div>
               <p className="mt-1 text-sm text-ink">
                 {r.revised && r.firstProbability !== null ? (
                   <>
-                    {t.first} {toPercent(r.firstProbability)}% → {t.latestShort} <strong>{toPercent(r.latestProbability)}%</strong>
+                    <span className="text-ink-muted">Tentative:</span> {toPercent(r.firstProbability)}% →{' '}
+                    <span className="text-accent font-semibold">Finalised: {toPercent(r.latestProbability)}%</span>
                   </>
                 ) : (
-                  <strong>{toPercent(r.latestProbability)}%</strong>
+                  <>
+                    <span className="text-ink-muted">{r.isFinalised ? 'Finalised:' : 'Tentative:'}</span>{' '}
+                    <strong>{toPercent(r.latestProbability)}%</strong>
+                  </>
                 )}
               </p>
               {r.firstReason && (
-                <p className="mt-1 text-sm text-ink">
-                  <span className="text-ink-muted">{t.reasonFirst}: </span>
+                <p className="mt-1.5 text-sm text-ink">
+                  <span className="font-medium text-ink-muted">Round 1 Reason (Tentative): </span>
                   {r.firstReason}
                 </p>
               )}
               {r.revisionReason && (
                 <p className="mt-1 text-sm text-ink">
-                  <span className="text-ink-muted">{t.reasonRevision}: </span>
+                  <span className="font-medium text-accent">Round 2 Delphi Rationale (Finalised): </span>
                   {r.revisionReason}
                 </p>
               )}

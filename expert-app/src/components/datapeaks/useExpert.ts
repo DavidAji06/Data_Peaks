@@ -109,7 +109,19 @@ export function useExpert() {
       }
       const q = await api.getQuestion(token, id);
       setData(q);
-      setOwn(readOwn(q.question.id));
+      const stored = readOwn(q.question.id);
+      const serverR1 = q.own_response?.round_1;
+      const serverR2 = q.own_response?.round_2;
+      const firstVal = stored.first ?? (serverR1 ? Math.round(serverR1.probability * 100) : null);
+      const latestVal = stored.latest ?? (serverR2 ? Math.round(serverR2.probability * 100) : firstVal);
+      const firstReasonVal = stored.firstReason || (serverR1?.reason ?? "");
+      const resolvedOwn: OwnAnswer = {
+        first: firstVal,
+        latest: latestVal,
+        firstReason: firstReasonVal,
+      };
+      writeOwn(q.question.id, resolvedOwn);
+      setOwn(resolvedOwn);
       if (q.answered) await loadGroup(token, id);
       else {
         setGroup(null);

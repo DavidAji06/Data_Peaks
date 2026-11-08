@@ -9,6 +9,7 @@ import type {
   Alert,
   AnonymityLevel,
   ApiAlert,
+  ApiConsensusMetrics,
   ApiDecisionOut,
   ApiExpertQuestion,
   ApiExpertSettings,
@@ -21,10 +22,12 @@ import type {
   ApiRankedRisk,
   ApiResolveOut,
   ApiRisk,
+  ApiRoundStats,
   ApiRoundSummary,
   ApiSimilarRisk,
   ApiThemes,
   ApiTrackRecord,
+  ConsensusMetrics,
   DecisionResult,
   ExpertQuestion,
   ExpertSettings,
@@ -38,6 +41,7 @@ import type {
   RankedRisk,
   ResolveResult,
   RiskDetail,
+  RoundStats,
   RoundSummary,
   SimilarRisk,
   Themes,
@@ -159,10 +163,43 @@ export const toQuestionListItem = (q: ApiQuestionListItem): QuestionListItem => 
   answered: q.answered,
   median: q.median,
   weightedMean: q.weighted_mean ?? null,
+  delphiRound: q.delphi_round,
+  revised: q.revised ?? 0,
+  phase: q.phase,
 });
 
 const toRound = (r: ApiRoundSummary | null): RoundSummary | null =>
   r ? { count: r.count, median: r.median, min: r.min, max: r.max } : null;
+
+const toRoundStats = (s?: ApiRoundStats | null): RoundStats | null =>
+  s
+    ? {
+        count: s.count,
+        median: s.median,
+        mean: s.mean,
+        min: s.min,
+        max: s.max,
+        spread: s.spread,
+        iqr: s.iqr,
+        stdDev: s.std_dev,
+      }
+    : null;
+
+const toConsensusMetrics = (m?: ApiConsensusMetrics | null): ConsensusMetrics | null =>
+  m
+    ? {
+        round1: toRoundStats(m.round_1),
+        round2: toRoundStats(m.round_2),
+        latest: toRoundStats(m.latest),
+        medianShift: m.median_shift,
+        spreadReduction: m.spread_reduction,
+        convergenceRate: m.convergence_rate,
+        retainedCount: m.retained_count,
+        adjustedCount: m.adjusted_count,
+        consensusStatus: m.consensus_status,
+        meanShift: m.mean_shift,
+      }
+    : null;
 
 const toModeratorResponse = (r: ApiModeratorResponse): ModeratorResponse => ({
   label: r.label,
@@ -175,6 +212,29 @@ const toModeratorResponse = (r: ApiModeratorResponse): ModeratorResponse => ({
   revised: r.revised,
   brier: r.brier,
   weight: r.weight ?? null,
+  status: r.status ?? (r.revised ? 'finalised' : 'tentative'),
+  decision: r.decision ?? (r.revised ? 'adjusted' : 'pending_round_2'),
+  shift: r.shift ?? null,
+  isTentative: r.is_tentative ?? !r.revised,
+  isFinalised: r.is_finalised ?? r.revised,
+  round1: r.round_1
+    ? {
+        probability: r.round_1.probability,
+        reason: r.round_1.reason,
+        status: r.round_1.status,
+        createdAt: r.round_1.created_at,
+      }
+    : null,
+  round2: r.round_2
+    ? {
+        probability: r.round_2.probability,
+        reason: r.round_2.reason,
+        status: r.round_2.status,
+        decision: r.round_2.decision,
+        shift: r.round_2.shift ?? null,
+        createdAt: r.round_2.created_at,
+      }
+    : null,
 });
 
 export const toQuestionDetail = (d: ApiQuestionDetail): QuestionDetail => ({
@@ -194,9 +254,12 @@ export const toQuestionDetail = (d: ApiQuestionDetail): QuestionDetail => ({
     acapsProbability: d.risk.acaps_probability,
   },
   participation: { ...d.participation },
+  phase: d.phase,
+  delphiRound: d.question.delphi_round,
   firstRound: toRound(d.first_round),
   latest: toRound(d.latest),
   medianShift: d.median_shift,
+  consensusMetrics: toConsensusMetrics(d.consensus_metrics),
   weighted: d.weighted
     ? {
         mean: d.weighted.mean,
@@ -210,6 +273,8 @@ export const toQuestionDetail = (d: ApiQuestionDetail): QuestionDetail => ({
   baselineBrier: d.baseline_brier,
   distribution: d.distribution.map((b) => ({ range: b.range, count: b.count })),
   responses: d.responses.map(toModeratorResponse),
+  tentativeResponses: d.tentative_responses?.map(toModeratorResponse),
+  finalisedResponses: d.finalised_responses?.map(toModeratorResponse),
   themes: toThemes(d.themes),
 });
 

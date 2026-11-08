@@ -29,6 +29,7 @@ from ..services.scoring import (
     summarise_scores,
 )
 from ..services import weighting
+from ..services.consensus import compute_delphi_metrics
 
 router = APIRouter(
     prefix="/moderator",
@@ -97,15 +98,27 @@ def list_questions(db: Session = Depends(get_db)):
         latest = [rounds[max(rounds)].probability for rounds in by_expert.values()]
         summary = summarise(latest)
         weighted, _ = weighted_group(db, question.id, by_expert)
+        revised_count = sum(1 for rounds in by_expert.values() if 2 in rounds)
+        if question.status == "resolved":
+            phase = "Resolved"
+        elif question.status == "closed":
+            phase = "Delphi Completed (Final Results)"
+        elif getattr(question, "delphi_round", 1) == 2:
+            phase = "Phase 2: Delphi Consensus"
+        else:
+            phase = "Phase 1: Initial Elicitation"
         result.append({
             "id": question.id,
             "risk_id": question.risk_id,
             "text": question.text,
             "status": question.status,
+            "delphi_round": getattr(question, "delphi_round", 1),
             "outcome": question.outcome,
             "deadline": question.deadline,
             "invited": invited_count(db, question.id),
             "answered": len(by_expert),
+            "revised": revised_count,
+            "phase": phase,
             "median": summary["median"] if summary else None,
             "weighted_mean": weighted["mean"] if weighted else None,
         })
@@ -130,6 +143,20 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
 
     first = [rounds[1].probability for rounds in by_expert.values() if 1 in rounds]
     latest = [rounds[max(rounds)].probability for rounds in by_expert.values()]
+
+    first_dict = {expert_id: rounds[1].probability for expert_id, rounds in by_expert.items() if 1 in rounds}
+    second_dict = {expert_id: rounds[2].probability for expert_id, rounds in by_expert.items() if 2 in rounds}
+    latest_dict = {expert_id: rounds[max(rounds)].probability for expert_id, rounds in by_expert.items()}
+    delphi_metrics = compute_delphi_metrics(first_dict, second_dict, latest_dict)
+
+    if question.status == "resolved":
+        phase = "Resolved"
+    elif question.status == "closed":
+        phase = "Delphi Completed (Final Results)"
+    elif getattr(question, "delphi_round", 1) == 2:
+        phase = "Phase 2: Delphi Consensus"
+    else:
+        phase = "Phase 1: Initial Elicitation"
 
     # Sort by latest probability so the order doesn't reveal who answered when
     ordered = sorted(by_expert.items(), key=lambda item: item[1][max(item[1])].probability)
@@ -156,6 +183,36 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
 
         # The nickname stored with the answer, so renaming later never relabels past answers
         pseudonym = (first_answer or revision).pseudonym or expert.pseudonym
+
+        # Delphi decision and status
+        if revision:
+            if first_answer and abs(revision.probability - first_answer.probability) < 0.001:
+                decision = "kept"
+            else:
+                decision = "adjusted"
+            resp_status = "finalised"
+        else:
+            decision = "pending_round_2"
+            resp_status = "tentative"
+
+        shift = round(revision.probability - first_answer.probability, 4) if (revision and first_answer) else None
+
+        round_1_entry = {
+            "probability": first_answer.probability,
+            "reason": first_answer.reason,
+            "status": "tentative",
+            "created_at": first_answer.created_at.isoformat() if first_answer and first_answer.created_at else None,
+        } if first_answer else None
+
+        round_2_entry = {
+            "probability": revision.probability,
+            "reason": revision.reason,
+            "status": "finalised",
+            "decision": decision,
+            "shift": shift,
+            "created_at": revision.created_at.isoformat() if revision and revision.created_at else None,
+        } if revision else None
+
         responses.append({
             **moderator_label(expert, anonymous_number, level, pseudonym),
             "first_probability": first_answer.probability if first_answer else None,
@@ -166,11 +223,17 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
             "brier": brier(latest_answer.probability, question.outcome) if resolved else None,
             # An anonymous expert's weight is used privately but never shown next to their answer
             "weight": None if level == "anonymous" else weights[expert_id],
+            "status": resp_status,
+            "decision": decision,
+            "shift": shift,
+            "is_tentative": revision is None,
+            "is_finalised": revision is not None,
+            "round_1": round_1_entry,
+            "round_2": round_2_entry,
         })
 
-
-
-        
+    tentative_responses = [r for r in responses if r["is_tentative"]]
+    finalised_responses = [r for r in responses if r["is_finalised"]]
 
     first_summary = summarise(first)
     latest_summary = summarise(latest)
@@ -189,6 +252,7 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
             "resolution_criteria": question.resolution_criteria,
             "deadline": question.deadline,
             "status": question.status,
+            "delphi_round": getattr(question, "delphi_round", 1),
             "outcome": question.outcome,
         },
         "risk": {
@@ -198,6 +262,7 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
             "risk_level": risk.risk_level,
             "acaps_probability": risk.probability,
         },
+        "phase": phase,
         "participation": {
             "invited": invited_count(db, question_id),
             "answered": len(by_expert),
@@ -206,11 +271,14 @@ def question_detail(question_id: str, db: Session = Depends(get_db)):
         "first_round": first_summary,
         "latest": latest_summary,
         "median_shift": median_shift,
+        "consensus_metrics": delphi_metrics,
         "weighted": weighted,
         "group_median_brier": group_brier,
         "baseline_brier": BASELINE_BRIER,
         "distribution": bands(latest),
         "responses": responses,
+        "tentative_responses": tentative_responses,
+        "finalised_responses": finalised_responses,
         "themes": ml_outputs.stored_themes(question),
     }
 
@@ -288,3 +356,29 @@ def summarise_question(question_id: str, db: Session = Depends(get_db)):
     question.themes = json.dumps(themes)
     db.commit()
     return {"question_id": question_id, "reason_count": len(reasons), "themes": themes}
+
+
+@router.post("/questions/{question_id}/advance")
+def advance_question_round(question_id: str, db: Session = Depends(get_db)):
+    """Admin override: advance a question to Delphi Round 2 earlier."""
+    question = db.get(Question, question_id)
+    if question is None:
+        raise HTTPException(status_code=404, detail="Question not found")
+    from ..services.delphi_transition import manual_advance_to_round_2
+    res = manual_advance_to_round_2(db, question)
+    if res.get("action") == "error":
+        raise HTTPException(status_code=400, detail=res.get("message"))
+    return res
+
+
+@router.post("/questions/{question_id}/close")
+def close_question(question_id: str, db: Session = Depends(get_db)):
+    """Admin override: close a question to finalize Delphi results."""
+    question = db.get(Question, question_id)
+    if question is None:
+        raise HTTPException(status_code=404, detail="Question not found")
+    from ..services.delphi_transition import manual_close_question
+    res = manual_close_question(db, question)
+    if res.get("action") == "error":
+        raise HTTPException(status_code=400, detail=res.get("message"))
+    return res

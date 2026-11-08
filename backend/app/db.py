@@ -28,6 +28,9 @@ def add_missing_columns(bind=engine):
         columns = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info(experts)")}
         if columns and "followed" not in columns:
             conn.exec_driver_sql("ALTER TABLE experts ADD COLUMN followed TEXT")
+        q_cols = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info(questions)")}
+        if q_cols and "delphi_round" not in q_cols:
+            conn.exec_driver_sql("ALTER TABLE questions ADD COLUMN delphi_round INTEGER DEFAULT 1")
 
 
 def get_db():

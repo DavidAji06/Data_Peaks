@@ -59,11 +59,15 @@ function List({ items }: { items: QuestionListItem[] }) {
               <span>·</span>
               <span>{q.riskId}</span>
               <StatusTag tone={q.status === 'open' ? 'accent' : 'muted'}>{t.status[q.status] ?? q.status}</StatusTag>
+              <StatusTag tone={q.phase?.includes('Phase 2') || q.phase?.includes('Completed') ? 'accent' : 'muted'}>
+                {q.phase ?? (q.status === 'resolved' ? 'Resolved' : q.delphiRound === 2 ? 'Phase 2: Delphi Consensus' : 'Phase 1: Initial Elicitation')}
+              </StatusTag>
               {q.outcome !== null && <StatusTag>{t.outcome(q.outcome)}</StatusTag>}
             </div>
             <p className="mt-2 text-ink">{q.text}</p>
             <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-muted">
               <span>{t.answered(q.answered, q.invited)}</span>
+              {q.revised !== undefined && q.revised > 0 && <span>· {q.revised} finalised</span>}
               <span>
                 {q.median !== null && canShowAggregate(q.answered) ? t.median(`${toPercent(q.median)}%`) : t.noMedian}
               </span>

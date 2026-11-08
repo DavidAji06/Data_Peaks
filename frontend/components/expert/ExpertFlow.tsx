@@ -187,7 +187,23 @@ export function ExpertFlow({ token, data, source }: { token: string; data: Exper
 
       {(step === 'estimate' || step === 'revise') && (
         <Card className="mt-4">
-          {step === 'revise' && <h2 className="text-lg font-semibold text-ink">{s.revise.title}</h2>}
+          {step === 'revise' && (
+            <div>
+              <h2 className="text-lg font-semibold text-ink">{s.revise.title}</h2>
+              <div className="mt-2 rounded-lg bg-surface-muted p-3 text-sm">
+                <p className="font-semibold text-ink">
+                  {percent !== null && mine?.first !== undefined && percent === toPercent(mine.first)
+                    ? 'Delphi Round 2: Maintaining your evaluation'
+                    : 'Delphi Round 2: Adjusting your evaluation'}
+                </p>
+                <p className="mt-1 text-xs text-ink-muted">
+                  {group?.median !== null && percent !== null && Math.abs(percent - toPercent(group.median)) >= 15
+                    ? 'Your evaluation differs from the group median. If you maintain this stance, explaining what factors the consensus underweights provides crucial ground truth.'
+                    : 'Review peer statistics and arguments to finalize your consensus submission.'}
+                </p>
+              </div>
+            </div>
+          )}
           {step === 'estimate' && closed ? (
             <Notice tone="warning">{s.estimate.closed}</Notice>
           ) : (
@@ -202,7 +218,11 @@ export function ExpertFlow({ token, data, source }: { token: string; data: Exper
               <ProbabilitySlider id={sliderId} value={percent} onChange={setPercent} s={s} />
               <div>
                 <label htmlFor={reasonId} className="block font-medium text-ink">
-                  {step === 'estimate' ? s.estimate.reasonLabel : s.revise.changedMind}
+                  {step === 'estimate'
+                    ? s.estimate.reasonLabel
+                    : percent !== null && mine?.first !== undefined && percent === toPercent(mine.first)
+                    ? 'Why do you maintain your evaluation against the consensus? (required)'
+                    : s.revise.changedMind}
                 </label>
                 {step === 'estimate' && <p className="text-sm text-ink-muted">{s.estimate.reasonHint}</p>}
                 <textarea
@@ -261,10 +281,28 @@ export function ExpertFlow({ token, data, source }: { token: string; data: Exper
             </>
           )}
           <div className="mt-6 grid gap-2 sm:grid-cols-2">
-            <button type="button" onClick={() => go('receipt')} className={buttonClass.primary}>
+            <button
+              type="button"
+              onClick={() => {
+                const firstVal = mine?.first;
+                setPercent(firstVal === undefined ? null : toPercent(firstVal));
+                setReason('');
+                setStep('revise');
+              }}
+              className={buttonClass.primary}
+            >
               {s.group.keep}
             </button>
-            <button type="button" onClick={() => go('revise')} className={buttonClass.secondary}>
+            <button
+              type="button"
+              onClick={() => {
+                const latest = mine?.revised ?? mine?.first;
+                setPercent(latest === undefined ? null : toPercent(latest));
+                setReason('');
+                setStep('revise');
+              }}
+              className={buttonClass.secondary}
+            >
               {s.group.revise}
             </button>
           </div>

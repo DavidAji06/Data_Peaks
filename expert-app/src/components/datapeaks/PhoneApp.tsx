@@ -55,7 +55,7 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
     questions: [L(lang, "Questions", "Questions"), L(lang, "Share your view on a developing risk", "Votre avis sur un risque émergent")],
     group: [L(lang, "Group view", "Avis du groupe"), L(lang, "How does your view compare?", "Comparez votre réponse")],
   };
-  const pending = ex.questions.filter((q) => q.status === "open" && !q.answered).length;
+  const pending = ex.questions.filter((q) => q.status === "open" && (!q.answered || !q.revised)).length;
   // A different question starts with a fresh answer form and the group comparison.
   const shownId = ex.data?.question.id;
   useEffect(() => {
@@ -109,7 +109,7 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
         {!blocked && needsData && <QuestionSwitcher lang={lang} ex={ex} />}
         {!blocked && screen === "questions" && (
           <Question t={t} lang={lang} ex={ex} answer={answer} setAnswer={setAnswer} reason={reason} setReason={setReason}
-            onSubmitted={() => go("group")} onGroup={() => go("group")} />
+            onSubmitted={() => go("questions")} onGroup={() => go("group")} onHome={() => go("home")} />
         )}
         {!blocked && screen === "group" && (
           <Group t={t} lang={lang} ex={ex} view={groupView} setView={setGroupView}
@@ -123,38 +123,97 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
 
 /* ------------------------------------------------------------------ shared bits */
 
-function questionStatus(lang: Lang, q: { status: string; answered: boolean; revised: boolean }) {
-  if (q.status !== "open") return L(lang, "Closed", "Close");
-  if (q.revised) return L(lang, "Revised", "Révisée");
-  if (q.answered) return L(lang, "Answered", "Répondue");
-  return L(lang, "Open", "Ouverte");
+export type QuestionPhase = "phase1" | "phase2" | "completed" | "closed";
+
+export function getQuestionPhase(q: { status: string; answered: boolean; revised: boolean; delphi_round?: number }): QuestionPhase {
+  if (q.status !== "open") return "closed";
+  if (q.revised) return "completed";
+  if (q.answered) {
+    if (q.delphi_round === 1) return "phase1";
+    return "phase2";
+  }
+  return "phase1";
+}
+
+function questionStatus(lang: Lang, q: { status: string; answered: boolean; revised: boolean; delphi_round?: number }) {
+  const p = getQuestionPhase(q);
+  if (p === "closed") return L(lang, "Closed", "Close");
+  if (p === "completed") return L(lang, "Completed", "Finalisée");
+  if (p === "phase2") return L(lang, "Round 2 · Consensus", "2e tour · Consensus");
+  if (q.answered && q.delphi_round === 1) return L(lang, "Round 1 · Waiting", "1er tour · En attente");
+  return L(lang, "Round 1 · Initial", "1er tour · Initial");
 }
 
 /** Open and closed questions. Resolved ones are listed under Track record instead. */
 const liveQuestions = (ex: Expert) => ex.questions.filter((q) => q.status !== "resolved" || q.question_id === ex.data?.question.id);
 
-/** Lets the expert move between all their questions; shown on Questions and Group when there is more than one. */
+/** Lets the expert move between all their questions, filtering by phase (Round 1 vs Round 2 consensus). */
 function QuestionSwitcher({ lang, ex }: { lang: Lang; ex: Expert }) {
   const live = liveQuestions(ex);
-  if (live.length < 2) return null;
+  const [phaseFilter, setPhaseFilter] = useState<"all" | "phase1" | "phase2" | "completed">("all");
+
+  if (live.length === 0) return null;
+
+  const countPhase1 = live.filter((q) => getQuestionPhase(q) === "phase1").length;
+  const countPhase2 = live.filter((q) => getQuestionPhase(q) === "phase2").length;
+  const countCompleted = live.filter((q) => getQuestionPhase(q) === "completed").length;
+
+  const filtered = live.filter((q) => {
+    if (phaseFilter === "all") return true;
+    return getQuestionPhase(q) === phaseFilter;
+  });
+
   return (
-    <div className="mb-5">
-      <Eyebrow>{L(lang, `Your questions (${live.length})`, `Vos questions (${live.length})`)}</Eyebrow>
-      <div className="-mx-5 mt-2 flex gap-2 overflow-x-auto px-5 pb-1" role="tablist" aria-label={L(lang, "Your questions", "Vos questions")}>
-        {live.map((q) => {
+    <div className="mb-5 space-y-2.5">
+      <div className="flex items-center justify-between">
+        <Eyebrow>{L(lang, `Your questions (${live.length})`, `Vos questions (${live.length})`)}</Eyebrow>
+        {countPhase2 > 0 && (
+          <span className="flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-0.5 font-condensed text-[11px] font-bold text-navy">
+            {countPhase2} {L(lang, "in Round 2 (Consensus)", "au 2e tour (Consensus)")}
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Phase filter">
+        {([
+          ["all", L(lang, `All (${live.length})`, `Toutes (${live.length})`)],
+          ["phase1", L(lang, `Round 1 (${countPhase1})`, `1er tour (${countPhase1})`)],
+          ["phase2", L(lang, `Round 2 (${countPhase2})`, `2e tour (${countPhase2})`)],
+          ["completed", L(lang, `Completed (${countCompleted})`, `Finalisées (${countCompleted})`)],
+        ] as const).map(([k, label]) => (
+          <button
+            key={k}
+            role="tab"
+            aria-selected={phaseFilter === k}
+            onClick={() => setPhaseFilter(k)}
+            className={`rounded-full border px-2.5 py-1 text-xs font-condensed font-bold transition-colors ${
+              phaseFilter === k ? "border-navy bg-navy text-navy-foreground" : "border-input bg-card text-muted-foreground hover:bg-accent"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1" role="tablist" aria-label={L(lang, "Your questions", "Vos questions")}>
+        {filtered.map((q) => {
           const on = q.question_id === ex.data?.question.id;
-          const todo = q.status === "open" && !q.answered;
+          const p = getQuestionPhase(q);
+          const toneClass = p === "phase2" ? "text-primary-strong font-black" : p === "phase1" ? "text-risk" : "text-muted-foreground";
           return (
             <button key={q.question_id} role="tab" aria-selected={on} onClick={() => ex.selectQuestion(q.question_id)}
-              className={`min-h-11 w-44 shrink-0 rounded-lg border px-3 py-2 text-left ${on ? "border-primary bg-accent" : "bg-card"}`}>
+              className={`min-h-11 w-48 shrink-0 rounded-lg border px-3 py-2 text-left transition-all ${on ? "border-primary bg-accent ring-2 ring-primary/40 shadow-xs" : "bg-card hover:border-line-strong"}`}>
               <span className="flex items-center justify-between gap-2 font-condensed text-xs font-bold text-navy">
                 <span className="truncate">{q.risk.country}</span>
-                <span className={todo ? "text-risk" : "text-muted-foreground"}>{questionStatus(lang, q)}</span>
+                <span className={toneClass}>{questionStatus(lang, q)}</span>
               </span>
               <span className="mt-1 line-clamp-2 block text-xs leading-snug">{q.text}</span>
             </button>
           );
         })}
+        {filtered.length === 0 && (
+          <p className="py-2 text-xs text-muted-foreground italic">{L(lang, "No questions in this phase.", "Aucune question dans cette phase.")}</p>
+        )}
       </div>
     </div>
   );
@@ -468,16 +527,27 @@ function NextContribution({ lang, t, ex, onQuestions, onGroup }: { lang: Lang; t
   const d = ex.data;
   if (!d) return <UpToDate lang={lang} />;
   const closed = d.question.status !== "open";
-  const status = closed ? L(lang, "Closed", "Close") : d.revised ? L(lang, "Revised", "Révisée") : d.answered ? L(lang, "Answered", "Répondue") : L(lang, "Open", "Ouverte");
+  const inRound2 = d.answered && !d.revised && !closed;
+  const status = closed
+    ? L(lang, "Closed", "Close")
+    : d.revised
+    ? L(lang, "Completed", "Finalisée")
+    : inRound2
+    ? L(lang, "Round 2 · Consensus open", "2e tour · Consensus ouvert")
+    : L(lang, "Round 1 · Open", "1er tour · Ouverte");
   return (
     <Card className="space-y-3">
-      <div className="flex items-center justify-between"><Eyebrow>{L(lang, "Your next contribution", "Votre prochaine contribution")}</Eyebrow><Badge tone={closed ? "muted" : "primary"}>{status}</Badge></div>
+      <div className="flex items-center justify-between">
+        <Eyebrow>{L(lang, "Your next contribution", "Votre prochaine contribution")}</Eyebrow>
+        <Badge tone={closed ? "muted" : inRound2 ? "risk" : d.revised ? "muted" : "primary"}>{status}</Badge>
+      </div>
       <p className="font-condensed text-sm font-bold text-navy">{d.risk.country} · Risk {d.risk.id}</p>
       <p className="line-clamp-2 font-medium leading-snug">{d.question.text}</p>
       <p className="font-condensed text-xs text-muted-foreground">{L(lang, "About 2 minutes", "Environ 2 minutes")} · {L(lang, "Outcome by", "Résultat le")} {fmtDate(lang, d.question.deadline)}</p>
       {closed ? <p className="text-sm text-muted-foreground">{t.e2}</p>
-        : d.answered ? <Button className="h-14 w-full text-lg" onClick={onGroup}>{L(lang, "View group insight", "Voir l'avis du groupe")}</Button>
-          : <Button className="h-14 w-full text-lg" onClick={onQuestions}>{L(lang, "Share your view", "Donner mon avis")}</Button>}
+        : inRound2 ? <Button className="h-14 w-full text-lg" onClick={onQuestions}>{L(lang, "Participate in Round 2 Consensus", "Participer au 2e tour (Consensus)")}</Button>
+        : d.revised ? <Button className="h-14 w-full text-lg" onClick={onGroup}>{L(lang, "View group insight", "Voir l'avis du groupe")}</Button>
+        : <Button className="h-14 w-full text-lg" onClick={onQuestions}>{L(lang, "Share your view (Round 1)", "Donner mon avis (1er tour)")}</Button>}
     </Card>
   );
 }
@@ -504,7 +574,410 @@ function AnswerFields({ t, lang, answer, setAnswer, reason, setReason, disabled 
   );
 }
 
-function Question(p: { t: T; lang: Lang; ex: Expert; answer: number; setAnswer: (n: number) => void; reason: string; setReason: (s: string) => void; onSubmitted: () => void; onGroup: () => void }) {
+function DelphiCompletedCard({ lang, ex, onGroup, onHome }: { lang: Lang; ex: Expert; onGroup: () => void; onHome: () => void }) {
+  const { first, latest } = ex.own;
+  const g = ex.group;
+  const enough = !!(g && g.response_count >= MIN_GROUP && g.median !== null);
+  const medianVal = enough && g?.median !== null ? to100(g.median) : null;
+  const shift = latest !== null && first !== null ? latest - first : null;
+
+  return (
+    <Card className="space-y-4 p-5">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+          <CircleCheck className="h-6 w-6" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-navy">{L(lang, "Delphi Consensus Evaluation Finalized", "Consensus Delphi finalisé")}</h2>
+          <p className="text-xs text-muted-foreground">{L(lang, "Both rounds of expert elicitation are complete.", "Les deux tours de consultation sont terminés.")}</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 rounded-lg bg-secondary/40 p-3 text-center sm:grid-cols-3">
+        <div>
+          <p className="text-xs font-bold text-muted-foreground">{L(lang, "Round 1 Initial", "1er tour initial")}</p>
+          <p className="font-display text-2xl text-navy">{first !== null ? pct(lang, first) : "—"}</p>
+        </div>
+        <div>
+          <p className="text-xs font-bold text-muted-foreground">{L(lang, "Round 2 Final", "2e tour final")}</p>
+          <p className="font-display text-2xl text-primary-strong">{latest !== null ? pct(lang, latest) : (first !== null ? pct(lang, first) : "—")}</p>
+        </div>
+        <div className="col-span-2 rounded bg-card p-1 sm:col-span-1">
+          <p className="text-xs font-bold text-muted-foreground">{L(lang, "Group Median", "Médiane groupe")}</p>
+          <p className="font-display text-2xl text-navy">{medianVal !== null ? pct(lang, medianVal) : "—"}</p>
+        </div>
+      </div>
+
+      {shift !== null && (
+        <p className="font-condensed text-xs text-muted-foreground">
+          {shift === 0
+            ? L(lang, "You maintained your evaluation across both rounds.", "Vous avez maintenu votre évaluation sur les deux tours.")
+            : L(lang, `Your evaluation adjusted by ${shift > 0 ? `+${shift}%` : `${shift}%`} in the consensus round.`, `Votre évaluation a évolué de ${shift > 0 ? `+${shift} %` : `${shift} %`} lors du tour de consensus.`)}
+        </p>
+      )}
+
+      <p className="text-sm text-muted-foreground leading-snug">
+        {L(lang,
+          "Your two-round Delphi contribution has been saved. ACAPS analysts will synthesize the panel consensus alongside ground-truth field evidence.",
+          "Votre contribution Delphi en deux tours a été enregistrée. Les analystes ACAPS vont synthétiser le consensus avec les éléments de terrain."
+        )}
+      </p>
+
+      <div className="flex gap-2 pt-1">
+        <Button variant="outline" className="flex-1" onClick={onGroup}>{L(lang, "View Group Details", "Voir l'analyse du groupe")}</Button>
+        <Button variant="ghost" className="flex-1" onClick={onHome}>{L(lang, "Back to Home", "Retour à l'accueil")}</Button>
+      </div>
+    </Card>
+  );
+}
+
+function DelphiWaitingCard({ lang, ex, onHome }: { lang: Lang; ex: Expert; onGroup: () => void; onHome: () => void }) {
+  const { first } = ex.own;
+  return (
+    <Card className="space-y-4 p-5">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white">
+          <Clock className="h-6 w-6" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-navy">{L(lang, "Round 1 Submitted — Awaiting Peer Panel", "1er tour soumis — En attente du panel")}</h2>
+          <p className="text-xs text-muted-foreground">{L(lang, "Your initial forecast was received. Round 2 (Delphi Consensus) opens when 80% of regional experts respond.", "Votre estimation initiale a été reçue. Le 2e tour ouvrira dès que 80% des experts auront répondu.")}</p>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-primary/20 bg-accent/30 p-3 text-center">
+        <p className="text-xs font-bold text-muted-foreground">{L(lang, "Your Round 1 Independent Estimate", "Votre estimation du 1er tour")}</p>
+        <p className="font-display text-3xl text-navy">{first !== null ? pct(lang, first) : "—"}</p>
+      </div>
+
+      <div className="flex gap-2">
+        <Button variant="outline" className="flex-1" onClick={onHome}>{L(lang, "All Questions", "Toutes les questions")}</Button>
+        <Button className="flex-1" onClick={() => void ex.refresh()}>{L(lang, "Check for Round 2", "Vérifier le 2e tour")}</Button>
+      </div>
+    </Card>
+  );
+}
+
+function DelphiRound2Question(p: {
+  t: T;
+  lang: Lang;
+  ex: Expert;
+  onDone: () => void;
+  onGroup: () => void;
+  onHome: () => void;
+}) {
+  const { lang, ex, t, onDone, onGroup } = p;
+  const d = ex.data!;
+  const g = ex.group;
+  const first = ex.own.first;
+  const firstReason = ex.own.firstReason;
+  const enough = !!(g && g.response_count >= MIN_GROUP && g.median !== null && g.min !== null && g.max !== null);
+  const medianVal = enough && g?.median !== null ? to100(g.median) : null;
+  const divergence = first !== null && medianVal !== null ? first - medianVal : null;
+  const isDivergent = divergence !== null && Math.abs(divergence) >= 15;
+
+  const [decision, setDecision] = useState<"keep" | "adjust">(isDivergent ? "keep" : "adjust");
+  const [adjustedVal, setAdjustedVal] = useState<number>(first ?? 50);
+  const [reason, setReason] = useState<string>("");
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [showEvidence, setShowEvidence] = useState(false);
+
+  const save = async () => {
+    if (!reason.trim()) {
+      setErr(L(lang, "Please provide your reasoning for this consensus round.", "Veuillez expliquer votre raisonnement pour ce tour de consensus."));
+      return;
+    }
+    setSaving(true);
+    setErr(null);
+    try {
+      const finalProb = decision === "keep" ? (first ?? 50) : adjustedVal;
+      await ex.submitRevision(finalProb, reason.trim());
+      onDone();
+    } catch {
+      setErr(L(lang, "Couldn't record your consensus evaluation. Please try again.", "Impossible d'enregistrer votre évaluation de consensus. Veuillez réessayer."));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const lists: [string, string[]][] = [
+    [L(lang, "Where views align", "Points d'accord"), g?.themes.agreement ?? []],
+    [L(lang, "Where views differ", "Points de désaccord"), g?.themes.disagreement ?? []],
+    [L(lang, "Additional context", "Contexte supplémentaire"), g?.themes.new_information ?? []],
+  ];
+  const hasThemes = lists.some(([, items]) => items.length > 0);
+
+  const cases = d.similar_risks.length
+    ? d.similar_risks.map((s) => ({ place: s.country, code: s.risk_id, status: s.outcome, text: s.what_happened || s.title, full: s.what_happened_full || "", title: s.title, sources: s.sources ?? [], evolution: s.evolution }))
+    : t.cases;
+
+  return (
+    <div className="space-y-6">
+      {/* Banner */}
+      <div className="rounded-xl border-2 border-primary/40 bg-accent p-4 shadow-xs">
+        <div className="flex items-center justify-between gap-2">
+          <Badge tone="risk">{L(lang, "Phase 2: Delphi Consensus Round", "Phase 2 : Tour de consensus Delphi")}</Badge>
+          <span className="font-condensed text-xs font-bold text-navy">{L(lang, "Round 2 of 2", "Tour 2 sur 2")}</span>
+        </div>
+        <h2 className="mt-2 font-display text-2xl leading-tight text-navy">{L(lang, "Compare with peers and reach consensus", "Comparez avec les pairs et visez le consensus")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+          {L(lang,
+            "Your independent Round 1 estimate was recorded. Below are anonymized group statistics and peer rationale. Please decide whether to maintain your evaluation (and explain why if you disagree with the consensus) or adjust your estimate.",
+            "Votre estimation indépendante du 1er tour est enregistrée. Examinez les statistiques et arguments des pairs ci-dessous, puis choisissez de maintenir votre avis (en motivant votre désaccord) ou d'ajuster votre estimation."
+          )}
+        </p>
+      </div>
+
+      {/* Question header */}
+      <div className="-mx-5 -mt-2 border-b bg-card px-5 py-4">
+        <Eyebrow>{d.risk.country} · Risk {d.risk.id}</Eyebrow>
+        <h1 className="mt-1 font-display text-2xl leading-tight text-navy">{d.question.text}</h1>
+        <button
+          onClick={() => setShowEvidence(!showEvidence)}
+          className="mt-2 flex items-center gap-1 text-xs font-medium text-primary-strong underline"
+        >
+          {showEvidence
+            ? L(lang, "Hide background evidence & cases", "Masquer le contexte et cas passés")
+            : L(lang, "View background evidence & past cases", "Voir le contexte et cas passés")}
+          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showEvidence ? "rotate-180" : ""}`} />
+        </button>
+      </div>
+
+      {/* Collapsible evidence */}
+      {showEvidence && (
+        <div className="space-y-4 rounded-xl border bg-secondary/20 p-4">
+          <div>
+            <SectionLabel>{t.changed}</SectionLabel>
+            <p className="mt-1 text-sm font-medium">{d.trigger_update ? d.trigger_update.report.title : t.news}</p>
+            {d.trigger_update?.report.url && (
+              <a href={d.trigger_update.report.url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-primary-strong underline">Source</a>
+            )}
+          </div>
+          <div>
+            <SectionLabel>{t.similar}</SectionLabel>
+            <CasesCarousel t={t} cases={cases} />
+          </div>
+        </div>
+      )}
+
+      {/* Group Statistics */}
+      <section className="space-y-3">
+        <SectionLabel>{L(lang, "Peer Consensus Statistics", "Statistiques du consensus des pairs")}</SectionLabel>
+        <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-3">
+          <StatTile label={L(lang, "Your Round 1", "Votre 1er tour")} value={first !== null ? pct(lang, first) : "—"} />
+          <StatTile label={L(lang, "Group Median", "Médiane du groupe")} value={enough ? pct(lang, medianVal!) : "—"} />
+          <div className="col-span-2 rounded-md bg-secondary/60 p-3 text-foreground sm:col-span-1">
+            <p className="text-xs font-bold leading-tight">{L(lang, "Panel Range", "Éventail du panel")}</p>
+            <p className="mt-1 font-display text-2xl leading-none">
+              {enough ? `${to100(g!.min!)}%–${to100(g!.max!)}%` : L(lang, "Collecting...", "En collecte...")}
+            </p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">{g?.response_count ?? 0} {L(lang, "experts answered", "experts ont répondu")}</p>
+          </div>
+        </div>
+
+        {firstReason && (
+          <div className="rounded-lg border bg-card p-3 text-sm">
+            <span className="font-condensed text-xs font-bold uppercase tracking-wider text-muted-foreground">{L(lang, "Your Round 1 reasoning", "Votre raisonnement du 1er tour")}:</span>
+            <p className="mt-0.5 italic text-navy">“{firstReason}”</p>
+          </div>
+        )}
+
+        {enough ? (
+          <>
+            <div className="pt-2">
+              <CompareAxis lang={lang} min={to100(g!.min!)} max={to100(g!.max!)} median={medianVal!} first={first} latest={decision === "adjust" ? adjustedVal : first} />
+            </div>
+
+            {/* Divergence banner */}
+            {isDivergent ? (
+              <div className="rounded-lg border-2 border-amber-300 bg-amber-50 p-4 text-amber-950">
+                <div className="flex items-center gap-2 font-bold text-amber-900">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-200 text-xs font-black">!</span>
+                  <span>{L(lang, "Notable Divergence from Group Consensus", "Divergence notable avec le consensus")} ({divergence! > 0 ? `+${divergence}%` : `${divergence}%`})</span>
+                </div>
+                <p className="mt-1 text-sm leading-relaxed text-amber-900/90">
+                  {L(lang,
+                    `Your Round 1 assessment (${first}%) is ${Math.abs(divergence!)}% ${divergence! > 0 ? "higher" : "lower"} than the group median (${medianVal}%). If you maintain your view, articulating what factors the consensus underweights provides crucial ground-truth signal for ACAPS.`,
+                    `Votre évaluation du 1er tour (${first} %) est de ${Math.abs(divergence!)} % plus ${divergence! > 0 ? "élevée" : "basse"} que la médiane (${medianVal} %). Expliquer vos raisons apporte un éclairage crucial à ACAPS.`
+                  )}
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-lg border-2 border-emerald-300 bg-emerald-50 p-4 text-emerald-950">
+                <div className="flex items-center gap-2 font-bold text-emerald-900">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-200 text-xs font-black">✓</span>
+                  <span>{L(lang, "Close to Group Consensus", "Proche du consensus du groupe")} ({divergence !== null && divergence >= 0 ? `+${divergence}%` : `${divergence}%`})</span>
+                </div>
+                <p className="mt-1 text-sm leading-relaxed text-emerald-900/90">
+                  {L(lang,
+                    `Your initial evaluation (${first}%) aligns closely with the panel median (${medianVal}%).`,
+                    `Votre évaluation initiale (${first} %) est proche de la médiane du panel (${medianVal} %).`
+                  )}
+                </p>
+              </div>
+            )}
+          </>
+        ) : (
+          <Card className="p-4 text-sm text-muted-foreground">
+            {L(lang, "Group statistics will populate once at least 5 experts contribute.", "Les statistiques du groupe apparaîtront dès que 5 experts auront contribué.")} ({g?.response_count ?? 0}/5)
+          </Card>
+        )}
+      </section>
+
+      {/* AI summary */}
+      {hasThemes && (
+        <section className="space-y-3">
+          <SectionLabel>{L(lang, "AI Summary of Peer Arguments", "Synthèse IA des arguments des pairs")}</SectionLabel>
+          {lists.filter(([, items]) => items.length > 0).map(([title, items]) => (
+            <div key={title} className="space-y-1.5">
+              <p className="font-condensed text-xs font-bold uppercase tracking-wider text-muted-foreground">{title}</p>
+              <ul className="space-y-1.5">
+                {items.map((it) => (
+                  <li key={it} className="rounded border bg-card px-3 py-2 text-sm leading-snug">{it}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* Decision area */}
+      <section className="space-y-4 rounded-xl border bg-card p-4 shadow-xs">
+        <SectionLabel>{L(lang, "Your Delphi Consensus Decision", "Votre décision de consensus Delphi")}</SectionLabel>
+        <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Delphi Decision">
+          <button
+            type="button"
+            role="radio"
+            aria-checked={decision === "keep"}
+            onClick={() => { setDecision("keep"); setErr(null); }}
+            className={`min-h-12 rounded-lg border-2 p-3 text-center transition-all ${
+              decision === "keep" ? "border-primary bg-accent font-bold text-navy" : "border-input bg-card text-muted-foreground hover:bg-secondary/40"
+            }`}
+          >
+            <span className="block text-sm">{L(lang, "Keep evaluation", "Conserver mon avis")}</span>
+            <span className="font-display text-lg text-primary-strong">{pct(lang, first ?? 50)}</span>
+          </button>
+
+          <button
+            type="button"
+            role="radio"
+            aria-checked={decision === "adjust"}
+            onClick={() => { setDecision("adjust"); setErr(null); }}
+            className={`min-h-12 rounded-lg border-2 p-3 text-center transition-all ${
+              decision === "adjust" ? "border-primary bg-accent font-bold text-navy" : "border-input bg-card text-muted-foreground hover:bg-secondary/40"
+            }`}
+          >
+            <span className="block text-sm">{L(lang, "Adjust evaluation", "Ajuster mon avis")}</span>
+            <span className="font-display text-lg text-primary-strong">{decision === "adjust" ? pct(lang, adjustedVal) : L(lang, "Revise %", "Réviser %")}</span>
+          </button>
+        </div>
+
+        {decision === "keep" ? (
+          <div className="space-y-3 pt-2">
+            <div className="rounded-lg bg-secondary/40 p-3 text-sm">
+              <p className="font-bold text-navy">{L(lang, "Maintaining your estimate at", "Maintien de votre estimation à")} {pct(lang, first ?? 50)}</p>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                {isDivergent
+                  ? L(lang,
+                      "Since your estimate differs from the group consensus, please explain why you maintain your evaluation. What evidence or local indicators does the general consensus overlook?",
+                      "Votre estimation différant du consensus, veuillez expliquer pourquoi vous la maintenez. Quels facteurs le groupe néglige-t-il ?"
+                    )
+                  : L(lang,
+                      "Please confirm the key reasons supporting your evaluation in light of peer perspectives.",
+                      "Veuillez confirmer vos raisons principales à la lumière des avis des pairs."
+                    )}
+              </p>
+            </div>
+            <div>
+              <label htmlFor="keep-reason" className="block text-sm font-bold text-navy">
+                {isDivergent
+                  ? L(lang, "Why do you disagree with the consensus? (required)", "Pourquoi êtes-vous en désaccord avec le consensus ? (requis)")
+                  : L(lang, "Rationale for maintaining your estimate (required)", "Justification du maintien de votre estimation (requis)")}
+              </label>
+              <textarea
+                id="keep-reason"
+                maxLength={280}
+                rows={3}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder={isDivergent ? L(lang, "e.g., Local market blockades indicate the consensus underestimates supply disruptions...", "ex. : Des blocages locaux indiquent que le consensus sous-estime...") : L(lang, "e.g., Confirmed by consistent peer reports and security dynamics...", "ex. : Confirmé par les rapports des pairs...")}
+                className="mt-2 w-full rounded-md border-2 bg-card p-3 text-base focus:border-primary focus:outline-none"
+              />
+              <p className={`text-right font-condensed text-xs ${280 - reason.length < 20 ? "font-bold text-risk" : "text-muted-foreground"}`}>{reason.length}/280</p>
+            </div>
+            {err && <p className="text-sm font-medium text-risk">{err}</p>}
+            <Button className="h-14 w-full text-lg" disabled={saving} onClick={() => void save()}>
+              {saving ? "…" : L(lang, `Confirm & Submit Final (${pct(lang, first ?? 50)})`, `Confirmer et soumettre (${pct(lang, first ?? 50)})`)}
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3 pt-2">
+            <section>
+              <label htmlFor="adjust-likely" className="text-sm font-bold text-navy">
+                {L(lang, "Adjusted probability estimate", "Estimation de probabilité ajustée")}
+              </label>
+              <div className="mt-1 flex items-baseline justify-center gap-3">
+                <span className="font-display text-5xl leading-none text-primary-strong">{pct(lang, adjustedVal)}</span>
+                <span className="font-condensed text-xs font-bold text-muted-foreground">
+                  ({adjustedVal - (first ?? 50) >= 0 ? `+${adjustedVal - (first ?? 50)}%` : `${adjustedVal - (first ?? 50)}%`} {L(lang, "from Round 1", "par rapport au 1er tour")}
+                  {medianVal !== null && ` · ${adjustedVal - medianVal >= 0 ? `+${adjustedVal - medianVal}%` : `${adjustedVal - medianVal}%`} ${L(lang, "vs median", "vs médiane")}`})
+                </span>
+              </div>
+              <input
+                id="adjust-likely"
+                type="range"
+                min={0}
+                max={100}
+                step={5}
+                value={adjustedVal}
+                onChange={(e) => setAdjustedVal(+e.target.value)}
+                className="acaps-range mt-3 h-3 w-full cursor-pointer"
+              />
+              <div className="mt-1 flex justify-between font-condensed text-xs text-muted-foreground">
+                <span>0 · {t.veryUnlikely}</span>
+                {medianVal !== null && <span className="font-bold text-navy">{L(lang, `Median: ${medianVal}%`, `Médiane : ${medianVal} %`)}</span>}
+                <span>{t.veryLikely} · 100</span>
+              </div>
+            </section>
+            <div>
+              <label htmlFor="adjust-reason" className="block text-sm font-bold text-navy">
+                {L(lang, "What influenced your adjustment towards consensus? (required)", "Qu'est-ce qui a motivé votre ajustement vers le consensus ? (requis)")}
+              </label>
+              <textarea
+                id="adjust-reason"
+                maxLength={280}
+                rows={3}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder={L(lang, "e.g., Peer arguments regarding troop deployments convinced me the likelihood is lower...", "ex. : Les arguments des pairs sur les déploiements ont motivé mon réajustement...")}
+                className="mt-2 w-full rounded-md border-2 bg-card p-3 text-base focus:border-primary focus:outline-none"
+              />
+              <p className={`text-right font-condensed text-xs ${280 - reason.length < 20 ? "font-bold text-risk" : "text-muted-foreground"}`}>{reason.length}/280</p>
+            </div>
+            {err && <p className="text-sm font-medium text-risk">{err}</p>}
+            <Button className="h-14 w-full text-lg" disabled={saving} onClick={() => void save()}>
+              {saving ? "…" : L(lang, `Submit Adjusted Evaluation (${pct(lang, adjustedVal)})`, `Soumettre l'évaluation ajustée (${pct(lang, adjustedVal)})`)}
+            </Button>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function Question(p: {
+  t: T;
+  lang: Lang;
+  ex: Expert;
+  answer: number;
+  setAnswer: (n: number) => void;
+  reason: string;
+  setReason: (s: string) => void;
+  onSubmitted: () => void;
+  onGroup: () => void;
+  onHome?: () => void;
+}) {
   const { t, lang, ex } = p;
   const d = ex.data!;
   const [open, setOpen] = useState(false);
@@ -531,18 +1004,57 @@ function Question(p: { t: T; lang: Lang; ex: Expert; answer: number; setAnswer: 
     }
   };
 
+  // Completed both rounds or closed
+  if (d.revised || closed) {
+    return (
+      <div className="space-y-6">
+        <DelphiCompletedCard lang={lang} ex={ex} onGroup={p.onGroup} onHome={p.onHome ?? p.onGroup} />
+      </div>
+    );
+  }
+
+  // Answered Round 1, waiting for Round 2 to open (below 80% threshold)
+  if (d.answered && d.question.delphi_round === 1) {
+    return (
+      <div className="space-y-6">
+        <DelphiWaitingCard lang={lang} ex={ex} onGroup={p.onGroup} onHome={p.onHome ?? p.onGroup} />
+      </div>
+    );
+  }
+
+  // Round 2 (Delphi consensus phase):
+  if (d.answered && !closed) {
+    return (
+      <DelphiRound2Question
+        t={t}
+        lang={lang}
+        ex={ex}
+        onDone={() => void ex.refresh()}
+        onGroup={p.onGroup}
+        onHome={p.onHome ?? p.onGroup}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {d.answered && (
-        <Card className="space-y-3 p-5">
-          <CircleCheck className="h-6 w-6 text-primary" /><h2 className="text-lg font-bold">{t.e3}</h2><p className="text-sm text-muted-foreground">{t.e3T}</p>
-          <Button variant="outline" className="w-full" onClick={p.onGroup}>{t.e3C}</Button>
-        </Card>
-      )}
       {closed && (
         <Card className="space-y-2 p-5"><Clock className="h-6 w-6 text-primary" /><h2 className="text-lg font-bold">{t.e2}</h2><p className="text-sm text-muted-foreground">{L(lang, "Answers are no longer being collected.", "Les réponses ne sont plus collectées.")}</p></Card>
       )}
-      <div className="-mx-5 -mt-6 bg-navy px-5 pt-5 pb-6 text-navy-foreground">
+      <div className="rounded-lg border border-primary/30 bg-accent/60 p-3 text-sm">
+        <div className="flex items-center gap-2 font-bold text-navy">
+          <Badge tone="risk">{L(lang, "Round 1 of 2", "1er tour sur 2")}</Badge>
+          <span>{L(lang, "Independent Assessment", "Évaluation indépendante")}</span>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+          {L(lang,
+            "Give your independent forecast without seeing peer answers. After submitting, you will advance to Round 2 (Delphi Consensus Round) with peer statistics.",
+            "Donnez votre première estimation sans voir les réponses des autres experts. Vous passerez ensuite au 2e tour (consensus Delphi) avec les statistiques du groupe."
+          )}
+        </p>
+      </div>
+
+      <div className="-mx-5 -mt-2 bg-navy px-5 pt-5 pb-6 text-navy-foreground">
         <p className="font-condensed text-xs font-bold uppercase tracking-widest">{d.risk.country} · Risk {d.risk.id}{level && ` · ${level}`}</p>
         <h1 className="mt-2 font-display text-3xl leading-tight tracking-wide">{d.question.text}</h1>
         <span className="mt-3 block h-1.5 w-10 bg-foreground" />
@@ -730,13 +1242,20 @@ function Group({ t, lang, ex, view, setView, onQuestion, onHome, onProfile }: {
         </>
       )}
       <div className="space-y-3">
-        <Button className="h-14 w-full text-lg" onClick={() => setView("done")}>{L(lang, "Keep my estimate", "Conserver mon estimation")}</Button>
+        {!d.revised && !closed && (
+          <Button className="h-14 w-full text-lg" onClick={onQuestion}>
+            {L(lang, "Delphi Round 2 (Keep or Adjust)", "Décision 2e tour Delphi (Conserver ou ajuster)")}
+          </Button>
+        )}
         {d.revised ? (
-          <p className="text-center text-sm text-muted-foreground">{L(lang, "You've used your one revision.", "Vous avez utilisé votre unique révision.")}</p>
+          <>
+            <p className="text-center text-sm text-muted-foreground">{L(lang, "You've completed both Delphi rounds.", "Vous avez terminé les deux tours Delphi.")}</p>
+            <Button className="h-14 w-full text-lg" onClick={() => setView("done")}>{L(lang, "View Consensus Receipt", "Voir le reçu de consensus")}</Button>
+          </>
         ) : !closed && (
           <Button variant="outline" className="h-14 w-full text-lg" onClick={() => setView("revise")}>{L(lang, "Revise my estimate", "Réviser mon estimation")}</Button>
         )}
-        <Button variant="ghost" className="w-full" onClick={onQuestion}>{L(lang, "View context", "Voir le contexte")}</Button>
+        <Button variant="ghost" className="w-full" onClick={onQuestion}>{L(lang, "View context & background", "Voir le contexte et l'historique")}</Button>
       </div>
     </div>
   );

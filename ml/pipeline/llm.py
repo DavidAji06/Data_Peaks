@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 
 from .greenpt import GreenPT
+from .nlp_themes import extract_themes_nlp
 
 THEME_KEYS = ("agreement", "disagreement", "new_information")
 MAX_POINTS = 3
@@ -50,19 +52,26 @@ def summarise_reasons(reasons: list[str]) -> dict:
         {"role": "user", "content": "Expert reasons:\n" + "\n".join(f"- {r}" for r in cleaned)},
     ]
 
-    try:
-        reply = GreenPT(timeout=30).chat(messages, temperature=0.0, max_tokens=600)
-    except (Exception, SystemExit) as error:  # GreenPT raises SystemExit if the key is missing
-        print(f"[llm] summarise_reasons failed: {error}")
-        return empty_themes()
+    has_key = bool(os.environ.get("GREENPT_API_KEY") or os.environ.get("GREENPT_KEY"))
+    if not has_key:
+        try:
+            from .greenpt import env
+            has_key = bool(env("GREENPT_API_KEY") or env("GREENPT_KEY"))
+        except Exception:
+            has_key = False
 
-    data = parse_json(reply)
-    if not isinstance(data, dict):
-        print("[llm] summarise_reasons got a reply that wasn't valid JSON")
-        return empty_themes()
+    if has_key:
+        try:
+            reply = GreenPT(timeout=30).chat(messages, temperature=0.0, max_tokens=600)
+            data = parse_json(reply)
+            if isinstance(data, dict):
+                return {
+                    key: [str(point).strip() for point in data.get(key, []) if str(point).strip()][:MAX_POINTS]
+                    if isinstance(data.get(key), list) else []
+                    for key in THEME_KEYS
+                }
+        except (Exception, SystemExit) as error:
+            print(f"[llm] GreenPT failed ({error}), falling back to NLP theme detector")
 
-    return {
-        key: [str(point).strip() for point in data.get(key, []) if str(point).strip()][:MAX_POINTS]
-        if isinstance(data.get(key), list) else []
-        for key in THEME_KEYS
-    }
+    # Fast, deterministic, zero-cost NLP detection of agreement/disagreement/novel context
+    return extract_themes_nlp(cleaned)

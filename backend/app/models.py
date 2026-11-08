@@ -98,6 +98,7 @@ class Question(Base):
     resolution_criteria: Mapped[str] = mapped_column(Text)
     deadline: Mapped[date]
     status: Mapped[str] = mapped_column(default="open")
+    delphi_round: Mapped[int] = mapped_column(default=1)  # 1 = Round 1 (Initial), 2 = Round 2 (Consensus)
     outcome: Mapped[int | None]  # 1 = happened, 0 = didn't, None = unresolved
     themes: Mapped[str | None] = mapped_column(Text)  # AI summary as JSON
 
