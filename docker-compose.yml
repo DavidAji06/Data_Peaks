@@ -1,7 +1,7 @@
 # Runs the whole stack locally, the same way it runs on the server:
 #   docker compose up --build
 # Dashboard http://localhost:3000/mod · Expert app http://localhost:8080/?token=demo-expert-a · API http://localhost:8000/docs
-# Secrets (RESEND_API_KEY or SMTP_*, MODERATOR_KEY, GREENPT_API_KEY) come from .env next to this file.
+# Secrets (BREVO_API_KEY or SMTP_*, MODERATOR_KEY, GREENPT_API_KEY) come from .env next to this file.
 
 services:
   db:
@@ -32,7 +32,7 @@ services:
       MODERATOR_KEY: ${MODERATOR_KEY:-dev-moderator-key}
       EMAIL_PROVIDER: ${EMAIL_PROVIDER:-}
       EMAIL_FROM: ${EMAIL_FROM:-}
-      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}

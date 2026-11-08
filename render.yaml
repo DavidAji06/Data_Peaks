@@ -30,10 +30,10 @@ services:
       - key: CORS_ORIGINS
         value: https://data-peaks-dashboard.onrender.com,https://data-peaks-expert.onrender.com
       # Email (invites, welcome, sign-in links). Render's free plan blocks outbound SMTP ports,
-      # so use Resend over HTTPS: set RESEND_API_KEY and EMAIL_FROM. SMTP_* are for paid plans
-      # or other hosts. With RESEND_API_KEY set, Resend is used (EMAIL_PROVIDER can force "smtp").
+      # so send through Brevo's HTTPS API: set BREVO_API_KEY (an "xkeysib-" API key) and
+      # EMAIL_FROM (a Brevo-verified sender). SMTP_* are for paid plans or other hosts.
       # See backend/.env.example.
-      - key: RESEND_API_KEY
+      - key: BREVO_API_KEY
         sync: false
       - key: EMAIL_FROM
         sync: false

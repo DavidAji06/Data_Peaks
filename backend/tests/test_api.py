@@ -768,3 +768,13 @@ def test_login_link_rate_limited_per_ip(client, login_mail):
     codes = [client.post("/auth/login-link", json={"email": f"x{i}@example.org"}).status_code for i in range(25)]
     assert codes[:20] == [200] * 20
     assert codes[-1] == 429
+
+
+def test_brevo_payload_from_message():
+    from app.services import mailer
+    message = mailer.login_message("x@example.org", "https://app/?token=t")
+    message.replace_header("From", "ACAPS panel <panel@example.org>")
+    payload = mailer.brevo_payload(message)
+    assert payload["sender"] == {"email": "panel@example.org", "name": "ACAPS panel"}
+    assert payload["to"] == [{"email": "x@example.org"}]
+    assert "https://app/?token=t" in payload["textContent"] and "https://app/?token=t" in payload["htmlContent"]

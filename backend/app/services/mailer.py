@@ -1,14 +1,14 @@
 """
 Sends panel emails (invitation, welcome, sign-in link). Standard library only.
 
-Two transports, picked by EMAIL_PROVIDER (default: "resend" when RESEND_API_KEY is set, else "smtp"):
+Two transports, picked by EMAIL_PROVIDER (default: "brevo" when BREVO_API_KEY is set, else "smtp"):
 
-- smtp:   SMTP_HOST, SMTP_PORT (587 STARTTLS or 465 SSL), SMTP_USER, SMTP_PASSWORD
-- resend: RESEND_API_KEY, sent over HTTPS (https://resend.com). Use it where outbound SMTP ports
-          are blocked, e.g. Render's free plan.
+- smtp:  SMTP_HOST, SMTP_PORT (587 STARTTLS or 465 SSL), SMTP_USER, SMTP_PASSWORD
+- brevo: BREVO_API_KEY (an API v3 key "xkeysib-...", not the SMTP key), sent over HTTPS.
+         Use it where outbound SMTP ports are blocked, e.g. Render's free plan.
 
-EMAIL_FROM (or SMTP_FROM) is the sender, e.g. "ACAPS expert panel <panel@your-domain.org>". With
-Resend and no verified domain, use "onboarding@resend.dev" (it can only send to your own address).
+EMAIL_FROM (or SMTP_FROM) is the sender, e.g. "ACAPS expert panel <you@gmail.com>". For Brevo it
+must be a sender verified in Brevo (Senders, Domains & Dedicated IPs).
 
 With neither configured, nothing is sent: the link is printed and the moderator copies it from the dashboard.
 """
@@ -20,6 +20,7 @@ import ssl
 import urllib.error
 import urllib.request
 from email.message import EmailMessage
+from email.utils import parseaddr
 from pathlib import Path
 
 ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
@@ -41,12 +42,12 @@ _load_env_file()
 
 
 def provider() -> str | None:
-    """'resend', 'smtp', or None when email is off."""
+    """'brevo', 'smtp', or None when email is off."""
     name = (os.getenv("EMAIL_PROVIDER") or "").strip().lower()
     if not name:
-        name = "resend" if os.getenv("RESEND_API_KEY") else "smtp"
-    if name == "resend":
-        return "resend" if os.getenv("RESEND_API_KEY") else None
+        name = "brevo" if os.getenv("BREVO_API_KEY") else "smtp"
+    if name == "brevo":
+        return "brevo" if os.getenv("BREVO_API_KEY") else None
     if name == "smtp":
         return "smtp" if os.getenv("SMTP_HOST") else None
     return None
@@ -144,17 +145,24 @@ def _parts(message: EmailMessage) -> tuple[str, str | None]:
     return (text.get_content() if text else ""), (html.get_content() if html else None)
 
 
-def _send_resend(message: EmailMessage) -> None:
+def brevo_payload(message: EmailMessage) -> dict:
     text, html = _parts(message)
-    payload = {"from": message["From"], "to": [message["To"]], "subject": message["Subject"], "text": text}
+    name, address = parseaddr(message["From"])
+    sender_field = {"email": address, "name": name} if name else {"email": address}
+    payload = {"sender": sender_field, "to": [{"email": message["To"]}], "subject": message["Subject"], "textContent": text}
     if html:
-        payload["html"] = html
+        payload["htmlContent"] = html
+    return payload
+
+
+def _send_brevo(message: EmailMessage) -> None:
     request = urllib.request.Request(
-        "https://api.resend.com/emails",
-        data=json.dumps(payload).encode(),
+        "https://api.brevo.com/v3/smtp/email",
+        data=json.dumps(brevo_payload(message)).encode(),
         headers={
-            "Authorization": f"Bearer {os.environ['RESEND_API_KEY']}",
+            "api-key": os.environ["BREVO_API_KEY"],
             "Content-Type": "application/json",
+            "Accept": "application/json",
             "User-Agent": "data-peaks-api",
         },
         method="POST",
@@ -162,8 +170,8 @@ def _send_resend(message: EmailMessage) -> None:
     try:
         with urllib.request.urlopen(request, timeout=15) as response:
             response.read()
-    except urllib.error.HTTPError as e:  # Resend explains what is wrong (unverified domain, bad key...)
-        raise RuntimeError(f"Resend {e.code}: {e.read().decode(errors='replace')[:300]}") from None
+    except urllib.error.HTTPError as e:  # Brevo explains what is wrong (unverified sender, bad key...)
+        raise RuntimeError(f"Brevo {e.code}: {e.read().decode(errors='replace')[:300]}") from None
 
 
 def _send_smtp(message: EmailMessage) -> None:
@@ -191,8 +199,8 @@ def _send(message: EmailMessage) -> tuple[bool, str | None]:
         print(f"[notify] Email not configured, not emailed to {to}: {message['Subject']}")
         return False, "Email is not configured on the server"
     try:
-        if transport == "resend":
-            _send_resend(message)
+        if transport == "brevo":
+            _send_brevo(message)
         else:
             _send_smtp(message)
         print(f"[notify] Emailed {to}: {message['Subject']}")
