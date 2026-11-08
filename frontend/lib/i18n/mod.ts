@@ -308,6 +308,41 @@ export const mod = {
     completionChange: (id: string, from: number | null, to: number) =>
       `${id}: completion ${from ?? '?'}% → ${to}%`,
   },
+
+  questionFilters: {
+    label: 'Filter questions',
+    search: 'Search',
+    searchPlaceholder: 'Question text, Q-id or R-id',
+    stage: 'Stage',
+    country: 'Country',
+    sort: 'Sort by',
+    all: 'All',
+    stages: { round1: 'Round 1 · first answers', round2: 'Round 2 · consensus', closed: 'Closed', resolved: 'Resolved' },
+    sorts: { deadline: 'Deadline, soonest first', participation: 'Lowest participation first', id: 'Question id' },
+    clear: 'Clear filters',
+    count: (shown: number, total: number) => (shown === total ? `${total} questions` : `${shown} of ${total} questions`),
+    empty: 'No questions match these filters.',
+    unknownCountry: 'Country unknown',
+  },
+
+  regionMap: {
+    title: 'Affected region',
+    affected: 'Affected',
+    ring1: 'Shares a border',
+    ring2: 'Two borders away',
+    distance: 'Distance rings (250 / 500 / 1,000 km)',
+    show: 'Show',
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    reset: 'Reset view',
+    hoverHint: 'Hover or tap a country to name it.',
+    caveat:
+      'Geography only: shading shows shared borders and distance from the affected area, not a modelled likelihood of spillover.',
+    neighbours: 'Neighbouring countries',
+    notMapped: (name: string) => `${name} could not be placed on the map.`,
+    aria: (affected: string, neighbours: string) =>
+      `Map of ${affected}. Countries sharing a border: ${neighbours || 'none'}.`,
+  },
 };
 
 export type ModStrings = typeof mod;

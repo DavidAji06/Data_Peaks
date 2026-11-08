@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { PageHeader, StatusTag } from '@/components/mod/parts';
+import { RegionMap } from '@/components/mod/RegionMap';
+import { splitCountries } from '@/lib/region';
 import { RiskDecisionPanel } from '@/components/mod/RiskDecisionPanel';
 import { TriggerCard } from '@/components/mod/TriggerCard';
 import { Card, Chip, RiskChip } from '@/components/ui/primitives';
@@ -52,6 +54,13 @@ async function RiskView({ params }: { params: PageProps<'/mod/risks/[id]'>['para
               {risk.status && <StatusTag>{risk.status}</StatusTag>}
             </div>
           </Card>
+
+          {splitCountries(risk.country).length > 0 && (
+            <Card>
+              <h2 className="mb-3 text-base font-semibold text-ink">{mod.regionMap.title}</h2>
+              <RegionMap countries={splitCountries(risk.country)} />
+            </Card>
+          )}
 
           <Card>
             <h2 className="text-base font-semibold text-ink">{t.questions}</h2>

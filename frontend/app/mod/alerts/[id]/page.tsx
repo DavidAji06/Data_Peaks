@@ -5,6 +5,8 @@ import { Suspense } from 'react';
 import { AlertDecisionForm } from '@/components/mod/AlertDecisionForm';
 import { AlertScores, placeLabel } from '@/components/mod/AlertScores';
 import { PageHeader, StatusTag, fmtDate } from '@/components/mod/parts';
+import { RegionMap } from '@/components/mod/RegionMap';
+import { splitCountries } from '@/lib/region';
 import { TriggerCard } from '@/components/mod/TriggerCard';
 import { Card, Notice, RiskChip } from '@/components/ui/primitives';
 import { getAlertDetail } from '@/lib/api';
@@ -131,6 +133,13 @@ async function AlertDetailView({ params }: { params: PageProps<'/mod/alerts/[id]
               <Notice tone="warning">{t.riskUnknown}</Notice>
             )}
           </Card>
+
+          {splitCountries(risk?.country ?? alert.country).length > 0 && (
+            <Card>
+              <h2 className="mb-3 text-base font-semibold text-ink">{mod.regionMap.title}</h2>
+              <RegionMap countries={splitCountries(risk?.country ?? alert.country)} />
+            </Card>
+          )}
         </div>
 
         <AlertDecisionForm
