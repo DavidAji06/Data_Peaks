@@ -1,0 +1,111 @@
+/*
+ * Moderator dashboard theme: the expert app's ACAPS look (see expert-app/src/styles.css), scoped to /mod.
+ * It only re-points the design tokens from globals.css inside `.acaps-mod`, so /outcomes and the root
+ * tokens are unchanged. Colours: ACAPS blue #0096ba (accents), ACAPS dark blue #004b78 (buttons, links,
+ * active states), slate ink #0f172a. Fonts: Roboto (body), Bebas Neue (titles), Roboto Condensed (labels).
+ */
+.acaps-mod {
+  --acaps-blue: #0096ba;
+  --acaps-navy: #004b78;
+  --acaps-ink: #0f172a;
+
+  /* Primary: navy for buttons/links/active (AA on white), ACAPS blue for marks and bars */
+  --color-primary-700: #003a5d;
+  --color-primary-600: var(--acaps-navy);
+  --color-primary-500: var(--acaps-blue);
+  --color-primary-100: #dbeef5;
+  --color-primary-50: #e9f5f9;
+
+  /* Neutrals (slate, as in the expert app) */
+  --color-ink-900: var(--acaps-ink);
+  --color-ink-700: #334155;
+  --color-ink-500: #475569;
+  --color-ink-400: #64748b;
+
+  --color-surface-page: #f8fafc;
+  --color-surface-card: #f1f5f9;
+  --color-surface-white: #ffffff;
+
+  --color-border-subtle: #e2e8f0;
+  --color-border-default: #cbd5e1;
+  --color-line: #e2e8f0;
+
+  --color-band: #dbeef5;
+
+  /* Aliases must be restated here: on :root they were resolved against the old values */
+  --color-canvas: var(--color-surface-page);
+  --color-surface: var(--color-surface-white);
+  --color-surface-muted: var(--color-surface-card);
+  --color-ink: var(--color-ink-900);
+  --color-ink-muted: var(--color-ink-500);
+  --color-line-strong: var(--color-border-default);
+  --color-accent: var(--color-primary-600);
+  --color-accent-hover: var(--color-primary-700);
+  --color-accent-soft: var(--color-primary-50);
+  --color-on-accent: var(--color-surface-white);
+
+  --font-sans: var(--font-acaps-sans), 'Roboto', system-ui, sans-serif;
+  --font-display: var(--font-acaps-display), 'Bebas Neue', 'Roboto Condensed', sans-serif;
+  --font-condensed: var(--font-acaps-condensed), 'Roboto Condensed', 'Roboto', sans-serif;
+
+  background: var(--color-surface-page);
+  color: var(--color-ink-900);
+  font-family: var(--font-sans);
+}
+
+.acaps-mod :focus-visible {
+  outline: 2px solid var(--acaps-blue);
+  outline-offset: 2px;
+}
+
+.acaps-mod .font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.acaps-mod .font-condensed {
+  font-family: var(--font-condensed);
+}
+
+/* Page title (PageHeader, error, not found): Bebas, dark blue, like the expert app's headings */
+.acaps-mod main h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 2.25rem;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--acaps-navy);
+}
+
+/* Section titles: the expert app's SectionLabel (Bebas, dark blue, small ACAPS-blue bar) */
+.acaps-mod main h2.font-semibold {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--acaps-navy);
+}
+.acaps-mod main h2.font-semibold::before {
+  content: '';
+  flex: none;
+  width: 4px;
+  height: 1rem;
+  background: var(--acaps-blue);
+}
+
+/* Small field labels ("Report", "Evidence", AI theme names): condensed, bold, tracked caps */
+.acaps-mod main :is(h2, h3).text-sm {
+  font-family: var(--font-condensed);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-500);
+}

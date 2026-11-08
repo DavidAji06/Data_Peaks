@@ -28,8 +28,8 @@ export function NavLinks({ path }: { path: string }) {
             key={item.href}
             href={item.href}
             aria-current={active ? 'page' : undefined}
-            className={`inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-sm font-medium ${
-              active ? 'bg-accent-soft text-accent' : 'text-ink hover:bg-surface-muted'
+            className={`inline-flex min-h-11 shrink-0 items-center rounded px-3 font-condensed text-sm font-bold uppercase tracking-wide ${
+              active ? 'bg-accent text-on-accent' : 'text-ink-muted hover:bg-accent-soft hover:text-accent'
             }`}
           >
             {item.label}
