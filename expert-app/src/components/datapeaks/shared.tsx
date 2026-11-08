@@ -10,7 +10,7 @@ export function median(xs: number[]) {
 }
 
 /** ACAPS wordmark with pointer motif. */
-export function Wordmark({ tagline = true, size = "md" }: { tagline?: boolean; size?: "sm" | "md" }) {
+export function Wordmark({ tagline = true, size = "md", lang = "en" }: { tagline?: boolean; size?: "sm" | "md"; lang?: Lang }) {
   return (
     <div className="flex flex-col leading-none">
       <div className="relative inline-flex flex-col items-end" aria-label="ACAPS">
@@ -21,7 +21,7 @@ export function Wordmark({ tagline = true, size = "md" }: { tagline?: boolean; s
         </svg>
         <span className={`-mt-1 font-sans font-medium lowercase leading-none tracking-tight text-foreground ${size === "sm" ? "text-xl" : "text-3xl"}`}>acaps</span>
       </div>
-      {tagline && <span className="mt-1 font-condensed text-[10px] uppercase tracking-wider opacity-80">See the crisis, change the outcome</span>}
+      {tagline && <span className="mt-1 font-condensed text-[10px] uppercase tracking-wider opacity-80">{lang === "fr" ? "Voir la crise, changer l'issue" : "See the crisis, change the outcome"}</span>}
     </div>
   );
 }
@@ -58,7 +58,7 @@ export function Button({ children, onClick, variant = "primary", className = "",
 
 export function LangToggle({ lang, setLang, dark = false }: { lang: Lang; setLang: (l: Lang) => void; dark?: boolean }) {
   return (
-    <div className={`inline-flex rounded-md border p-0.5 font-condensed text-sm ${dark ? "border-navy-foreground/30" : ""}`} role="group" aria-label="Language">
+    <div className={`inline-flex rounded-md border p-0.5 font-condensed text-sm ${dark ? "border-navy-foreground/30" : ""}`} role="group" aria-label={lang === "fr" ? "Langue" : "Language"}>
       {(["en", "fr"] as const).map((l) => (
         <button key={l} onClick={() => setLang(l)} aria-pressed={lang === l}
           className={`rounded px-2.5 py-1 font-bold ${lang === l ? "bg-highlight text-highlight-foreground" : dark ? "text-navy-foreground" : "text-muted-foreground"}`}>

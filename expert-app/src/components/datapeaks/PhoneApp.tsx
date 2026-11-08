@@ -3,7 +3,10 @@ import {
   ChevronDown, ChevronLeft, ChevronRight, Check, Lock, EyeOff, UserRound, Newspaper, Link2Off, Clock, CircleCheck,
   WifiOff, Loader2, House, FileQuestion, Users, Search, List, Globe2, RotateCcw, X, MapPin, Pencil,
 } from "lucide-react";
-import { dict, pct } from "./i18n";
+import { colon, countryName, dict, pct, term } from "./i18n";
+
+/** A signed difference in points, e.g. "+12%" (or "+12 %" in French). */
+const signedPct = (lang: Lang, n: number) => (n > 0 ? "+" : "") + pct(lang, n);
 import campImg from "@/assets/camp_sahel.jpg";
 import convoyImg from "@/assets/convoy_chad.jpg";
 import { Badge, Button, Card, LangToggle, SectionLabel, Wordmark, type Lang } from "./shared";
@@ -92,7 +95,7 @@ export function PhoneApp({ lang, setLang, onSignOut }: { lang: Lang; setLang: (l
         <p className="line-clamp-1 text-xs opacity-80">{titles[screen][1]}</p>
         <span className="absolute -bottom-1 left-5 h-1.5 w-10 bg-primary" />
       </div>
-      <nav className="flex gap-1 border-b bg-card px-2 pt-3 pb-1.5" role="tablist" aria-label="Sections">
+      <nav className="flex gap-1 border-b bg-card px-2 pt-3 pb-1.5" role="tablist" aria-label={L(lang, "Sections", "Rubriques")}>
         {nav.map(([s, label, Icon]) => (
           <button key={s} role="tab" aria-selected={screen === s} onClick={() => go(s)}
             className={`relative flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded px-1 py-1 font-condensed text-xs font-bold ${screen === s ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
@@ -224,11 +227,11 @@ function QuestionHeaderCarousel({ lang, ex }: { lang: Lang; ex: Expert }) {
         className="flex snap-x snap-mandatory items-start overflow-x-auto overflow-y-hidden transition-[height] duration-200 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {slides.map((q) => {
           const on = q.question_id === current;
-          const level = d.question.id === q.question_id && d.risk.risk_level ? ` · ${d.risk.risk_level} risk` : "";
+          const level = d.question.id === q.question_id && d.risk.risk_level ? ` · ${L(lang, `${d.risk.risk_level} risk`, `Risque ${term(lang, d.risk.risk_level).toLowerCase()}`)}` : "";
           return (
             <div key={q.question_id} role="tab" aria-selected={on} className="w-full shrink-0 snap-center px-5">
               <p className="flex items-center justify-between gap-2 font-condensed text-xs font-bold uppercase tracking-widest">
-                <span className="truncate">{q.risk.country} · Risk {q.risk.id}{level}</span>
+                <span className="truncate">{countryName(lang, q.risk.country)} · {L(lang, "Risk", "Risque")} {q.risk.id}{level}</span>
                 <span className="shrink-0 opacity-80">{questionStatus(lang, q)}</span>
               </p>
               <h1 className="mt-2 font-display text-3xl leading-tight tracking-wide">{q.text}</h1>
@@ -279,7 +282,7 @@ function QuestionSwitcher({ lang, ex }: { lang: Lang; ex: Expert }) {
               onClick={() => (on ? setExpanded(!expanded) : pick(q.question_id))}
               className={`flex shrink-0 snap-start flex-col justify-start rounded-lg border-2 p-3 text-left transition-colors ${live.length > 1 ? "w-[72%]" : "w-full"} ${open ? "min-h-32" : "h-32"} ${on ? "border-primary bg-accent" : "border-border bg-card"}`}>
               <span className="flex w-full items-center justify-between gap-2 font-condensed text-xs font-bold text-navy">
-                <span className="truncate">{q.risk.country} · {q.risk.id}</span>
+                <span className="truncate">{countryName(lang, q.risk.country)} · {q.risk.id}</span>
                 <span className={`shrink-0 ${todo ? "text-risk" : "text-muted-foreground"}`}>{questionStatus(lang, q)}</span>
               </span>
               <span className={`mt-1.5 block text-sm leading-snug ${open ? "" : "line-clamp-3"}`}>{q.text}</span>
@@ -555,20 +558,20 @@ function ContextSheet({ lang, ex, ctx, rankedLabel, question, panel, panelBusy, 
       <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-input" aria-hidden />
       <div className="flex items-start justify-between gap-2">
         <div>
-          <Eyebrow><MapPin className="mr-1 inline h-3 w-3" />{L(lang, "Context", "Contexte")}{question ? ` · Risk ${question.risk.id}` : ""}</Eyebrow>
+          <Eyebrow><MapPin className="mr-1 inline h-3 w-3" />{L(lang, "Context", "Contexte")}{question ? ` · ${L(lang, "Risk", "Risque")} ${question.risk.id}` : ""}</Eyebrow>
           <h3 className="font-display text-3xl leading-none text-navy">{ctx.name[lang]}</h3>
         </div>
         <button onClick={onClose} aria-label={L(lang, "Close", "Fermer")} className="flex h-11 w-11 items-center justify-center rounded-full border"><X className="h-5 w-5" /></button>
       </div>
       <p className="mt-2 text-sm leading-snug">{question?.risk.title ?? ctx.riskTitle}</p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <Badge tone="risk">{L(lang, "ACAPS risk level", "Niveau de risque ACAPS")}: {d?.risk.risk_level ?? ctx.risks.find((r) => r.id === riskId)?.riskLevel ?? ctx.riskLevel}</Badge>
+        <Badge tone="risk">{L(lang, "ACAPS risk level", "Niveau de risque ACAPS")}{colon(lang)}{term(lang, d?.risk.risk_level ?? ctx.risks.find((r) => r.id === riskId)?.riskLevel ?? ctx.riskLevel)}</Badge>
         <Badge tone="muted">{rankedLabel}</Badge>
       </div>
       {ctx.risks.filter((r) => r.id !== riskId).map((r) => (
         <div key={r.id} className="mt-3 border-t pt-2">
           <p className="text-sm leading-snug">{r.title}</p>
-          <Badge tone="risk">{L(lang, "ACAPS risk level", "Niveau de risque ACAPS")}: {r.riskLevel}</Badge>
+          <Badge tone="risk">{L(lang, "ACAPS risk level", "Niveau de risque ACAPS")}{colon(lang)}{term(lang, r.riskLevel)}</Badge>
         </div>
       ))}
       {update && (
@@ -809,12 +812,12 @@ function DelphiRound2Question(p: {
             <SectionLabel>{t.changed}</SectionLabel>
             <p className="mt-1 text-sm font-medium">{d.trigger_update ? d.trigger_update.report.title : t.news}</p>
             {d.trigger_update?.report.url && (
-              <a href={d.trigger_update.report.url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-primary-strong underline">Source</a>
+              <a href={d.trigger_update.report.url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-primary-strong underline">{L(lang, "Source", "Source")}</a>
             )}
           </div>
           <div>
             <SectionLabel>{t.similar}</SectionLabel>
-            <CasesCarousel t={t} cases={cases} />
+            <CasesCarousel t={t} lang={lang} cases={cases} />
           </div>
         </div>
       )}
@@ -828,7 +831,7 @@ function DelphiRound2Question(p: {
           <div className="col-span-2 rounded-md bg-secondary/60 p-3 text-foreground sm:col-span-1">
             <p className="text-xs font-bold leading-tight">{L(lang, "Panel Range", "Éventail du panel")}</p>
             <p className="mt-1 font-display text-2xl leading-none">
-              {enough ? `${to100(g!.min!)}%–${to100(g!.max!)}%` : L(lang, "Collecting...", "En collecte...")}
+              {enough ? `${pct(lang, to100(g!.min!))}–${pct(lang, to100(g!.max!))}` : L(lang, "Collecting...", "En collecte...")}
             </p>
             <p className="mt-0.5 text-[11px] text-muted-foreground">{g?.response_count ?? 0} {L(lang, "experts answered", "experts ont répondu")}</p>
           </div>
@@ -836,7 +839,7 @@ function DelphiRound2Question(p: {
 
         {firstReason && (
           <div className="rounded-lg border bg-card p-3 text-sm">
-            <span className="font-condensed text-xs font-bold uppercase tracking-wider text-muted-foreground">{L(lang, "Your Round 1 reasoning", "Votre raisonnement du 1er tour")}:</span>
+            <span className="font-condensed text-xs font-bold uppercase tracking-wider text-muted-foreground">{L(lang, "Your Round 1 reasoning", "Votre raisonnement du 1er tour")}{colon(lang).trimEnd()}</span>
             <p className="mt-0.5 italic text-navy">“{firstReason}”</p>
           </div>
         )}
@@ -852,7 +855,7 @@ function DelphiRound2Question(p: {
               <div className="rounded-lg border-2 border-amber-300 bg-amber-50 p-4 text-amber-950">
                 <div className="flex items-center gap-2 font-bold text-amber-900">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-200 text-xs font-black">!</span>
-                  <span>{L(lang, "Notable Divergence from Group Consensus", "Divergence notable avec le consensus")} ({divergence! > 0 ? `+${divergence}%` : `${divergence}%`})</span>
+                  <span>{L(lang, "Notable Divergence from Group Consensus", "Divergence notable avec le consensus")} ({signedPct(lang, divergence!)})</span>
                 </div>
                 <p className="mt-1 text-sm leading-relaxed text-amber-900/90">
                   {L(lang,
@@ -865,7 +868,7 @@ function DelphiRound2Question(p: {
               <div className="rounded-lg border-2 border-emerald-300 bg-emerald-50 p-4 text-emerald-950">
                 <div className="flex items-center gap-2 font-bold text-emerald-900">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-200 text-xs font-black">✓</span>
-                  <span>{L(lang, "Close to Group Consensus", "Proche du consensus du groupe")} ({divergence !== null && divergence >= 0 ? `+${divergence}%` : `${divergence}%`})</span>
+                  <span>{L(lang, "Close to Group Consensus", "Proche du consensus du groupe")} ({divergence !== null ? signedPct(lang, divergence) : "—"})</span>
                 </div>
                 <p className="mt-1 text-sm leading-relaxed text-emerald-900/90">
                   {L(lang,
@@ -903,7 +906,7 @@ function DelphiRound2Question(p: {
       {/* Decision area */}
       <section className="space-y-4 rounded-xl border bg-card p-4 shadow-xs">
         <SectionLabel>{L(lang, "Your Delphi Consensus Decision", "Votre décision de consensus Delphi")}</SectionLabel>
-        <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Delphi Decision">
+        <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={L(lang, "Delphi decision", "Décision Delphi")}>
           <button
             type="button"
             role="radio"
@@ -978,8 +981,8 @@ function DelphiRound2Question(p: {
               <div className="mt-1 flex items-baseline justify-center gap-3">
                 <span className="font-display text-5xl leading-none text-primary-strong">{pct(lang, adjustedVal)}</span>
                 <span className="font-condensed text-xs font-bold text-muted-foreground">
-                  ({adjustedVal - (first ?? 50) >= 0 ? `+${adjustedVal - (first ?? 50)}%` : `${adjustedVal - (first ?? 50)}%`} {L(lang, "from Round 1", "par rapport au 1er tour")}
-                  {medianVal !== null && ` · ${adjustedVal - medianVal >= 0 ? `+${adjustedVal - medianVal}%` : `${adjustedVal - medianVal}%`} ${L(lang, "vs median", "vs médiane")}`})
+                  ({signedPct(lang, adjustedVal - (first ?? 50))} {L(lang, "from Round 1", "par rapport au 1er tour")}
+                  {medianVal !== null && ` · ${signedPct(lang, adjustedVal - medianVal)} ${L(lang, "vs median", "par rapport à la médiane")}`})
                 </span>
               </div>
               <input
@@ -1139,16 +1142,16 @@ function Question(p: {
             <p className="font-medium leading-snug">{update ? update.report.title : t.news}</p>
             <p className="mt-1 font-condensed text-xs text-muted-foreground">
               {update
-                ? [update.region_match && update.matched_place ? L(lang, `Reporting near ${update.matched_place} (place-name match)`, `Informations près de ${update.matched_place} (correspondance de lieu)`) : L(lang, `Related reporting in ${d.risk.country}`, `Informations liées : ${d.risk.country}`), update.report.source, fmtDate(lang, update.report.published_at)].filter(Boolean).join(" · ")
+                ? [update.region_match && update.matched_place ? L(lang, `Reporting near ${update.matched_place} (place-name match)`, `Informations près de ${update.matched_place} (correspondance de lieu)`) : L(lang, `Related reporting in ${d.risk.country}`, `Informations liées : ${countryName(lang, d.risk.country)}`), update.report.source, fmtDate(lang, update.report.published_at)].filter(Boolean).join(" · ")
                 : t.newsMeta}
             </p>
-            {update?.report.url && <a href={update.report.url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-primary-strong underline">Source</a>}
+            {update?.report.url && <a href={update.report.url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs text-primary-strong underline">{L(lang, "Source", "Source")}</a>}
           </div></div>
         </Card>
       </section>
       <section>
         <SectionLabel>{t.similar}</SectionLabel>
-        <CasesCarousel t={t} cases={cases} />
+        <CasesCarousel t={t} lang={lang} cases={cases} />
       </section>
       <AnswerFields {...p} disabled={d.answered || closed} />
       {err && <p className="text-sm text-risk">{err}</p>}
@@ -1173,7 +1176,7 @@ function LinkedText({ text }: { text: string }) {
 
 type Case = { place: string; code: string; status: string; text: string; full?: string; title?: string; sources?: string[]; evolution?: ApiSimilarRisk["evolution"] };
 
-function CasesCarousel({ t, cases }: { t: T; cases: Case[] }) {
+function CasesCarousel({ t, lang, cases }: { t: T; lang: Lang; cases: Case[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const [idx, setIdx] = useState(0);
   const [expanded, setExpanded] = useState<number | null>(null);
@@ -1191,18 +1194,18 @@ function CasesCarousel({ t, cases }: { t: T; cases: Case[] }) {
           <div key={c.code + i} className="w-full shrink-0 snap-center px-1 py-1" aria-label={`${i + 1} / ${cases.length}`}>
             <Card className="h-full">
               <div>
-                <p className="text-2xl font-medium text-navy">{c.place}</p>
-                <p className="font-condensed text-xs text-muted-foreground">{c.code} · {c.status}</p>
+                <p className="text-2xl font-medium text-navy">{countryName(lang, c.place)}</p>
+                <p className="font-condensed text-xs text-muted-foreground">{c.code} · {term(lang, c.status)}</p>
                 {expanded === i && c.title && <p className="mt-3 font-bold leading-snug">{c.title}</p>}
                 {expanded === i && c.evolution && (c.evolution.hazard_materialisation || c.evolution.impact_materialisation || c.evolution.rationale_update) ? (
                   <div className="mt-3 space-y-3">
-                    <p className="font-condensed text-xs font-bold uppercase tracking-widest text-muted-foreground">How it evolved</p>
+                    <p className="font-condensed text-xs font-bold uppercase tracking-widest text-muted-foreground">{L(lang, "How it evolved", "Évolution")}</p>
                     <div className="flex flex-wrap gap-2">
-                      <Badge tone="muted">Outcome: {c.status}</Badge>
-                      {c.evolution.what_materialised && <Badge tone="muted">Materialised: {c.evolution.what_materialised}</Badge>}
-                      {c.evolution.trend && <Badge tone="muted">Trend: {c.evolution.trend}</Badge>}
+                      <Badge tone="muted">{L(lang, "Outcome", "Résultat")}{colon(lang)}{term(lang, c.status)}</Badge>
+                      {c.evolution.what_materialised && <Badge tone="muted">{L(lang, "Materialised", "Matérialisé")}{colon(lang)}{term(lang, c.evolution.what_materialised)}</Badge>}
+                      {c.evolution.trend && <Badge tone="muted">{L(lang, "Trend", "Tendance")}{colon(lang)}{term(lang, c.evolution.trend)}</Badge>}
                     </div>
-                    {([["Hazard", c.evolution.hazard_materialisation], ["Impact", c.evolution.impact_materialisation], ["Updates", c.evolution.rationale_update]] as const)
+                    {([[L(lang, "Hazard", "Aléa"), c.evolution.hazard_materialisation], [L(lang, "Impact", "Impact"), c.evolution.impact_materialisation], [L(lang, "Updates", "Mises à jour"), c.evolution.rationale_update]] as const)
                       .filter(([, v]) => v)
                       .map(([label, v]) => (
                         <div key={label}>
@@ -1214,11 +1217,11 @@ function CasesCarousel({ t, cases }: { t: T; cases: Case[] }) {
                 ) : (
                   <p className="mt-3 text-base leading-relaxed">{expanded === i && c.full ? c.full : c.text}</p>
                 )}
-                {(c.full || c.title) && <button onClick={() => setExpanded(expanded === i ? null : i)} aria-expanded={expanded === i} className="mt-2 flex min-h-11 items-center gap-1 text-sm font-medium text-primary-strong">{expanded === i ? "Show less" : "Read the full case"}<ChevronDown className={`h-4 w-4 transition-transform ${expanded === i ? "rotate-180" : ""}`} /></button>}
+                {(c.full || c.title) && <button onClick={() => setExpanded(expanded === i ? null : i)} aria-expanded={expanded === i} className="mt-2 flex min-h-11 items-center gap-1 text-sm font-medium text-primary-strong">{expanded === i ? L(lang, "Show less", "Réduire") : L(lang, "Read the full case", "Lire le cas complet")}<ChevronDown className={`h-4 w-4 transition-transform ${expanded === i ? "rotate-180" : ""}`} /></button>}
               </div>
               {expanded === i && !!c.sources?.length && (
                 <div className="mt-3 space-y-1 border-t pt-2">
-                  <p className="font-condensed text-xs text-muted-foreground">Sources</p>
+                  <p className="font-condensed text-xs text-muted-foreground">{L(lang, "Sources", "Sources")}</p>
                   {c.sources.map((url) => (
                     <a key={url} href={url} target="_blank" rel="noreferrer" className="block break-all text-xs text-primary-strong underline">{new URL(url).hostname.replace(/^www\./, "")}</a>
                   ))}
@@ -1229,13 +1232,13 @@ function CasesCarousel({ t, cases }: { t: T; cases: Case[] }) {
         ))}
       </div>
       <div className="mt-3 flex items-center justify-between">
-        <button onClick={() => go(idx - 1)} disabled={idx === 0} aria-label="Previous case" className="flex h-11 w-11 items-center justify-center rounded-full border bg-card disabled:opacity-30"><ChevronLeft className="h-5 w-5" /></button>
+        <button onClick={() => go(idx - 1)} disabled={idx === 0} aria-label={L(lang, "Previous case", "Cas précédent")} className="flex h-11 w-11 items-center justify-center rounded-full border bg-card disabled:opacity-30"><ChevronLeft className="h-5 w-5" /></button>
         <div className="flex gap-2">
           {cases.map((c, i) => (
-            <button key={c.code + i} onClick={() => go(i)} aria-label={c.place} className={`h-2.5 rounded-full transition-all ${i === idx ? "w-6 bg-primary" : "w-2.5 bg-input"}`} />
+            <button key={c.code + i} onClick={() => go(i)} aria-label={countryName(lang, c.place)} className={`h-2.5 rounded-full transition-all ${i === idx ? "w-6 bg-primary" : "w-2.5 bg-input"}`} />
           ))}
         </div>
-        <button onClick={() => go(idx + 1)} disabled={idx === cases.length - 1} aria-label="Next case" className="flex h-11 w-11 items-center justify-center rounded-full border bg-card disabled:opacity-30"><ChevronRight className="h-5 w-5" /></button>
+        <button onClick={() => go(idx + 1)} disabled={idx === cases.length - 1} aria-label={L(lang, "Next case", "Cas suivant")} className="flex h-11 w-11 items-center justify-center rounded-full border bg-card disabled:opacity-30"><ChevronRight className="h-5 w-5" /></button>
       </div>
       <p className="mt-3 text-center text-xs text-muted-foreground">{t.casesNote}</p>
     </div>
@@ -1349,7 +1352,7 @@ function CompareAxis({ lang, min, max, median, first, latest }: { lang: Lang; mi
           </>
         )}
       </div>
-      <div className="mt-2 flex justify-between font-condensed text-xs text-muted-foreground"><span>0%</span><span>50%</span><span>100%</span></div>
+      <div className="mt-2 flex justify-between font-condensed text-xs text-muted-foreground"><span>{pct(lang, 0)}</span><span>{pct(lang, 50)}</span><span>{pct(lang, 100)}</span></div>
     </div>
   );
 }
@@ -1486,7 +1489,7 @@ function Profile({ t, lang, ex, onSignOut }: { t: T; lang: Lang; ex: Expert; onS
                 )}
               </div>
             )}
-            <p className="font-condensed text-sm text-muted-foreground">{L(lang, "Expert panel", "Panel d'experts")}{s?.country ? ` · ${s.country}` : ""}</p>
+            <p className="font-condensed text-sm text-muted-foreground">{L(lang, "Expert panel", "Panel d'experts")}{s?.country ? ` · ${countryName(lang, s.country)}` : ""}</p>
           </div>
         </div>
         {editingName && (

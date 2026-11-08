@@ -28,8 +28,35 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+const LANG_KEY = "datapeaks.lang";
+
+function storedLang(): Lang | null {
+  try {
+    const v = window.localStorage.getItem(LANG_KEY);
+    return v === "en" || v === "fr" ? v : null;
+  } catch {
+    return null; // Private mode or blocked storage: fall back to English
+  }
+}
+
 function Index() {
-  const [lang, setLang] = useState<Lang>("en");
+  const [lang, setLangState] = useState<Lang>("en");
+  // The chosen language survives reloads and sign-in; read on the client only
+  useEffect(() => {
+    const saved = storedLang();
+    if (saved) setLangState(saved);
+  }, []);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+  const setLang = useCallback((l: Lang) => {
+    setLangState(l);
+    try {
+      window.localStorage.setItem(LANG_KEY, l);
+    } catch {
+      // Not saved: the choice still applies until the page is reloaded
+    }
+  }, []);
   // An activation link (?join=) shows the join screen first; the URL is read on the client only.
   const [joinToken, setJoinToken] = useState<string | null | undefined>(undefined);
   // The signed-in expert (from ?token= or this device), null = show the sign-in screen

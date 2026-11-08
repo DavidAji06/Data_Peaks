@@ -126,3 +126,46 @@ const fr: Dict = {
 
 export const dict: Record<Lang, Dict> = { en, fr };
 export const pct = (lang: Lang, n: number) => (lang === "fr" ? `${n} %` : `${n}%`);
+
+/* The backend sends a few fixed English values (risk levels, case outcomes, country names).
+   These translate them for display; anything unknown is shown as it came. */
+
+const TERMS_FR: Record<string, string> = {
+  // Risk levels
+  "very high": "Très élevé", high: "Élevé", medium: "Moyen", low: "Faible", "very low": "Très faible",
+  // Past-case outcomes and how they evolved
+  materialised: "Matérialisé", "not materialised": "Non matérialisé", "partially materialised": "Partiellement matérialisé",
+  "hazard and impact": "Aléa et impact", hazard: "Aléa", impact: "Impact",
+  deteriorated: "Détérioré", stable: "Stable", improved: "Amélioré",
+};
+
+/** A risk level, outcome or trend from the data, in the chosen language. */
+export const term = (lang: Lang, value: string | null | undefined): string => {
+  if (!value) return "";
+  return lang === "fr" ? (TERMS_FR[value.trim().toLowerCase()] ?? value) : value;
+};
+
+const COUNTRIES_FR: Record<string, string> = {
+  Afghanistan: "Afghanistan", Algeria: "Algérie", Bangladesh: "Bangladesh", Benin: "Bénin", Burundi: "Burundi",
+  Cameroon: "Cameroun", "Central African Republic": "République centrafricaine", Chad: "Tchad", Colombia: "Colombie",
+  Congo: "Congo", Cuba: "Cuba", "Democratic Republic of the Congo": "République démocratique du Congo", Egypt: "Égypte",
+  "El Salvador": "Salvador", Ethiopia: "Éthiopie", Ghana: "Ghana", Guatemala: "Guatemala", Haiti: "Haïti",
+  Honduras: "Honduras", Indonesia: "Indonésie", Iran: "Iran", Iraq: "Irak", "Ivory Coast": "Côte d'Ivoire",
+  Kenya: "Kenya", Lebanon: "Liban", Libya: "Libye", Madagascar: "Madagascar", Mali: "Mali", Mauritania: "Mauritanie",
+  Mexico: "Mexique", Mongolia: "Mongolie", Morocco: "Maroc", Mozambique: "Mozambique", Myanmar: "Myanmar",
+  Nepal: "Népal", Niger: "Niger", Nigeria: "Nigeria", Palestine: "Palestine", Panama: "Panama",
+  "Papua New Guinea": "Papouasie-Nouvelle-Guinée", Peru: "Pérou", Philippines: "Philippines", Rwanda: "Rwanda",
+  Somalia: "Somalie", "South Sudan": "Soudan du Sud", "Sri Lanka": "Sri Lanka", Sudan: "Soudan", Syria: "Syrie",
+  Tanzania: "Tanzanie", "Timor Leste": "Timor oriental", Togo: "Togo", Tunisia: "Tunisie", Turkey: "Turquie",
+  Uganda: "Ouganda", Ukraine: "Ukraine", Venezuela: "Venezuela", Yemen: "Yémen", Zimbabwe: "Zimbabwe",
+};
+
+/** A country name (or a comma-separated list of them) from the data, in the chosen language. */
+export const countryName = (lang: Lang, value: string | null | undefined): string => {
+  if (!value) return "";
+  if (lang !== "fr") return value;
+  return value.split(",").map((c) => COUNTRIES_FR[c.trim()] ?? c.trim()).join(", ");
+};
+
+/** French puts a space before a colon. */
+export const colon = (lang: Lang) => (lang === "fr" ? " : " : ": ");
