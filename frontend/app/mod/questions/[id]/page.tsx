@@ -73,22 +73,6 @@ async function QuestionView({ params }: { params: PageProps<'/mod/questions/[id]
             )}
           </Card>
 
-          <Card>
-            <h2 className="text-base font-semibold text-ink">{t.participation}</h2>
-            <dl className="mt-2 grid grid-cols-3 gap-3">
-              {[
-                [t.invited, d.participation.invited],
-                [t.answered, `${d.participation.answered} (Tentative)`],
-                [t.revised, `${d.participation.revised} (Finalised)`],
-              ].map(([label, n]) => (
-                <div key={label}>
-                  <dt className="text-sm text-ink-muted">{label}</dt>
-                  <dd className="text-xl font-semibold text-ink">{n}</dd>
-                </div>
-              ))}
-            </dl>
-          </Card>
-
           {showFigures && d.consensusMetrics && (
             <Card>
               <div className="flex items-center justify-between">
@@ -183,6 +167,25 @@ async function QuestionView({ params }: { params: PageProps<'/mod/questions/[id]
         </div>
 
         <div className="grid gap-4">
+          <Card>
+            <h2 className="text-base font-semibold text-ink">{t.participation}</h2>
+            <dl className="mt-2 grid grid-cols-3 gap-3">
+              {(
+                [
+                  [t.invited, d.participation.invited, null],
+                  [t.answered, d.participation.answered, 'Tentative'],
+                  [t.revised, d.participation.revised, 'Finalised'],
+                ] as const
+              ).map(([label, n, note]) => (
+                <div key={label} className="flex flex-col">
+                  <dt className="text-sm leading-snug text-ink-muted">{label}</dt>
+                  <dd className="mt-auto pt-1 text-2xl font-semibold leading-none text-ink">{n}</dd>
+                  {note && <dd className="mt-1 text-xs text-ink-muted">{note}</dd>}
+                </div>
+              ))}
+            </dl>
+          </Card>
+
           <DelphiStageControl
             questionId={q.id}
             status={q.status}
@@ -242,7 +245,6 @@ function Responses({ d }: { d: QuestionDetail }) {
           </span>
         </div>
       </div>
-      <p className="mt-1 text-sm text-ink-muted">{t.responsesHelp}</p>
       {d.responses.length === 0 ? (
         <p className="mt-3 text-ink-muted">{t.noResponses}</p>
       ) : (

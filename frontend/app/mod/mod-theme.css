@@ -100,6 +100,55 @@
   background: var(--acaps-blue);
 }
 
+/*
+ * Alert and risk blocks (queue, ranked list, detail intro): a soft ACAPS-blue tint instead of the dark blue,
+ * with the hazard icon in the top-right corner.
+ */
+.acaps-mod {
+  --soft-blue-bg: #f2f8fb;
+  --soft-blue-border: #d4e8f0;
+  --soft-blue-hover: #9fd0e2;
+  --soft-blue-badge: #dcEFF6;
+  --soft-blue-icon: #0077a0;
+}
+.acaps-mod .soft-block {
+  position: relative;
+  background: var(--soft-blue-bg);
+  border: 1px solid var(--soft-blue-border);
+  border-radius: 14px;
+  padding-right: 4rem;
+}
+.acaps-mod a.soft-block:hover {
+  border-color: var(--soft-blue-hover);
+}
+.acaps-mod .soft-block > .hazard-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+}
+.acaps-mod .hazard-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background: var(--soft-blue-badge);
+  color: var(--soft-blue-icon);
+  flex: none;
+}
+.acaps-mod .hazard-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background: var(--soft-blue-badge);
+  color: var(--soft-blue-icon);
+  flex: none;
+}
+
 /* Small field labels ("Report", "Evidence", AI theme names): condensed, bold, tracked caps */
 .acaps-mod main :is(h2, h3).text-sm {
   font-family: var(--font-condensed);

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { PageHeader, StatusTag } from '@/components/mod/parts';
+import { HazardBadge } from '@/components/mod/HazardIcon';
 import { RegionMap } from '@/components/mod/RegionMap';
 import { splitCountries } from '@/lib/region';
 import { RiskDecisionPanel } from '@/components/mod/RiskDecisionPanel';
@@ -45,8 +46,9 @@ async function RiskView({ params }: { params: PageProps<'/mod/risks/[id]'>['para
 
       <div className="grid gap-4 lg:grid-cols-[3fr_2fr] lg:items-start">
         <div className="grid gap-4">
-          <Card>
-            <div className="flex flex-wrap items-center gap-2">
+          <Card className="soft-block">
+            <HazardBadge text={[risk.title]} />
+            <div className="flex min-h-10 flex-wrap items-center gap-2">
               {risk.riskLevel && <RiskChip level={risk.riskLevel} label={t.level(risk.riskLevel)} />}
               {risk.acapsProbability && <Chip>{t.probability(risk.acapsProbability)}</Chip>}
               {risk.impact !== null && <Chip>{t.impact(risk.impact)}</Chip>}
@@ -54,13 +56,6 @@ async function RiskView({ params }: { params: PageProps<'/mod/risks/[id]'>['para
               {risk.status && <StatusTag>{risk.status}</StatusTag>}
             </div>
           </Card>
-
-          {splitCountries(risk.country).length > 0 && (
-            <Card>
-              <h2 className="mb-3 text-base font-semibold text-ink">{mod.regionMap.title}</h2>
-              <RegionMap countries={splitCountries(risk.country)} focusText={risk.title} />
-            </Card>
-          )}
 
           <Card>
             <h2 className="text-base font-semibold text-ink">{t.questions}</h2>
@@ -109,7 +104,16 @@ async function RiskView({ params }: { params: PageProps<'/mod/risks/[id]'>['para
           )}
         </div>
 
-        <RiskDecisionPanel riskId={risk.id} source={source} triggers={risk.triggers} />
+        <div className="grid gap-4">
+          <RiskDecisionPanel riskId={risk.id} source={source} triggers={risk.triggers} />
+
+          {splitCountries(risk.country).length > 0 && (
+            <Card>
+              <h2 className="mb-3 text-base font-semibold text-ink">{mod.regionMap.title}</h2>
+              <RegionMap countries={splitCountries(risk.country)} focusText={risk.title} />
+            </Card>
+          )}
+        </div>
       </div>
     </>
   );

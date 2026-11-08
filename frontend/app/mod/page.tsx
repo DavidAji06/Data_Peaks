@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { AlertScores, placeLabel } from '@/components/mod/AlertScores';
+import { HazardBadge } from '@/components/mod/HazardIcon';
 import { PageHeader, StatusTag, fmtDate } from '@/components/mod/parts';
 import { byImpactThenDate } from '@/lib/adapters';
 import { getAlerts } from '@/lib/api';
@@ -77,7 +78,6 @@ async function AlertQueue({ searchParams }: { searchParams: PageProps<'/mod'>['s
             {n === 0 ? mod.alerts.anyImpact : `${n}+`}
           </Link>
         ))}
-        <span className="text-ink-muted">{mod.alerts.sortNote}</span>
         {hidden > 0 && <span className="text-ink-muted">{mod.alerts.hidden(hidden)}</span>}
       </div>
 
@@ -89,8 +89,9 @@ async function AlertQueue({ searchParams }: { searchParams: PageProps<'/mod'>['s
             <li key={a.id}>
               <Link
                 href={`/mod/alerts/${encodeURIComponent(a.id)}`}
-                className="block rounded-xl border border-line bg-surface p-4 hover:border-line-strong"
+                className="soft-block block p-4"
               >
+                <HazardBadge text={[a.report.title, a.description]} />
                 <div className="flex flex-wrap items-center gap-2 text-sm text-ink-muted">
                   <span className="font-medium text-ink">{a.id}</span>
                   <span>·</span>

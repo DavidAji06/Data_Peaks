@@ -6,6 +6,7 @@ import { RiskChip } from '@/components/ui/primitives';
 import { mod } from '@/lib/i18n/mod';
 import { toPercent } from '@/lib/probability';
 import type { RankedRisk } from '@/lib/types';
+import { HazardBadge } from './HazardIcon';
 import { MiniBar, fmtDate } from './parts';
 
 const t = mod.risks;
@@ -59,8 +60,9 @@ export function RiskList({ items }: { items: RankedRisk[] }) {
             <li key={r.riskId}>
               <Link
                 href={`/mod/risks/${encodeURIComponent(r.riskId)}`}
-                className="grid gap-3 rounded-xl border border-line bg-surface p-4 hover:border-line-strong md:grid-cols-[1fr_17rem]"
+                className="soft-block grid gap-3 p-4 md:grid-cols-[1fr_17rem]"
               >
+                <HazardBadge text={[r.title]} />
                 <div>
                   <p className="text-sm text-ink-muted">
                     {r.riskId} · {r.country}

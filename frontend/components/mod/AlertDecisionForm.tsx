@@ -68,7 +68,6 @@ export function AlertDecisionForm({ alertId, status: serverStatus, source, count
           <p className="font-medium">
             {result.status === 'approved' ? t.approved(result.questionId, result.expertsInvited) : t.rejected}
           </p>
-          {result.status === 'approved' && <p className="mt-1 text-sm">{t.notifyNote}</p>}
         </Notice>
         <div className="mt-4 flex flex-wrap gap-3">
           {result.status === 'approved' && (

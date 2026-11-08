@@ -242,16 +242,12 @@ function RegionMapInner({ countries, focusText, reportText }: Props) {
           ))}
         </svg>
 
-        <div className="pointer-events-none absolute left-2 top-2 max-w-[70%] rounded bg-surface/95 px-2 py-1 font-condensed text-sm shadow-sm" aria-live="polite">
-          {hover !== null ? (
-            <>
-              <span className="font-bold text-ink">{FEATURES[hover]!.properties.name}</span>
-              {zoneLabel(hover) && <span className="text-ink-muted"> · {zoneLabel(hover)}</span>}
-            </>
-          ) : (
-            <span className="text-ink-muted">{model.focus ? t.centredOn(model.focus.name) : t.centredOnCountry}</span>
-          )}
-        </div>
+        {hover !== null && (
+          <div className="pointer-events-none absolute left-2 top-2 max-w-[70%] rounded bg-surface/95 px-2 py-1 font-condensed text-sm shadow-sm" aria-live="polite">
+            <span className="font-bold text-ink">{FEATURES[hover]!.properties.name}</span>
+            {zoneLabel(hover) && <span className="text-ink-muted"> · {zoneLabel(hover)}</span>}
+          </div>
+        )}
 
         <div className="absolute right-2 top-2 flex flex-col gap-1">
           <button type="button" className={button} onClick={() => setZoom((z) => Math.min(z * 1.5, 6))} aria-label={t.zoomIn}>+</button>

@@ -1,5 +1,6 @@
 import { mod } from '@/lib/i18n/mod';
 import type { ParsedTrigger } from '@/lib/types';
+import { HazardInline } from './HazardIcon';
 import { fmtDate } from './parts';
 
 /** One ACAPS trigger as recorded: completion bar (with the number), description, objective, last update. */
@@ -11,7 +12,10 @@ export function TriggerCard({ trigger, highlight = false }: { trigger: ParsedTri
         {trigger.id}
         {trigger.lastUpdate && ` · ${mod.risk.lastUpdate(fmtDate(trigger.lastUpdate))}`}
       </p>
-      <p className="mt-0.5 font-medium text-ink">{trigger.title}</p>
+      <p className="mt-1 flex items-start gap-2 font-medium text-ink">
+        <HazardInline text={[trigger.title, trigger.description]} />
+        <span className="pt-0.5">{trigger.title}</span>
+      </p>
       {pct !== null && (
         <div className="mt-2">
           <p className="text-sm text-ink">{mod.alert.completion(pct)}</p>

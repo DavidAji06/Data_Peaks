@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { AlertDecisionForm } from '@/components/mod/AlertDecisionForm';
 import { AlertScores, placeLabel } from '@/components/mod/AlertScores';
+import { HazardBadge } from '@/components/mod/HazardIcon';
 import { PageHeader, StatusTag, fmtDate } from '@/components/mod/parts';
 import { RegionMap } from '@/components/mod/RegionMap';
 import { splitCountries } from '@/lib/region';
@@ -61,9 +62,10 @@ async function AlertDetailView({ params }: { params: PageProps<'/mod/alerts/[id]
         back={{ href: alert.status === 'pending' ? '/mod' : `/mod?status=${alert.status}`, label: mod.alerts.title.toLowerCase() }}
       />
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_1fr] lg:items-start">
+      <div className="grid gap-4 lg:grid-cols-[3fr_2fr] lg:items-start">
         <div className="grid gap-4">
-          <Card>
+          <Card className="soft-block">
+            <HazardBadge text={[alert.report.title, alert.description]} />
             <div className="flex flex-wrap items-center gap-2">
               <StatusTag>{mod.alerts.tabs[alert.status]}</StatusTag>
               {alert.strengthWord && alert.strength !== null && (
@@ -81,7 +83,6 @@ async function AlertDetailView({ params }: { params: PageProps<'/mod/alerts/[id]
                 .join(' · ')}
             </p>
             <AlertScores alert={alert} />
-            {alert.impactScore !== null && <p className="mt-1 text-xs text-ink-muted">{mod.alerts.scoresNote}</p>}
             {alert.description && alert.description !== alert.report.title && (
               <p className="mt-2 text-sm text-ink">{alert.description}</p>
             )}
@@ -133,6 +134,18 @@ async function AlertDetailView({ params }: { params: PageProps<'/mod/alerts/[id]
               <Notice tone="warning">{t.riskUnknown}</Notice>
             )}
           </Card>
+        </div>
+
+        <div className="grid gap-4">
+          <AlertDecisionForm
+            alertId={alert.id}
+            status={alert.status}
+            source={source}
+            country={risk?.country ?? alert.riskId}
+            today={today}
+            minDeadline={minDeadline}
+            defaults={defaults}
+          />
 
           {splitCountries(risk?.country ?? alert.country).length > 0 && (
             <Card>
@@ -145,16 +158,6 @@ async function AlertDetailView({ params }: { params: PageProps<'/mod/alerts/[id]
             </Card>
           )}
         </div>
-
-        <AlertDecisionForm
-          alertId={alert.id}
-          status={alert.status}
-          source={source}
-          country={risk?.country ?? alert.riskId}
-          today={today}
-          minDeadline={minDeadline}
-          defaults={defaults}
-        />
       </div>
     </>
   );
