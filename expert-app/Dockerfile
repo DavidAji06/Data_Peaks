@@ -12,7 +12,6 @@ COPY . .
 # The browser calls the API directly, so the API must list this app's origin in CORS_ORIGINS.
 ARG VITE_API_URL=""
 ENV VITE_API_URL=$VITE_API_URL \
-XX
     NITRO_PRESET=node-server
 RUN npm run build
 
