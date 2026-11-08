@@ -21,22 +21,24 @@ RECENT_DAYS = 180         # Many countries report quarterly, so 90 days misses t
 MIN_ALERT_IMPACT = int(os.getenv("MIN_ALERT_IMPACT", "4"))        # Only high-impact events become alerts
 MAX_ALERTS_PER_RISK = int(os.getenv("MAX_ALERTS_PER_RISK", "3"))
 SCALE = 5                 # Impact scores run from 1 to 5
-WEIGHTS = {"signal_strength": 0.4, "uncertainty": 0.3, "impact": 0.3}
+# Priority uses only ACAPS's own ratings and track record, so every number on a card traces back to ACAPS.
+# Experts help most where the outcome is a toss-up and the stakes are high.
+WEIGHTS = {"uncertainty": 0.5, "impact": 0.5}
 
 
 def isos(value) -> set[str]:
     return {code.strip().upper() for code in str(value).split(",") if code.strip()}
 
 
-def observed_rates(risks: pd.DataFrame) -> dict[str, float]:
-    """How often each ACAPS probability rating actually materialised."""
+def observed_history(risks: pd.DataFrame) -> dict[str, tuple[int, int]]:
+    """How many past risks with each ACAPS probability rating materialised: (happened, resolved)."""
     resolved = risks[risks["Status"].isin(["Materialised", "Not materialised"])]
     happened = resolved["Status"] == "Materialised"
-    rates = happened.groupby(resolved["Probability"]).mean()
-    overall = happened.mean()
-    print("Observed materialisation rate by ACAPS rating:")
-    print(rates.round(2).to_string(), f"\n(overall {overall:.2f})\n")
-    return {**rates.to_dict(), "_overall": overall}
+    counts = happened.groupby(resolved["Probability"]).agg(["sum", "count"])
+    print("Past outcomes by ACAPS probability rating (happened, resolved):")
+    print(counts.to_string(), "\n")
+    history = {rating: (int(row["sum"]), int(row["count"])) for rating, row in counts.iterrows()}
+    return {**history, "_overall": (int(happened.sum()), int(len(happened)))}
 
 
 def optional_int(value):
@@ -81,7 +83,7 @@ def main():
     print(f"{len(recent)} events in the {RECENT_DAYS} days up to {latest.date()}\n")
 
     risks = pd.read_csv(RISKS)
-    rates = observed_rates(risks)
+    history = observed_history(risks)
     active = risks[risks["Status"] == "Active"]
 
     candidates, ranked = [], []
@@ -90,23 +92,24 @@ def main():
         # One report can appear once per access indicator, so count each report once
         matches = matches.drop_duplicates(subset=["date", "description"])
 
-        # Signal: average impact of recent events in the risk's countries, scaled 0-1
-        signal = round(float(matches["impact_score"].mean()) / SCALE, 2) if len(matches) else 0.0
-
-        p = float(rates.get(risk["Probability"], rates["_overall"]))
+        happened, resolved = history.get(risk["Probability"], history["_overall"])
+        p = happened / resolved
         uncertainty = round(4 * p * (1 - p), 2)  # 1 at 50%, 0 at 0% or 100%
         impact = round(float(risk["Impact"]) / SCALE, 2) if pd.notna(risk["Impact"]) else 0.5
 
-        breakdown = {"signal_strength": signal, "uncertainty": uncertainty, "impact": impact}
+        breakdown = {"uncertainty": uncertainty, "impact": impact}
         priority = round(sum(WEIGHTS[key] * breakdown[key] for key in WEIGHTS), 2)
 
         ranked.append({
             "risk_id": risk["Risk ID"],
             "title": risk["Risk Title"],
             "country": risk["Country"],
+            "risk_level": None if pd.isna(risk["Risk Level"]) else str(risk["Risk Level"]),
+            "acaps_probability": None if pd.isna(risk["Probability"]) else str(risk["Probability"]),
             "p_materialise": round(p, 2),
+            "history": {"happened": happened, "resolved": resolved},
             "priority_score": priority,
-            "score_breakdown": {**breakdown, "review_age": None},  # Not computed yet
+            "score_breakdown": breakdown,
         })
 
         # Risk title plus trigger titles and descriptions, for the region-match heuristic
@@ -128,7 +131,7 @@ def main():
             seen_events.add(event_id)
             alerts.append(alert)
 
-    ranked.sort(key=lambda row: row["priority_score"], reverse=True)
+    ranked.sort(key=lambda row: (row["priority_score"], row["score_breakdown"]["impact"]), reverse=True)
 
     (PROCESSED / "ranked_risks.json").write_text(json.dumps(ranked, indent=2), encoding="utf-8")
     (PROCESSED / "alerts.json").write_text(json.dumps(alerts, indent=2), encoding="utf-8")

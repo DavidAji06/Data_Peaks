@@ -11,7 +11,7 @@ import { mod } from '@/lib/i18n/mod';
 import type { DataSource, Panels } from '@/lib/types';
 import { ModSkeleton } from '../loading';
 
-export const metadata: Metadata = { title: 'Panel' };
+export const metadata: Metadata = { title: 'Expert management' };
 
 const t = mod.panel;
 const TABS = ['panels', 'requests', 'invitations'] as const;
@@ -34,7 +34,7 @@ async function Panel({ searchParams }: { searchParams: PageProps<'/mod/panel'>['
 
   return (
     <>
-      <PageHeader title={t.title} intro={t.pageIntro} source={source} />
+      <PageHeader title={t.title} source={source} />
 
       <nav aria-label={t.title} className="mb-5 flex gap-1 border-b border-line">
         {TABS.map((s) => (

@@ -7,11 +7,14 @@ import { mod } from '@/lib/i18n/mod';
 import { toPercent } from '@/lib/probability';
 import type { RankedRisk } from '@/lib/types';
 import { HazardBadge } from './HazardIcon';
-import { MiniBar, fmtDate } from './parts';
+import { MiniBar } from './parts';
 
 const t = mod.risks;
 
-/** Ranked risks sorted by priority, with the score breakdown always visible (explainability). */
+/**
+ * Ranked risks sorted by priority, with the score breakdown always visible (explainability).
+ * Priority uses only ACAPS's own ratings: impact, and how often risks with the same probability rating came true.
+ */
 export function RiskList({ items }: { items: RankedRisk[] }) {
   const [country, setCountry] = useState('');
   const [level, setLevel] = useState('');
@@ -22,7 +25,7 @@ export function RiskList({ items }: { items: RankedRisk[] }) {
   );
   const shown = items
     .filter((r) => (!country || r.country === country) && (!level || r.riskLevel === level))
-    .sort((a, b) => b.priorityScore - a.priorityScore);
+    .sort((a, b) => b.priorityScore - a.priorityScore || b.breakdown.impact - a.breakdown.impact);
 
   const select = 'mt-1 min-h-11 w-full rounded-lg border border-line-strong bg-surface px-3 text-ink sm:w-56';
 
@@ -71,18 +74,19 @@ export function RiskList({ items }: { items: RankedRisk[] }) {
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-ink-muted">
                     {r.riskLevel && <RiskChip level={r.riskLevel} label={mod.risk.level(r.riskLevel)} />}
                     {r.acapsProbability && <span>{mod.risk.probability(r.acapsProbability)}</span>}
-                    <span>{r.lastReviewed ? t.reviewed(fmtDate(r.lastReviewed)) : t.notReviewed}</span>
                   </div>
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-ink">{t.score(r.priorityScore.toFixed(2))}</p>
                   <div className="mt-1 grid gap-1">
-                    <MiniBar label={t.breakdown.signalStrength} value={r.breakdown.signalStrength} />
-                    <MiniBar label={t.breakdown.uncertainty} value={r.breakdown.uncertainty} />
                     <MiniBar label={t.breakdown.impact} value={r.breakdown.impact} />
-                    <MiniBar label={t.breakdown.reviewAge} value={r.breakdown.reviewAge} />
+                    <MiniBar label={t.breakdown.uncertainty} value={r.breakdown.uncertainty} />
                   </div>
-                  <p className="mt-1 text-xs text-ink-muted">{t.model(toPercent(r.modelProbability))}</p>
+                  <p className="mt-1 text-xs text-ink-muted">
+                    {r.history && r.acapsProbability
+                      ? t.history(r.acapsProbability, r.history.happened, r.history.resolved)
+                      : t.historyRate(toPercent(r.historicalRate))}
+                  </p>
                 </div>
               </Link>
             </li>

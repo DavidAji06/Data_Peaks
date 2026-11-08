@@ -435,10 +435,11 @@ export interface ApiRankedRisk {
   country: string;
   p_materialise: number;
   priority_score: number;
-  score_breakdown: { signal_strength: number; uncertainty: number; impact: number; review_age: number | null };
-  risk_level?: string; // curated extras (mock/curated.json), not sent by the API
-  acaps_probability?: string;
-  last_reviewed?: string | null;
+  score_breakdown: { uncertainty: number; impact: number };
+  /** Past ACAPS risks with the same probability rating: how many happened, out of how many resolved. */
+  history?: { happened: number; resolved: number };
+  risk_level?: string | null;
+  acaps_probability?: string | null;
 }
 
 // ===========================================================================
@@ -719,11 +720,12 @@ export interface RankedRisk {
   title: string;
   country: string;
   priorityScore: number;
-  breakdown: { signalStrength: number; uncertainty: number; impact: number; reviewAge: number | null };
-  modelProbability: number;
+  breakdown: { uncertainty: number; impact: number };
+  /** Share of past risks with the same ACAPS probability rating that happened. */
+  historicalRate: number;
+  history: { happened: number; resolved: number } | null;
   riskLevel: string | null;
   acapsProbability: string | null;
-  lastReviewed: string | null;
 }
 
 export interface RankedRisks {

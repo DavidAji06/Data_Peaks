@@ -8,8 +8,8 @@ export const mod = {
     alerts: 'Alerts',
     questions: 'Questions',
     risks: 'Risks',
-    leaderboard: 'Calibration',
-    panel: 'Panel',
+    leaderboard: 'Experts',
+    panel: 'Expert management',
   },
   title: 'ACAPS moderator',
   noAuth: 'ACAPS staff only',
@@ -22,7 +22,7 @@ export const mod = {
   backTo: (where: string) => `Back to ${where}`,
 
   panel: {
-    title: 'Expert panel',
+    title: 'Expert management',
     email: 'Email address',
     emailHelp: 'Used only to send the invite and their personal link. Never shown to other experts or the public.',
     emailPlaceholder: 'name@example.org',
@@ -56,7 +56,6 @@ export const mod = {
     resending: 'Sending…',
     resent: 'Sent',
     resendFailed: 'Not sent',
-    pageIntro: 'Who answers for which country. ACAPS invites experts and decides who joins each country panel.',
     tabs: { panels: 'Panels', requests: 'Requests', invitations: 'Invitations' },
     panelsIntro: (min: number, max: number) =>
       `Members get that country's questions. Aim for ${min} to ${max} per country.`,
@@ -224,9 +223,7 @@ export const mod = {
   },
 
   leaderboard: {
-    title: 'Calibration',
-    intro: (n: number) =>
-      `Everyone on the panel: how much they take part and how well their forecasts matched what happened. Ranking needs at least ${n} resolved questions. Lower Brier is better.`,
+    title: 'Experts',
     baseline: (b: string) => `Always saying 50% scores ${b}.`,
     practiceNote: 'Experts tagged Demo are synthetic: their scores come from practice questions with real ACAPS outcomes and simulated answers.',
     rankedTitle: 'Ranked',
@@ -260,17 +257,17 @@ export const mod = {
 
   risks: {
     title: 'Ranked risks',
-    intro: 'Active ACAPS risks, ordered by how much an expert check would help now.',
+    intro: 'Active ACAPS risks. High impact and an uncertain outcome come first: that is where expert judgement adds most.',
     filterCountry: 'Country',
     filterLevel: 'Risk level',
     all: 'All',
     count: (n: number, total: number) => (n === total ? `${n} risks` : `${n} of ${total} risks`),
     empty: 'No risks match these filters.',
     score: (s: string) => `Priority ${s}`,
-    breakdown: { signalStrength: 'Signal', uncertainty: 'Uncertainty', impact: 'Impact', reviewAge: 'Review age' },
-    reviewed: (age: string) => `Last reviewed ${age}`,
-    notReviewed: 'No review date',
-    model: (p: number) => `Model: ${p}% likely to materialise`,
+    breakdown: { uncertainty: 'Uncertainty', impact: 'Impact' },
+    history: (rating: string, happened: number, resolved: number) =>
+      `Past ${rating}-probability risks: ${happened} of ${resolved} happened`,
+    historyRate: (p: number) => `${p}% of past risks with this rating happened`,
   },
 
   risk: {

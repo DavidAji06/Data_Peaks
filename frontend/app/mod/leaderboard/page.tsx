@@ -7,7 +7,7 @@ import { mod } from '@/lib/i18n/mod';
 import type { Participation } from '@/lib/types';
 import { ModSkeleton } from '../loading';
 
-export const metadata: Metadata = { title: 'Calibration' };
+export const metadata: Metadata = { title: 'Experts' };
 
 const t = mod.leaderboard;
 
@@ -72,7 +72,7 @@ async function Board() {
   const { data, source } = await getLeaderboard();
   return (
     <>
-      <PageHeader title={t.title} intro={t.intro(data.minResolved)} source={source} />
+      <PageHeader title={t.title} source={source} />
       <div className="grid gap-6">
         <Card>
           <h2 className="text-base font-semibold text-ink">{t.rankedTitle}</h2>

@@ -10,9 +10,6 @@ import fs from 'node:fs';
 const CSV_URL = new URL('../../data/risk-radar-export.csv', import.meta.url);
 const OUT_DIR = new URL('../mock/', import.meta.url);
 
-/** Constant "today" for the placeholder review-age score (never Date.now()). */
-const REFERENCE_DATE = '2026-11-06';
-
 // Risks selected on top of the 28 active ones.
 const SIMILAR_IDS = ['R0248', 'R0998', 'R1002']; // similar-risk cards for R1043, in this order
 // Two extra resolved risks for practice "replay" questions (Sudan, Libya are in the allowed country list):
@@ -24,8 +21,6 @@ const REPLAY_EXTRAS = [
 ];
 const UPDATES_FOR = new Set(['R1043', 'R1066', 'R1055']);
 const SIMILARITY_PLACEHOLDERS = { R0248: 0.81, R0998: 0.74, R1002: 0.69 };
-const SIGNAL_STRENGTH = { R1043: 0.82, R1066: 0.55 };
-const DEFAULT_SIGNAL_STRENGTH = 0.2;
 
 // ---------------------------------------------------------------------------
 // CSV
@@ -276,12 +271,6 @@ for (const r of selected) {
   triggers.push(...trigs);
 
   const allUpdates = parseUpdates(id, r['Rationale update']);
-  let lastReviewed = null;
-  if (allUpdates.length) lastReviewed = allUpdates[0].date;
-  else {
-    const dates = trigs.map((t) => t.lastUpdate).filter(Boolean).sort();
-    if (dates.length) lastReviewed = dates[dates.length - 1];
-  }
 
   const impact = parseInt(r['Impact'], 10);
   if (!(impact >= 1 && impact <= 5)) throw new Error(`${id}: bad impact "${r['Impact']}"`);
@@ -302,7 +291,6 @@ for (const r of selected) {
   risk.expectedExposure = r['Expected exposure'];
   risk.priorityNeeds = r['Expected priority needs'].split(',').map((s) => s.trim()).filter(Boolean);
   risk.rationaleSummary = rationaleSummary(r['Rationale']);
-  risk.lastReviewed = lastReviewed;
   risk.triggerIds = trigs.map((t) => t.id);
   if (UPDATES_FOR.has(id)) risk.updates = allUpdates;
 
@@ -342,33 +330,38 @@ const similar = SIMILAR_IDS.map((id) => {
   };
 });
 
-// Ranked risks (placeholder formula)
-const MID = { very_low: 0.05, low: 0.2, medium: 0.5, high: 0.78, very_high: 0.95 };
-const dayMs = 86400000;
-const daysBetween = (a, b) => Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / dayMs);
+// Ranked risks: same formula as scripts/export_api_files.py, from ACAPS's own ratings only.
+// history = past risks with the same probability rating: how many happened, out of how many resolved.
+const history = {};
+for (const r of records) {
+  const status = statusOf(r);
+  if (status !== 'materialised' && status !== 'not_materialised') continue;
+  if (!collapse(r['Probability'])) continue; // A few resolved risks have no rating
+  const key = band(r['Probability']);
+  history[key] ??= { happened: 0, resolved: 0 };
+  history[key].resolved += 1;
+  if (status === 'materialised') history[key].happened += 1;
+}
 const ranked = risks
   .filter((r) => r.status === 'active')
   .map((r) => {
-    const mid = MID[r.probability];
+    const past = history[r.probability];
+    const rate = past.happened / past.resolved;
     const impact = round2(r.impact / 5);
-    const uncertainty = round2(1 - Math.abs(mid - 0.5) * 2);
-    const reviewAge = r.lastReviewed === null ? 1 : round2(Math.min(1, daysBetween(r.lastReviewed, REFERENCE_DATE) / 90));
-    const signalStrength = SIGNAL_STRENGTH[r.id] ?? DEFAULT_SIGNAL_STRENGTH;
-    const score = round2(0.4 * signalStrength + 0.2 * uncertainty + 0.25 * impact + 0.15 * reviewAge);
+    const uncertainty = round2(4 * rate * (1 - rate)); // 1 at 50%, 0 at 0% or 100%
     return {
       riskId: r.id,
       title: r.title,
       country: r.country,
-      iso: r.iso,
-      score,
-      breakdown: { signalStrength, uncertainty, impact, reviewAge },
-      modelProbability: mid,
+      score: round2(0.5 * uncertainty + 0.5 * impact),
+      breakdown: { uncertainty, impact },
+      rate: round2(rate),
+      history: past,
       acapsProbability: r.probability,
       riskLevel: r.riskLevel,
-      lastReviewed: r.lastReviewed,
     };
   })
-  .sort((a, b) => b.score - a.score);
+  .sort((a, b) => b.score - a.score || b.breakdown.impact - a.breakdown.impact);
 
 // ---------------------------------------------------------------------------
 // Write
@@ -385,11 +378,9 @@ const curated = {
     generatedBy: 'scripts/extract-risk-radar.mjs',
     synthetic: 'partly',
     note:
-      `Real risk IDs, titles, ratings and outcome text. similarity, priority_score, score_breakdown and p_materialise are placeholders until the ML pipeline lands. ` +
-      `Ranked placeholder formula: mid = {very_low:0.05, low:0.2, medium:0.5, high:0.78, very_high:0.95}[probability]; impact = Impact/5; uncertainty = round2(1 - abs(mid - 0.5) * 2); ` +
-      `review_age = round2(min(1, days(last review to ${REFERENCE_DATE}) / 90)); signal_strength = 0.82 for R1043, 0.55 for R1066, else 0.2; ` +
-      `priority_score = round2(0.4*signal + 0.2*uncertainty + 0.25*impact + 0.15*review_age); p_materialise = mid. ` +
-      `risk_level, acaps_probability and last_reviewed are curated extras the API's ranked items don't have yet.`,
+      `Real risk IDs, titles, ratings and outcome text. similarity is a placeholder. ` +
+      `Ranked formula (same as scripts/export_api_files.py): p_materialise = share of resolved risks with the same ACAPS probability rating that happened; ` +
+      `uncertainty = round2(4*p*(1-p)); impact = Impact/5; priority_score = round2(0.5*uncertainty + 0.5*impact).`,
   },
   similar_risks: {
     R1043: similar.map((s) => ({
@@ -406,17 +397,12 @@ const curated = {
     risk_id: r.riskId,
     title: r.title,
     country: r.country,
-    p_materialise: r.modelProbability,
-    priority_score: r.score,
-    score_breakdown: {
-      signal_strength: r.breakdown.signalStrength,
-      uncertainty: r.breakdown.uncertainty,
-      impact: r.breakdown.impact,
-      review_age: r.breakdown.reviewAge,
-    },
     risk_level: r.riskLevel.charAt(0).toUpperCase() + r.riskLevel.slice(1),
     acaps_probability: LABEL[r.acapsProbability],
-    last_reviewed: r.lastReviewed,
+    p_materialise: r.rate,
+    history: r.history,
+    priority_score: r.score,
+    score_breakdown: r.breakdown,
   })),
 };
 fs.mkdirSync(OUT_DIR, { recursive: true });

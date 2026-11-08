@@ -353,16 +353,11 @@ export const toRankedRisk = (r: ApiRankedRisk): RankedRisk => ({
   title: r.title,
   country: r.country,
   priorityScore: r.priority_score,
-  breakdown: {
-    signalStrength: r.score_breakdown.signal_strength,
-    uncertainty: r.score_breakdown.uncertainty,
-    impact: r.score_breakdown.impact,
-    reviewAge: r.score_breakdown.review_age,
-  },
-  modelProbability: r.p_materialise,
+  breakdown: { uncertainty: r.score_breakdown.uncertainty, impact: r.score_breakdown.impact },
+  historicalRate: r.p_materialise,
+  history: r.history ?? null,
   riskLevel: r.risk_level ?? null,
   acapsProbability: r.acaps_probability ?? null,
-  lastReviewed: r.last_reviewed ?? null,
 });
 
 export const toRiskDetail = (r: ApiRisk): RiskDetail => ({
