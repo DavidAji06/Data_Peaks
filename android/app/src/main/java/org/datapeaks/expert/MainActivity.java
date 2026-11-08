@@ -2,6 +2,18 @@ package org.datapeaks.expert;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.verify.domain.DomainVerificationManager;
+import android.content.pm.verify.domain.DomainVerificationUserState;
+import android.provider.Settings;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Color;
@@ -44,10 +56,13 @@ public class MainActivity extends Activity {
     private View loading;
     private View offline;
     private boolean firstPageShown = false;
+    private boolean askedLinkSetting = false;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        prefs = getSharedPreferences("app", MODE_PRIVATE);
         FrameLayout root = new FrameLayout(this);
         root.setBackgroundColor(Color.parseColor("#F8FAFC"));
 
@@ -125,6 +140,7 @@ public class MainActivity extends Activity {
                     loading.setVisibility(View.GONE);
                 }
                 CookieManager.getInstance().flush();
+                maybeAskToOpenLinksHere();
             }
 
             @Override
@@ -219,6 +235,90 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         web.destroy();
         super.onDestroy();
+    }
+
+    // Getting the emailed sign-in link into the app.
+    // Android 12+ opens https links in an app only once the site's assetlinks.json verifies it, or the
+    // user has turned the link on in "Open by default". Until then the link lands in the browser.
+
+    /** Signed out and links not yet handed to this app: offer to open the Android setting. */
+    private void maybeAskToOpenLinksHere() {
+        if (askedLinkSetting || Build.VERSION.SDK_INT < 31 || linksOpenHere()) return;
+        web.evaluateJavascript("localStorage.getItem('dp-expert-token')", value -> {
+            boolean signedIn = value != null && !"null".equals(value) && !"\"\"".equals(value);
+            if (signedIn || askedLinkSetting || isFinishing()) return;
+            askedLinkSetting = true;
+            new AlertDialog.Builder(this)
+                    .setTitle("Open sign-in links in this app")
+                    .setMessage("So the link in the ACAPS email opens here instead of your browser:\n\n"
+                            + "1. Tap \"Open settings\"\n"
+                            + "2. Turn on \"Open supported links\"\n"
+                            + "3. Tap \"Add link\" and tick " + APP_HOST + "\n\n"
+                            + "Or copy the link from the email and come back: the app picks it up.")
+                    .setPositiveButton("Open settings", (d, w) -> openLinkSettings())
+                    .setNegativeButton("Not now", null)
+                    .show();
+        });
+    }
+
+    private boolean linksOpenHere() {
+        if (Build.VERSION.SDK_INT < 31) return true; // older Android asks which app to use
+        try {
+            DomainVerificationManager m = getSystemService(DomainVerificationManager.class);
+            DomainVerificationUserState st = m.getDomainVerificationUserState(getPackageName());
+            if (st == null || !st.isLinkHandlingAllowed()) return false;
+            Integer state = st.getHostToStateMap().get(APP_HOST);
+            return state != null && state != DomainVerificationUserState.DOMAIN_STATE_NONE;
+        } catch (Exception e) {
+            return true; // can't tell: don't nag
+        }
+    }
+
+    private void openLinkSettings() {
+        Uri pkg = Uri.parse("package:" + getPackageName());
+        try {
+            startActivity(new Intent(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS, pkg));
+        } catch (ActivityNotFoundException e) {
+            startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg));
+        }
+    }
+
+    private static final Pattern URL_IN_TEXT = Pattern.compile("https://\\S+");
+
+    /** A sign-in/invite/join link just copied (e.g. long-press in the email): offer to use it. */
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (!hasFocus) return;
+        try {
+            ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            if (cm == null || !cm.hasPrimaryClip()) return;
+            ClipDescription desc = cm.getPrimaryClipDescription();
+            if (desc == null || !(desc.hasMimeType("text/*"))) return;
+            long ts = desc.getTimestamp();
+            if (ts != 0 && ts <= prefs.getLong("clipSeen", 0)) return; // only new copies
+            prefs.edit().putLong("clipSeen", ts).apply();
+            ClipData clip = cm.getPrimaryClip();
+            if (clip == null || clip.getItemCount() == 0) return;
+            CharSequence text = clip.getItemAt(0).coerceToText(this);
+            if (text == null) return;
+            Matcher mt = URL_IN_TEXT.matcher(text);
+            if (!mt.find()) return;
+            Uri link = Uri.parse(mt.group());
+            if (!isAppUrl(link)) return;
+            if (link.getQueryParameter("token") == null && link.getQueryParameter("join") == null) return;
+            new AlertDialog.Builder(this)
+                    .setTitle("Sign in with the copied link?")
+                    .setMessage("You copied an ACAPS expert link. Open it in the app?")
+                    .setPositiveButton("Sign in", (d, w) -> {
+                        offline.setVisibility(View.GONE);
+                        web.loadUrl(link.toString());
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        } catch (Exception ignored) {
+            // Clipboard not readable: nothing to offer
+        }
     }
 
     // Native screens shown before the site loads, and when the phone can't reach it
