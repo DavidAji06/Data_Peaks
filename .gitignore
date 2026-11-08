@@ -34,6 +34,10 @@ desktop.ini
 # Node (if teams use JS/TS)
 node_modules/
 package-lock.json
+# The two apps' lock files ARE committed: Docker/Render builds need them (npm crashes on
+# expert-app's "overrides" without a lock file, and they pin the versions that were tested)
+!frontend/package-lock.json
+!expert-app/package-lock.json
 yarn.lock
 
 # Data artifacts (keep original data, ignore generated)
