@@ -11,9 +11,8 @@ COPY . .
 # VITE_* values are baked into the browser bundle at build time.
 # The browser calls the API directly, so the API must list this app's origin in CORS_ORIGINS.
 ARG VITE_API_URL=""
-ARG VITE_EXPERT_TOKEN="demo-expert-a"
 ENV VITE_API_URL=$VITE_API_URL \
-    VITE_EXPERT_TOKEN=$VITE_EXPERT_TOKEN \
+XX
     NITRO_PRESET=node-server
 RUN npm run build
 

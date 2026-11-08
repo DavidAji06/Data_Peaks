@@ -1,5 +1,5 @@
 /**
- * Browser-side actions: submit, group view, revise, approve/reject alerts, resolve questions.
+ * Browser-side moderator actions: approve/reject alerts, resolve questions, invites, panel decisions.
  *
  * Calls the same backend the page was loaded from (`source` from the server): the real API
  * (CORS allows http://localhost:3000), or the offline demo backend at /api/demo when the page
@@ -7,27 +7,18 @@
  * fails with a NetworkError and the screen keeps the input and offers a retry.
  * No mock data is imported here, so nothing private is bundled for the browser.
  */
-import { toDecisionResult, toExpertSettings, toGroupView, toResolveResult, toThemes } from './adapters';
+import { toDecisionResult, toResolveResult, toThemes } from './adapters';
 import { ApiError, NetworkError } from './api-error';
 import type {
-  ApiAnswerIn,
   ApiDecisionIn,
   ApiDecisionOut,
-  ApiExpertQuestion,
-  ApiExpertSettings,
-  ApiJoinIn,
-  ApiJoinOut,
   ApiPanelInviteIn,
   ApiPanelInviteOut,
-  ApiSettingsUpdate,
-  ApiGroupView,
   ApiResolveOut,
   ApiRiskDecisionIn,
   ApiSummariseOut,
   DataSource,
   DecisionResult,
-  ExpertSettings,
-  GroupView,
   ResolveResult,
   Themes,
 } from './types';
@@ -63,30 +54,6 @@ async function request<T>(
 
 const enc = encodeURIComponent;
 
-/** First answer. probability 0–1, reason 1–280 characters. 409 = already answered. */
-export const submitAnswer = (source: DataSource, token: string, answer: ApiAnswerIn) =>
-  request<{ status: 'received' }>(source, 'POST', `/q/${enc(token)}/responses`, answer);
-
-/** Revision. 403 = no first answer yet, 409 = already revised. */
-export const submitRevision = (source: DataSource, token: string, answer: ApiAnswerIn) =>
-  request<{ status: 'revised' }>(source, 'POST', `/q/${enc(token)}/revision`, answer);
-
-/** Group view, fetched only after a successful submit. 403 → 'locked' (a state, not an error). */
-export async function fetchGroupView(source: DataSource, token: string): Promise<GroupView | 'locked'> {
-  try {
-    return toGroupView(await request<ApiGroupView>(source, 'GET', `/q/${enc(token)}/group`));
-  } catch (e) {
-    if (e instanceof ApiError && e.status === 403) return 'locked';
-    throw e;
-  }
-}
-
-/** Re-reads the server flags after a 409, to land on the right step. */
-export async function fetchProgress(source: DataSource, token: string): Promise<{ answered: boolean; revised: boolean }> {
-  const q = await request<ApiExpertQuestion>(source, 'GET', `/q/${enc(token)}`);
-  return { answered: q.answered, revised: q.revised };
-}
-
 /** Approve (all question fields, future deadline) or reject. 409 = already decided, 422 = invalid. */
 export async function decideAlert(source: DataSource, alertId: string, decision: ApiDecisionIn): Promise<DecisionResult> {
   return toDecisionResult(await request<ApiDecisionOut>(source, 'POST', `/alerts/${enc(alertId)}/decision`, decision, moderatorBaseFor(source)));
@@ -103,17 +70,6 @@ export async function resolveQuestion(source: DataSource, questionId: string, ou
 export async function summariseQuestion(source: DataSource, questionId: string): Promise<{ reasonCount: number; themes: Themes }> {
   const r = await request<ApiSummariseOut>(source, 'POST', `/moderator/questions/${enc(questionId)}/summarise`, undefined, moderatorBaseFor(source));
   return { reasonCount: r.reason_count, themes: toThemes(r.themes) };
-}
-
-/** Join the panel from an invite link. 404 unknown invite, 409 already used, 422 invalid. */
-export async function joinPanel(source: DataSource, token: string, body: ApiJoinIn): Promise<{ pseudonym: string; appLink: string | null }> {
-  const r = await request<ApiJoinOut>(source, 'POST', `/join/${enc(token)}`, body);
-  return { pseudonym: r.pseudonym, appLink: r.app_link ?? null };
-}
-
-/** Change privacy settings. Only the fields sent change. */
-export async function updateSettings(source: DataSource, token: string, body: ApiSettingsUpdate): Promise<ExpertSettings> {
-  return toExpertSettings(await request<ApiExpertSettings>(source, 'PATCH', `/q/${enc(token)}/settings`, body));
 }
 
 export interface InviteResult {

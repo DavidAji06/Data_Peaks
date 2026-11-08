@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { PublicHeader } from '@/components/public/PublicOutcomeView';
 import { getPublicOutcomes } from '@/lib/api';
 import { strings as s } from '@/lib/strings';
-import { QuestionSkeleton } from '@/app/q/[token]/loading';
+import { QuestionSkeleton } from '@/components/ui/QuestionSkeleton';
 import { PublicOutcomesClient } from '@/components/public/PublicOutcomesClient';
 
 export const metadata: Metadata = { title: 'Resolved forecasts · Ground Truth' };

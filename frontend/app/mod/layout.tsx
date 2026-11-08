@@ -15,7 +15,7 @@ export default function ModLayout({ children }: LayoutProps<'/mod'>) {
       <header className="border-b border-line bg-surface">
         <div className="mx-auto w-full max-w-5xl px-4 pt-3">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <Link href="/" className="font-semibold text-ink">
+            <Link href="/mod" className="font-semibold text-ink">
               Ground Truth <span className="font-normal text-ink-muted">· {mod.title}</span>
             </Link>
             <p className="text-xs text-ink-muted">{mod.noAuth}</p>

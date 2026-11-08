@@ -11,7 +11,7 @@ import statistics
 import threading
 from datetime import datetime, timezone
 
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -25,6 +25,7 @@ from .schemas import (
     AlertDecision,
     AnswerIn,
     JoinIn,
+    LoginLinkIn,
     PanelInviteIn,
     PanelRequestIn,
     RiskDecisionIn,
@@ -34,6 +35,7 @@ from .services import mailer, ml_outputs, panels
 from .services.alert_import import import_alert_items
 from .services.auth import require_moderator
 from .services.links import expert_invites, require_invite, resolve_link
+from .services.rate_limit import RateLimiter
 from .services.routing import clean_followed, followed_countries, route_question, should_notify
 from .services.scoring import expert_scores, latest_answers
 
@@ -416,6 +418,56 @@ def join_panel(token: str, body: JoinIn, db: Session = Depends(get_db)):
         "app_link": app_link,
         "link_emailed": emailed,  # False: the app shows the link so the expert can save it
     }
+
+
+# Expert: signing in again with email (passwordless)
+
+LOGIN_LINK_RESPONSE = {
+    "status": "sent",
+    "detail": "If this email belongs to a panel member, a sign-in link is on its way.",
+}
+login_by_email = RateLimiter(limit=3, window_seconds=15 * 60)
+login_by_ip = RateLimiter(limit=20, window_seconds=15 * 60)
+
+
+def client_ip(request: Request) -> str:
+    # Render (and most hosts) put the caller first in X-Forwarded-For
+    forwarded = request.headers.get("x-forwarded-for", "")
+    return forwarded.split(",")[0].strip() or (request.client.host if request.client else "unknown")
+
+
+def expert_for_email(db: Session, email: str) -> Expert | None:
+    expert = db.scalar(select(Expert).where(func.lower(Expert.email) == email).limit(1))
+    if expert is not None:
+        return expert
+    invite = db.scalar(
+        select(PanelInvite)
+        .where(func.lower(PanelInvite.email) == email, PanelInvite.used.is_(True), PanelInvite.expert_id.is_not(None))
+        .order_by(PanelInvite.joined_at.desc())
+        .limit(1)
+    )
+    return db.get(Expert, invite.expert_id) if invite else None
+
+
+@app.post("/auth/login-link")
+def request_login_link(body: LoginLinkIn, request: Request, background: BackgroundTasks, db: Session = Depends(get_db)):
+    """
+    Emails the expert their personal link. The answer is the same whether or not the email is
+    known, so the form can't be used to find out who is on the panel. The link is never returned.
+    """
+    if not login_by_ip.allow(client_ip(request)):
+        raise HTTPException(status_code=429, detail="Too many sign-in requests. Try again in a few minutes.")
+    email = body.email.strip().lower()
+    if not login_by_email.allow(email):
+        return LOGIN_LINK_RESPONSE  # Same answer: silently stop emailing this address for a while
+    expert = expert_for_email(db, email)
+    if expert is not None:
+        if not expert.link_token:
+            expert.link_token = secrets.token_urlsafe(16)
+            db.commit()
+        # Sent after the response, so the reply takes as long for unknown emails as for known ones
+        background.add_task(mailer.send_login_link, expert.email or email, f"{EXPERT_APP_URL}/?token={expert.link_token}")
+    return LOGIN_LINK_RESPONSE
 
 
 # Expert: secret-link routes

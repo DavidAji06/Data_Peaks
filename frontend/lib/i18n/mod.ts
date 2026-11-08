@@ -12,7 +12,7 @@ export const mod = {
     panel: 'Panel',
   },
   title: 'ACAPS moderator',
-  noAuth: 'Demo: no sign-in yet. A real deployment needs moderator accounts.',
+  noAuth: 'ACAPS staff only',
   demoOffline: 'Demo data (offline)',
   demoUntilMl: 'Demo data until the ML pipeline lands',
   tryAgain: 'Try again',

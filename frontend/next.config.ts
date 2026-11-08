@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // The dashboard has no landing page: "/" opens the (password-protected) moderator area.
+  async redirects() {
+    return [{ source: "/", destination: "/mod", permanent: false }];
+  },
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

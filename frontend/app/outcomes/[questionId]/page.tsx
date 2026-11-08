@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { PublicOutcomeView } from '@/components/public/PublicOutcomeView';
 import { getPublicOutcome } from '@/lib/api';
-import { QuestionSkeleton } from '@/app/q/[token]/loading';
+import { QuestionSkeleton } from '@/components/ui/QuestionSkeleton';
 
 export const metadata: Metadata = { title: 'Public summary · Ground Truth' };
 

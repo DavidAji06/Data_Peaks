@@ -13,6 +13,3 @@ export function QuestionSkeleton() {
   );
 }
 
-export default function Loading() {
-  return <QuestionSkeleton />;
-}

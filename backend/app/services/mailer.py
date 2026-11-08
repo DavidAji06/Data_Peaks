@@ -1,19 +1,24 @@
 """
-Sends panel invitation emails over SMTP (standard library only).
+Sends panel emails (invitation, welcome, sign-in link). Standard library only.
 
-Configure in backend/.env (or real environment variables):
-    SMTP_HOST=smtp.gmail.com
-    SMTP_PORT=587
-    SMTP_USER=you@gmail.com
-    SMTP_PASSWORD=<app password>
-    SMTP_FROM=ACAPS expert panel <you@gmail.com>   (optional, defaults to SMTP_USER)
+Two transports, picked by EMAIL_PROVIDER (default: "resend" when RESEND_API_KEY is set, else "smtp"):
 
-With no SMTP_HOST, nothing is sent: the link is printed and the moderator copies it from the dashboard.
+- smtp:   SMTP_HOST, SMTP_PORT (587 STARTTLS or 465 SSL), SMTP_USER, SMTP_PASSWORD
+- resend: RESEND_API_KEY, sent over HTTPS (https://resend.com). Use it where outbound SMTP ports
+          are blocked, e.g. Render's free plan.
+
+EMAIL_FROM (or SMTP_FROM) is the sender, e.g. "ACAPS expert panel <panel@your-domain.org>". With
+Resend and no verified domain, use "onboarding@resend.dev" (it can only send to your own address).
+
+With neither configured, nothing is sent: the link is printed and the moderator copies it from the dashboard.
 """
 
+import json
 import os
 import smtplib
 import ssl
+import urllib.error
+import urllib.request
 from email.message import EmailMessage
 from pathlib import Path
 
@@ -35,15 +40,30 @@ def _load_env_file():
 _load_env_file()
 
 
+def provider() -> str | None:
+    """'resend', 'smtp', or None when email is off."""
+    name = (os.getenv("EMAIL_PROVIDER") or "").strip().lower()
+    if not name:
+        name = "resend" if os.getenv("RESEND_API_KEY") else "smtp"
+    if name == "resend":
+        return "resend" if os.getenv("RESEND_API_KEY") else None
+    if name == "smtp":
+        return "smtp" if os.getenv("SMTP_HOST") else None
+    return None
+
+
 def is_configured() -> bool:
-    return bool(os.getenv("SMTP_HOST"))
+    return provider() is not None
+
+
+def sender() -> str:
+    return os.getenv("EMAIL_FROM") or os.getenv("SMTP_FROM") or os.getenv("SMTP_USER") or "no-reply@localhost"
 
 
 def invite_message(to: str, join_link: str, country: str) -> EmailMessage:
-    sender = os.getenv("SMTP_FROM") or os.getenv("SMTP_USER") or "no-reply@localhost"
     msg = EmailMessage()
     msg["Subject"] = "You're invited to the ACAPS expert panel"
-    msg["From"] = sender
+    msg["From"] = sender()
     msg["To"] = to
     msg.set_content(
         f"Hello,\n\n"
@@ -72,10 +92,9 @@ It works once and is personal to you. Please don't forward it.</p>
 
 
 def welcome_message(to: str, app_link: str, pseudonym: str, anonymous: bool) -> EmailMessage:
-    sender = os.getenv("SMTP_FROM") or os.getenv("SMTP_USER") or "no-reply@localhost"
     msg = EmailMessage()
     msg["Subject"] = "Your personal link to the ACAPS expert panel"
-    msg["From"] = sender
+    msg["From"] = sender()
     msg["To"] = to
     who = "You answer anonymously." if anonymous else f"Your nickname is {pseudonym}. You can change it in your profile."
     msg.set_content(
@@ -96,30 +115,89 @@ text-decoration:none;border-radius:6px;font-weight:bold">Open my expert app</a><
     return msg
 
 
-def _send(message: EmailMessage) -> tuple[bool, str | None]:
-    """Returns (sent, error). Never raises: a failed email must not lose the invite or the account."""
-    to = message["To"]
-    if not is_configured():
-        print(f"[notify] SMTP not configured, not emailed to {to}: {message['Subject']}")
-        return False, "Email is not configured on the server"
+def login_message(to: str, app_link: str) -> EmailMessage:
+    msg = EmailMessage()
+    msg["Subject"] = "Your sign-in link to the ACAPS expert panel"
+    msg["From"] = sender()
+    msg["To"] = to
+    msg.set_content(
+        "Hello,\n\nSomeone (hopefully you) asked to sign in to the ACAPS expert panel app.\n\n"
+        f"Sign in:\n{app_link}\n\n"
+        "This link signs you in, so please don't forward it. If you didn't ask for it, ignore this email.\n\nACAPS"
+    )
+    msg.add_alternative(
+        f"""<p>Hello,</p>
+<p>Someone (hopefully you) asked to sign in to the ACAPS expert panel app.</p>
+<p><a href="{app_link}" style="display:inline-block;padding:12px 20px;background:#0b2e4f;color:#fff;
+text-decoration:none;border-radius:6px;font-weight:bold">Sign in</a></p>
+<p style="color:#666;font-size:13px">This link signs you in, so please don't forward it.
+If you didn't ask for it, ignore this email.</p>
+<p>ACAPS</p>""",
+        subtype="html",
+    )
+    return msg
+
+
+def _parts(message: EmailMessage) -> tuple[str, str | None]:
+    text = message.get_body(("plain",))
+    html = message.get_body(("html",))
+    return (text.get_content() if text else ""), (html.get_content() if html else None)
+
+
+def _send_resend(message: EmailMessage) -> None:
+    text, html = _parts(message)
+    payload = {"from": message["From"], "to": [message["To"]], "subject": message["Subject"], "text": text}
+    if html:
+        payload["html"] = html
+    request = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=json.dumps(payload).encode(),
+        headers={
+            "Authorization": f"Bearer {os.environ['RESEND_API_KEY']}",
+            "Content-Type": "application/json",
+            "User-Agent": "data-peaks-api",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=15) as response:
+            response.read()
+    except urllib.error.HTTPError as e:  # Resend explains what is wrong (unverified domain, bad key...)
+        raise RuntimeError(f"Resend {e.code}: {e.read().decode(errors='replace')[:300]}") from None
+
+
+def _send_smtp(message: EmailMessage) -> None:
     host = os.environ["SMTP_HOST"]
     port = int(os.getenv("SMTP_PORT", "587"))
     user = os.getenv("SMTP_USER")
     password = os.getenv("SMTP_PASSWORD")
+    context = ssl.create_default_context()
+    if port == 465:
+        server = smtplib.SMTP_SSL(host, port, timeout=15, context=context)
+    else:
+        server = smtplib.SMTP(host, port, timeout=15)
+        server.starttls(context=context)
+    with server:
+        if user and password:
+            server.login(user, password)
+        server.send_message(message)
+
+
+def _send(message: EmailMessage) -> tuple[bool, str | None]:
+    """Returns (sent, error). Never raises: a failed email must not lose the invite or the account."""
+    to = message["To"]
+    transport = provider()
+    if transport is None:
+        print(f"[notify] Email not configured, not emailed to {to}: {message['Subject']}")
+        return False, "Email is not configured on the server"
     try:
-        context = ssl.create_default_context()
-        if port == 465:
-            server = smtplib.SMTP_SSL(host, port, timeout=15, context=context)
+        if transport == "resend":
+            _send_resend(message)
         else:
-            server = smtplib.SMTP(host, port, timeout=15)
-            server.starttls(context=context)
-        with server:
-            if user and password:
-                server.login(user, password)
-            server.send_message(message)
+            _send_smtp(message)
         print(f"[notify] Emailed {to}: {message['Subject']}")
         return True, None
-    except Exception as e:  # SMTP, DNS or auth failure: keep going, report it
+    except Exception as e:  # SMTP/HTTP, DNS or auth failure: keep going, report it
         print(f"[notify] Email to {to} failed: {e!r}")
         return False, "The email could not be sent"
 
@@ -133,3 +211,7 @@ def send_invite(to: str, join_link: str, country: str) -> tuple[bool, str | None
 
 def send_welcome(to: str, app_link: str, pseudonym: str, anonymous: bool) -> tuple[bool, str | None]:
     return _send(welcome_message(to, app_link, pseudonym, anonymous))
+
+
+def send_login_link(to: str, app_link: str) -> tuple[bool, str | None]:
+    return _send(login_message(to, app_link))

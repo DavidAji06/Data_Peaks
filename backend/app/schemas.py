@@ -44,6 +44,11 @@ class PanelInviteIn(BaseModel):
     country: str = Field(min_length=2, max_length=80)
 
 
+class LoginLinkIn(BaseModel):
+    # Loose on purpose: a malformed address gets the same answer as an unknown one
+    email: str = Field(min_length=3, max_length=254)
+
+
 class PanelRequestIn(BaseModel):
     country: str = Field(min_length=2, max_length=80)
     note: str | None = Field(default=None, max_length=280)  # Optional: why they know this context

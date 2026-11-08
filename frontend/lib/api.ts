@@ -17,10 +17,7 @@ import { connection } from 'next/server';
 import curatedFile from '@/mock/curated.json';
 import {
   isPlaceholderRanked,
-  isPlaceholderSimilar,
   toAlert,
-  toExpertQuestion,
-  toExpertSettings,
   toPublicOutcome,
   toLeaderboard,
   toPanelInvites,
@@ -29,7 +26,6 @@ import {
   toQuestionListItem,
   toRankedRisk,
   toRiskDetail,
-  toTrackRecord,
 } from './adapters';
 import { ApiError, NetworkError } from './api-error';
 import { mockRequest } from './server/mock-backend';
@@ -37,9 +33,6 @@ import type {
   Alert,
   AlertStatus,
   ApiAlert,
-  ApiExpertQuestion,
-  ApiExpertSettings,
-  ApiJoinInfo,
   ApiPublicQuestion,
   ApiLeaderboard,
   ApiPanelInvites,
@@ -49,9 +42,6 @@ import type {
   ApiRankedRisk,
   ApiRisk,
   ApiSimilarRisk,
-  ApiTrackRecord,
-  ExpertQuestion,
-  ExpertSettings,
   Leaderboard,
   PanelInvites,
   Panels,
@@ -61,7 +51,6 @@ import type {
   QuestionListItem,
   RankedRisks,
   RiskDetail,
-  TrackRecord,
 } from './types';
 
 export { ApiError, NetworkError };
@@ -127,93 +116,6 @@ async function load<T>(loader: (call: Call) => Promise<T>, audience: Audience = 
 }
 
 const enc = encodeURIComponent;
-
-// ---------------------------------------------------------------------------
-// Expert (secret link)
-// ---------------------------------------------------------------------------
-
-export function getExpertQuestion(token: string): Promise<Loaded<ExpertQuestion>> {
-  return load(async (call) => {
-    const raw = await call<ApiExpertQuestion>('GET', `/q/${enc(token)}`);
-    const similar = isPlaceholderSimilar(raw.similar_risks)
-      ? (() => {
-          const curatedItems = curated.similar_risks[raw.risk.id] ?? [];
-          if (curatedItems.length === 0) {
-            console.warn(`[Ground Truth] No curated similar risks found for risk ${raw.risk.id}`);
-          }
-          return { items: curatedItems, areDemo: true };
-        })()
-      : { items: raw.similar_risks, areDemo: false };
-    // Only the anonymity level is used from the settings; the pseudonym and topics stay on the server.
-    let level: ExpertQuestion['anonymityLevel'] = null;
-    try {
-      level = (await call<ApiExpertSettings>('GET', `/q/${enc(token)}/settings`)).anonymity_level;
-    } catch (e) {
-      // 404/405: a backend without the settings endpoint yet. Show the generic "who sees" line.
-      if (!(e instanceof ApiError && (e.status === 404 || e.status === 405))) throw e;
-    }
-    return toExpertQuestion(raw, similar, level);
-  });
-}
-
-export function getTrackRecord(token: string): Promise<Loaded<TrackRecord>> {
-  return load(async (call) => toTrackRecord(await call<ApiTrackRecord>('GET', `/q/${enc(token)}/track-record`)));
-}
-
-export interface SettingsPage {
-  /** null = this backend has no settings endpoint yet */
-  settings: ExpertSettings | null;
-  /** null = a personal link with no open question yet */
-  questionId: string | null;
-}
-
-/** Privacy settings, reached through the expert's question link. 404 on the link itself = invalid link. */
-export function getSettingsPage(token: string): Promise<Loaded<SettingsPage>> {
-  return load(async (call) => {
-    // A personal link (demo-expert-a) works before any question exists: then only settings answer
-    const q = await call<ApiExpertQuestion>('GET', `/q/${enc(token)}`).catch((e: unknown) => {
-      if (e instanceof ApiError && e.status === 404) return null;
-      throw e;
-    });
-    let settings: ExpertSettings | null = null;
-    try {
-      settings = toExpertSettings(await call<ApiExpertSettings>('GET', `/q/${enc(token)}/settings`));
-    } catch (e) {
-      if (!(e instanceof ApiError && (e.status === 404 || e.status === 405))) throw e;
-      if (!q) throw e; // Neither a question nor an expert behind this link
-    }
-    return { settings, questionId: q ? q.question.id : null };
-  });
-}
-
-/** True when the link belongs to an expert, even if no question is open for them yet. */
-export function isKnownLink(token: string): Promise<boolean> {
-  return load(async (call) => {
-    try {
-      await call<ApiExpertSettings>('GET', `/q/${enc(token)}/settings`);
-      return true;
-    } catch (e) {
-      if (e instanceof ApiError && e.status === 404) return false;
-      throw e;
-    }
-  }).then((loaded) => loaded.data);
-}
-
-/** Which backend a page with no data of its own should send actions to (GET /health). */
-export function getSource(): Promise<Loaded<null>> {
-  return load(async (call) => {
-    await call<{ status: string }>('GET', '/health');
-    return null;
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Joining the panel (sign-up link from a moderator invite; no key). 404 unknown, 409 already used.
-// ---------------------------------------------------------------------------
-
-export function getJoinInfo(token: string): Promise<Loaded<{ country: string }>> {
-  return load(async (call) => ({ country: (await call<ApiJoinInfo>('GET', `/join/${enc(token)}`)).country }));
-}
 
 // ---------------------------------------------------------------------------
 // Moderator (no auth in the backend yet: see HANDOFF.md)

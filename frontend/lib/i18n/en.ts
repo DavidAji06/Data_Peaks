@@ -235,7 +235,7 @@ export const en = {
     networkSettings: "Couldn't reach the server. Your choices are still here: try again.",
     slowNetwork: 'The server is taking a moment to respond. Still loading…',
     notFound: 'Page not found.',
-    toHome: 'Go to the start page',
+    toHome: 'See public results',
   },
   anonymity: {
     levels: {

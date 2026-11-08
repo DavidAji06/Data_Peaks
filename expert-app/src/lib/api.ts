@@ -3,7 +3,7 @@
  * Probabilities are 0–1 on the wire; the UI converts to 0–100 for display.
  *
  * Base URL: VITE_API_URL, or "/api" which the Vite dev server proxies to http://localhost:8000.
- * The expert link token is a credential: it is kept in memory/sessionStorage and never rendered.
+ * The expert link token is a credential: it is kept in localStorage ("dp-expert-token") and never rendered.
  */
 
 export type AnonymityLevel = "known_to_acaps" | "pseudonymous" | "anonymous";
@@ -142,7 +142,6 @@ export class ApiError extends Error {
 
 const BASE = ((import.meta.env["VITE_API_URL"] as string | undefined) || "/api").replace(/\/$/, "");
 const TOKEN_KEY = "dp-expert-token";
-const DEFAULT_TOKEN = (import.meta.env["VITE_EXPERT_TOKEN"] as string | undefined) || "demo-expert-a";
 
 let joinToken: string | null | undefined; // Kept once read, so a re-run effect still sees it
 
@@ -168,30 +167,54 @@ export function clearJoinToken() {
   joinToken = null;
 }
 
-/** After activation, the expert's personal link token becomes this tab's sign-in. */
+let memoryToken: string | null = null; // Used when storage is blocked (private browsing)
+
+/** After activation or an emailed sign-in link, the expert's personal link token is this device's sign-in. */
 export function setToken(token: string) {
+  memoryToken = token;
   try {
-    sessionStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(TOKEN_KEY, token);
   } catch {
-    /* storage unavailable: getToken falls back to the demo link */
+    /* storage unavailable: signed in for this page only */
   }
 }
 
-/** Reads ?token= once, removes it from the address bar, and keeps it for this tab only. */
-export function getToken(): string {
-  if (typeof window === "undefined") return DEFAULT_TOKEN;
+/**
+ * The signed-in expert's token, or null (show the sign-in screen). Reads ?token= (from an email
+ * link) once, saves it on this device and removes it from the address bar.
+ */
+export function getToken(): string | null {
+  if (typeof window === "undefined") return null;
   try {
     const url = new URL(window.location.href);
     const fromUrl = url.searchParams.get("token");
     if (fromUrl) {
-      sessionStorage.setItem(TOKEN_KEY, fromUrl);
+      setToken(fromUrl);
       url.searchParams.delete("token");
       window.history.replaceState(null, "", url.toString());
       return fromUrl;
     }
-    return sessionStorage.getItem(TOKEN_KEY) || DEFAULT_TOKEN;
   } catch {
-    return DEFAULT_TOKEN;
+    /* bad URL: fall through to the saved token */
+  }
+  try {
+    return localStorage.getItem(TOKEN_KEY) || memoryToken;
+  } catch {
+    return memoryToken;
+  }
+}
+
+/** Sign out: forget the token and everything this device kept for the expert. */
+export function clearToken() {
+  memoryToken = null;
+  for (const store of [() => localStorage, () => sessionStorage]) {
+    try {
+      const s = store();
+      s.removeItem(TOKEN_KEY);
+      for (const key of Object.keys(s)) if (key.startsWith("dp-")) s.removeItem(key);
+    } catch {
+      /* storage unavailable */
+    }
   }
 }
 
@@ -226,6 +249,9 @@ const q = (token: string) => `/q/${encodeURIComponent(token)}`;
 const qid = (questionId: string) => `?question_id=${encodeURIComponent(questionId)}`;
 
 export const api = {
+  /** Emails a sign-in link if the address belongs to an expert. Same answer either way; 429 = too many tries. */
+  requestLoginLink: (email: string) =>
+    request<{ status: string; detail: string }>("/auth/login-link", { method: "POST", body: JSON.stringify({ email }) }),
   /** 404 = unknown link, 409 = already used. */
   getJoin: (joinToken: string) => request<{ country: string }>(`/join/${encodeURIComponent(joinToken)}`),
   join: (joinToken: string, body: { anonymity_level: AnonymityLevel; language: string }) =>

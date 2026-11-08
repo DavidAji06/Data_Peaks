@@ -41,7 +41,7 @@ Data layer: `src/lib/api.ts` (HTTP client) and `src/components/datapeaks/useExpe
 
 The seed creates **no open question**. Questions are written by the moderator.
 
-- Each synthetic expert has a fixed personal link: `demo-expert-a` … `demo-expert-f`. The app uses `demo-expert-a` by default; open `http://localhost:8080/?token=demo-expert-b` for another expert. A personal link always points at the expert's newest open question.
+- Each synthetic expert has a fixed personal link: `demo-expert-a` … `demo-expert-f`. Open `http://localhost:8080/?token=demo-expert-a` to sign in as one (the token is saved on the device; Profile → Sign out forgets it). Without a saved token the app shows the email sign-in screen, which emails the expert their personal link via `POST /auth/login-link`. A personal link always points at the expert's newest open question.
 - Right after the seed, expert A sees **"You're up to date"** and the globe has no halo.
 - The moderator opens http://localhost:3000/mod, picks R1049's top alert, writes the question and approves it. The backend invites **every** expert whose country is one of the risk's countries (no panel cap) and prints one `[notify]` line per expert with a per-question link, `http://localhost:8080/?token=<invite token>`. Either that link or the personal link works.
 - `cd backend && ../venv/Scripts/python.exe -m app.demo_answers Q001` adds 5 synthetic answers (experts B–F) so expert A can demo the blind-answer lock. It refuses to run if the question does not exist.

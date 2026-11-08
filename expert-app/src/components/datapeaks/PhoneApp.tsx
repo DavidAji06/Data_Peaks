@@ -31,7 +31,7 @@ const fmtDate = (lang: Lang, iso: string | null | undefined) => {
 };
 const to100 = (p: number) => Math.round(p * 100);
 
-export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
+export function PhoneApp({ lang, setLang, onSignOut }: { lang: Lang; setLang: (l: Lang) => void; onSignOut: (why?: string) => void }) {
   const t = dict[lang];
   const ex = useExpert();
   const [screen, setScreen] = useState<Screen>("home");
@@ -43,6 +43,10 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
   useEffect(() => {
     if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) setPrefs({ reducedMotion: true, listView: false });
   }, []);
+  // A saved or emailed link the server no longer knows: back to sign-in, where a new one can be emailed
+  useEffect(() => {
+    if (ex.state === "invalid") onSignOut(`${t.e1}. ${t.e1T}`);
+  }, [ex.state, onSignOut, t]);
 
   const go = (s: Screen, gv: GroupView = "compare") => {
     setScreen(s);
@@ -105,7 +109,7 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
         <div hidden={screen !== "home"}>
           <Home t={t} lang={lang} ex={ex} active={screen === "home"} prefs={prefs} onOpen={openQuestion} />
         </div>
-        {blocked && <LoadNotice lang={lang} t={t} ex={ex} />}
+        {blocked && <LoadNotice lang={lang} t={t} ex={ex} onSignOut={onSignOut} />}
         {!blocked && screen === "group" && <QuestionSwitcher lang={lang} ex={ex} />}
         {!blocked && screen === "questions" && (
           <Question t={t} lang={lang} ex={ex} answer={answer} setAnswer={setAnswer} reason={reason} setReason={setReason}
@@ -115,7 +119,7 @@ export function PhoneApp({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => 
           <Group t={t} lang={lang} ex={ex} view={groupView} setView={setGroupView}
             onQuestion={() => go("questions")} onHome={() => go("home")} onProfile={() => go("profile")} />
         )}
-        {screen === "profile" && <Profile t={t} lang={lang} ex={ex} />}
+        {screen === "profile" && <Profile t={t} lang={lang} ex={ex} onSignOut={onSignOut} />}
       </main>
     </div>
   );
@@ -278,10 +282,10 @@ function QuestionSwitcher({ lang, ex }: { lang: Lang; ex: Expert }) {
   );
 }
 
-function LoadNotice({ t, lang, ex }: { t: T; lang: Lang; ex: Expert }) {
+function LoadNotice({ t, lang, ex, onSignOut }: { t: T; lang: Lang; ex: Expert; onSignOut: () => void }) {
   if (ex.state === "loading")
     return <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin" />{L(lang, "Loading…", "Chargement…")}</div>;
-  if (ex.state === "invalid") return <InvalidLink t={t} lang={lang} />;
+  if (ex.state === "invalid") return <InvalidLink t={t} lang={lang} onSignIn={onSignOut} />;
   if (ex.state === "ready") return <UpToDate lang={lang} />;
   return <OfflineCard lang={lang} ex={ex} />;
 }
@@ -292,11 +296,12 @@ function UpToDate({ lang }: { lang: Lang }) {
   );
 }
 
-function InvalidLink({ t, lang }: { t: T; lang: Lang }) {
+function InvalidLink({ t, lang, onSignIn }: { t: T; lang: Lang; onSignIn: () => void }) {
   return (
     <Card className="space-y-3 p-5">
       <Link2Off className="h-6 w-6 text-primary" /><h2 className="text-lg font-bold">{t.e1}</h2>
-      <p className="text-sm text-muted-foreground">{L(lang, "It may have expired. Ask your ACAPS contact for a new link.", "Il a peut-être expiré. Demandez un nouveau lien à votre contact ACAPS.")}</p>
+      <p className="text-sm text-muted-foreground">{t.e1T}</p>
+      <Button variant="outline" className="w-full" onClick={() => onSignIn()}>{t.e1C}</Button>
     </Card>
   );
 }
@@ -937,7 +942,7 @@ function Done({ t, lang, ex, onGroup, onHome, onProfile }: { t: T; lang: Lang; e
 
 /* ------------------------------------------------------------------ PROFILE */
 
-function Profile({ t, lang, ex }: { t: T; lang: Lang; ex: Expert }) {
+function Profile({ t, lang, ex, onSignOut }: { t: T; lang: Lang; ex: Expert; onSignOut: () => void }) {
   const s = ex.settings;
   const [privacy, setPrivacy] = useState<Privacy>("nickname");
   const [saving, setSaving] = useState(false);
@@ -984,7 +989,7 @@ function Profile({ t, lang, ex }: { t: T; lang: Lang; ex: Expert }) {
     }
   };
 
-  if (ex.state === "invalid") return <InvalidLink t={t} lang={lang} />;
+  if (ex.state === "invalid") return <InvalidLink t={t} lang={lang} onSignIn={onSignOut} />;
 
   return (
     <div className="space-y-8">
@@ -1046,6 +1051,11 @@ function Profile({ t, lang, ex }: { t: T; lang: Lang; ex: Expert }) {
         {saved === "ok" && <p className="flex items-center gap-1 text-sm text-success"><Check className="h-4 w-4" />{L(lang, "Preferences saved", "Préférences enregistrées")}</p>}
         {saved === "err" && <p className="text-sm text-risk">{L(lang, "Couldn't save. Your choices are still here — try again.", "Échec de l'enregistrement. Vos choix sont conservés — réessayez.")}</p>}
       </div>
+
+      <section className="space-y-2 border-t pt-6">
+        <Button variant="outline" className="w-full" onClick={() => onSignOut()}>{L(lang, "Sign out", "Se déconnecter")}</Button>
+        <p className="text-xs text-muted-foreground">{L(lang, "To sign in again, enter your email and we'll send you a new link.", "Pour vous reconnecter, saisissez votre e-mail : nous vous enverrons un nouveau lien.")}</p>
+      </section>
 
     </div>
   );

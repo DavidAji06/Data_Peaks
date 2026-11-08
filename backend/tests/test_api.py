@@ -712,3 +712,59 @@ def test_wrong_decision_for_the_state_is_refused(client):
     client.post("/q/tok-a/panels", json={"country": "Sudan"})
     rid = request_id(client)
     assert client.post(f"/moderator/panel-memberships/{rid}/decision", headers=MOD, json={"action": "remove"}).status_code == 409
+
+
+# Signing in again with email
+
+@pytest.fixture
+def login_mail(monkeypatch):
+    from app.main import login_by_email, login_by_ip
+    login_by_email.reset()
+    login_by_ip.reset()
+    sent = []
+    monkeypatch.setattr("app.services.mailer.send_login_link", lambda to, link: (sent.append((to, link)) or (True, None)))
+    return sent
+
+
+def test_login_link_emails_a_known_expert(client, login_mail):
+    r = client.post("/auth/login-link", json={"email": "  A@Example.org "})
+    assert r.status_code == 200
+    assert login_mail == [("a@example.org", login_mail[0][1])]
+    link = login_mail[0][1]
+    assert "/?token=" in link
+    token = link.split("token=", 1)[1]
+    assert token not in r.text  # The token only travels by email
+    assert client.get(f"/q/{token}/settings").status_code == 200  # And it signs in as that expert
+
+
+def test_login_link_unknown_email_sends_nothing(client, login_mail):
+    r = client.post("/auth/login-link", json={"email": "nobody@example.org"})
+    assert r.status_code == 200
+    assert login_mail == []
+
+
+def test_login_link_same_answer_for_known_and_unknown(client, login_mail):
+    known = client.post("/auth/login-link", json={"email": "b@example.org"})
+    unknown = client.post("/auth/login-link", json={"email": "ghost@example.org"})
+    malformed = client.post("/auth/login-link", json={"email": "not-an-email"})
+    assert known.status_code == unknown.status_code == malformed.status_code == 200
+    assert known.json() == unknown.json() == malformed.json()
+
+
+def test_joined_expert_can_sign_in_with_invite_email(client, login_mail):
+    joined = client.post("/join/join-1", json={"anonymity_level": "anonymous"}).json()
+    client.post("/auth/login-link", json={"email": "New@example.org"})
+    assert login_mail and login_mail[0][0] == "new@example.org"
+    assert login_mail[0][1].endswith(f"?token={joined['token']}")
+
+
+def test_login_link_rate_limited_per_email(client, login_mail):
+    for _ in range(5):
+        assert client.post("/auth/login-link", json={"email": "a@example.org"}).status_code == 200
+    assert len(login_mail) == 3  # Same answer, but no more emails for a while
+
+
+def test_login_link_rate_limited_per_ip(client, login_mail):
+    codes = [client.post("/auth/login-link", json={"email": f"x{i}@example.org"}).status_code for i in range(25)]
+    assert codes[:20] == [200] * 20
+    assert codes[-1] == 429

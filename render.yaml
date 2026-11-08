@@ -29,6 +29,15 @@ services:
         value: https://data-peaks-expert.onrender.com
       - key: CORS_ORIGINS
         value: https://data-peaks-dashboard.onrender.com,https://data-peaks-expert.onrender.com
+      # Email (invites, welcome, sign-in links). Render's free plan blocks outbound SMTP ports,
+      # so use Resend over HTTPS: set RESEND_API_KEY and EMAIL_FROM. SMTP_* are for paid plans
+      # or other hosts. See backend/.env.example.
+      - key: EMAIL_PROVIDER
+        value: resend
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT
