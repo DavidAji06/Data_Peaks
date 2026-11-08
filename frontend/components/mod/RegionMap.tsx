@@ -13,6 +13,7 @@ import { feature, neighbors } from 'topojson-client';
 import type { GeometryCollection, Topology } from 'topojson-specification';
 import countries110m from 'world-atlas/countries-110m.json';
 import { mod } from '@/lib/i18n/mod';
+import { findPlaces } from '@/lib/places';
 
 const t = mod.regionMap;
 
@@ -65,13 +66,21 @@ const noop = () => () => {};
  * Drawn in the browser only: server and client round the projected coordinates slightly differently,
  * which would break hydration. A same-size placeholder holds the space meanwhile.
  */
-export function RegionMap({ countries }: { countries: string[] }) {
-  const mounted = useSyncExternalStore(noop, () => true, () => false);
-  if (!mounted) return <div className="aspect-[8/5] w-full animate-pulse rounded-lg border border-line bg-surface-muted" />;
-  return <RegionMapInner countries={countries} />;
+interface Props {
+  countries: string[];
+  /** Text naming where the risk is (the risk title). The first known place in it becomes the rings' centre. */
+  focusText?: string | null;
+  /** Report text on alert pages: known places in it are marked too. */
+  reportText?: string | null;
 }
 
-function RegionMapInner({ countries }: { countries: string[] }) {
+export function RegionMap(props: Props) {
+  const mounted = useSyncExternalStore(noop, () => true, () => false);
+  if (!mounted) return <div className="aspect-[8/5] w-full animate-pulse rounded-lg border border-line bg-surface-muted" />;
+  return <RegionMapInner {...props} />;
+}
+
+function RegionMapInner({ countries, focusText, reportText }: Props) {
   const [hover, setHover] = useState<number | null>(null);
   const [zoom, setZoom] = useState(1);
   const [show, setShow] = useState({ ring1: true, ring2: true, distance: true });
@@ -88,10 +97,16 @@ function RegionMapInner({ countries }: { countries: string[] }) {
     for (const i of affected) for (const n of NEIGHBOURS[i] ?? []) if (!affected.has(n)) ring1.add(n);
     const ring2 = new Set<number>();
     for (const i of ring1) for (const n of NEIGHBOURS[i] ?? []) if (!affected.has(n) && !ring1.has(n)) ring2.add(n);
-    if (affected.size === 0) return { affected, ring1, ring2, missing, paths: null };
+    if (affected.size === 0) return { affected, ring1, ring2, missing, focus: null, paths: null };
+
+    // Centre on the place the risk names; else the first place the report names; else the country's centre
+    const riskPlaces = findPlaces(focusText, countries);
+    const reportPlaces = findPlaces(reportText, countries);
+    const focus = riskPlaces[0] ?? reportPlaces[0] ?? null;
+    const others = reportPlaces.filter((p) => p !== focus).slice(0, 3);
 
     const core: FeatureCollection = { type: 'FeatureCollection', features: [...affected].map((i) => FEATURES[i]!) };
-    const centre = geoCentroid(core);
+    const centre = focus?.at ?? geoCentroid(core);
     const circles = RINGS_KM.map((km) => geoCircle().center(centre).radius(km / KM_PER_DEGREE)());
     // Frame the affected countries plus the 1,000 km ring, so huge neighbours (Russia, China) don't shrink the view
     const frame: FeatureCollection = {
@@ -105,13 +120,18 @@ function RegionMapInner({ countries }: { countries: string[] }) {
       ring1,
       ring2,
       missing,
+      focus,
       paths: {
         countries: FEATURES.map((f) => path(f) ?? ''),
         rings: circles.map((c) => path(c) ?? ''),
         labels: [...affected].map((i) => ({ i, at: path.centroid(FEATURES[i]!) })),
+        centre: projection(centre as [number, number]) ?? [W / 2, H / 2],
+        markers: [...(focus ? [{ place: focus, main: true }] : []), ...others.map((place) => ({ place, main: false }))]
+          .map((m) => ({ ...m, xy: projection(m.place.at) }))
+          .filter((m): m is typeof m & { xy: [number, number] } => !!m.xy),
       },
     };
-  }, [countries]);
+  }, [countries, focusText, reportText]);
 
   const zoneOf = (i: number): Zone | null =>
     model.affected.has(i) ? 'affected' : model.ring1.has(i) ? 'ring1' : model.ring2.has(i) ? 'ring2' : null;
@@ -131,14 +151,17 @@ function RegionMapInner({ countries }: { countries: string[] }) {
   const affectedNames = names(model.affected);
   const ring1Names = names(model.ring1);
 
-  // Zoom around the centre of the frame by shrinking the viewBox
-  const vw = W / zoom;
-  const vh = H / zoom;
-  const viewBox = `${(W - vw) / 2} ${(H - vh) / 2} ${vw} ${vh}`;
-
   if (!model.paths) {
     return <p className="text-sm text-ink-muted">{countries.map((c) => t.notMapped(c)).join(' ')}</p>;
   }
+
+  // Zoom in on the rings' centre (the named place), kept inside the map
+  const vw = W / zoom;
+  const vh = H / zoom;
+  const [cx, cy] = model.paths.centre;
+  const vx = Math.min(Math.max(cx - vw / 2, 0), W - vw);
+  const vy = Math.min(Math.max(cy - vh / 2, 0), H - vh);
+  const viewBox = `${vx} ${vy} ${vw} ${vh}`;
 
   const button =
     'inline-flex h-9 min-w-9 items-center justify-center rounded border border-line-strong bg-surface px-2 font-condensed text-sm font-bold text-accent hover:bg-accent-soft';
@@ -191,6 +214,32 @@ function RegionMapInner({ countries }: { countries: string[] }) {
               </text>
             ) : null,
           )}
+          {model.paths.markers.map(({ place, main, xy }) => (
+            <g key={place.name} style={{ pointerEvents: 'none' }}>
+              <circle
+                cx={xy[0]}
+                cy={xy[1]}
+                r={(main ? 5.5 : 4) / zoom}
+                style={{ fill: main ? COLOURS.ring : 'var(--acaps-ink, #0f172a)', stroke: '#ffffff', strokeWidth: 1.75 / zoom }}
+              />
+              <text
+                x={xy[0] + 8 / zoom}
+                y={xy[1]}
+                dominantBaseline="middle"
+                style={{
+                  fill: 'var(--acaps-ink, #0f172a)',
+                  stroke: '#ffffff',
+                  strokeWidth: 3 / zoom,
+                  paintOrder: 'stroke',
+                  fontFamily: 'var(--font-condensed)',
+                  fontWeight: 700,
+                  fontSize: (main ? 12 : 11) / zoom,
+                }}
+              >
+                {place.name}
+              </text>
+            </g>
+          ))}
         </svg>
 
         <div className="pointer-events-none absolute left-2 top-2 max-w-[70%] rounded bg-surface/95 px-2 py-1 font-condensed text-sm shadow-sm" aria-live="polite">
@@ -200,7 +249,7 @@ function RegionMapInner({ countries }: { countries: string[] }) {
               {zoneLabel(hover) && <span className="text-ink-muted"> · {zoneLabel(hover)}</span>}
             </>
           ) : (
-            <span className="text-ink-muted">{t.hoverHint}</span>
+            <span className="text-ink-muted">{model.focus ? t.centredOn(model.focus.name) : t.centredOnCountry}</span>
           )}
         </div>
 
@@ -222,14 +271,7 @@ function RegionMapInner({ countries }: { countries: string[] }) {
         <Toggle on={show.distance} onChange={(v) => setShow((s) => ({ ...s, distance: v }))} dashed label={t.distance} />
       </fieldset>
 
-      {ring1Names.length > 0 && (
-        <p className="mt-2 text-sm text-ink">
-          <span className="font-condensed font-bold uppercase tracking-wide text-ink-muted">{t.neighbours}: </span>
-          {ring1Names.join(', ')}
-        </p>
-      )}
       {model.missing.length > 0 && <p className="mt-1 text-xs text-ink-muted">{model.missing.map((c) => t.notMapped(c)).join(' ')}</p>}
-      <p className="mt-1 text-xs text-ink-muted">{t.caveat}</p>
     </div>
   );
 }

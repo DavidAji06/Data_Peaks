@@ -58,7 +58,7 @@ async function RiskView({ params }: { params: PageProps<'/mod/risks/[id]'>['para
           {splitCountries(risk.country).length > 0 && (
             <Card>
               <h2 className="mb-3 text-base font-semibold text-ink">{mod.regionMap.title}</h2>
-              <RegionMap countries={splitCountries(risk.country)} />
+              <RegionMap countries={splitCountries(risk.country)} focusText={risk.title} />
             </Card>
           )}
 

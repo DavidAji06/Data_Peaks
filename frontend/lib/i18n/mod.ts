@@ -335,10 +335,8 @@ export const mod = {
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
     reset: 'Reset view',
-    hoverHint: 'Hover or tap a country to name it.',
-    caveat:
-      'Geography only: shading shows shared borders and distance from the affected area, not a modelled likelihood of spillover.',
-    neighbours: 'Neighbouring countries',
+    centredOn: (place: string) => `Rings centred on ${place}`,
+    centredOnCountry: 'Rings centred on the country (no place named)',
     notMapped: (name: string) => `${name} could not be placed on the map.`,
     aria: (affected: string, neighbours: string) =>
       `Map of ${affected}. Countries sharing a border: ${neighbours || 'none'}.`,

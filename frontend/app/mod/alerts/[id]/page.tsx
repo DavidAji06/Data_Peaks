@@ -137,7 +137,11 @@ async function AlertDetailView({ params }: { params: PageProps<'/mod/alerts/[id]
           {splitCountries(risk?.country ?? alert.country).length > 0 && (
             <Card>
               <h2 className="mb-3 text-base font-semibold text-ink">{mod.regionMap.title}</h2>
-              <RegionMap countries={splitCountries(risk?.country ?? alert.country)} />
+              <RegionMap
+                countries={splitCountries(risk?.country ?? alert.country)}
+                focusText={risk?.title}
+                reportText={[alert.matchedPlace, alert.report.title, alert.description].filter(Boolean).join(' · ')}
+              />
             </Card>
           )}
         </div>
