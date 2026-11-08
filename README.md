@@ -4,6 +4,8 @@
 
 **Challenge owners:** Lars Peters and Alexander Harper, [ACAPS](https://www.acaps.org/) — an independent humanitarian analysis organisation monitoring 100+ crises worldwide.
 
+> **Note:** The citizen app is available here: https://github.com/arshahem-maker/Whispers
+
 ---
 
 ## The Challenge
@@ -148,6 +150,7 @@ Read the [full methodology explainer](docs/risk-methodology.md).
 - [Data dictionary](docs/data-dictionary.md)
 - [Evaluation criteria](docs/evaluation-criteria.md)
 - [Resources and inspiration](docs/resources.md)
+- [Citizen app (Whispers)](https://github.com/arshahem-maker/Whispers)
 - [ACAPS Risk List](https://www.acaps.org/en/thematics/all-topics/risk-list) (live data)
 - [ACAPS API](https://api.acaps.org) (free account, token auth)
 
