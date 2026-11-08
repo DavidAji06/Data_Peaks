@@ -773,9 +773,8 @@ def test_login_link_rate_limited_per_ip(client, login_mail):
 def test_brevo_payload_from_message():
     from app.services import mailer
     message = mailer.login_message("x@example.org", "https://app/?token=t")
-    message.replace_header("From", "ACAPS panel <panel@example.org>")
     payload = mailer.brevo_payload(message)
-    assert payload["sender"] == {"email": "panel@example.org", "name": "ACAPS panel"}
+    assert payload["sender"]["name"] == "Data Peaks Expert Panel"
     assert payload["to"] == [{"email": "x@example.org"}]
     assert "https://app/?token=t" in payload["textContent"] and "https://app/?token=t" in payload["htmlContent"]
 
@@ -1033,3 +1032,16 @@ def test_moderator_questions_list_delphi_phase_and_rounds(client):
     assert by_id["Q_P3_CLOSED"]["status"] == "closed"
     assert by_id["Q_P3_CLOSED"]["phase"] == "Delphi Completed (Final Results)"
 
+
+def test_sender_name_never_comes_from_the_configured_address(monkeypatch):
+    from app.services import mailer
+    monkeypatch.setenv("EMAIL_FROM", "ACAPS expert panel <panel@example.org>")
+    messages = [
+        mailer.login_message("x@example.org", "https://app/?token=t"),
+        mailer.invite_message("x@example.org", "https://join", "Chad"),
+        mailer.welcome_message("x@example.org", "https://app", "Analyst A", False),
+    ]
+    assert mailer.brevo_payload(messages[0])["sender"] == {"email": "panel@example.org", "name": "Data Peaks Expert Panel"}
+    for m in messages:
+        text, html = mailer._parts(m)
+        assert "ACAPS" not in m["Subject"] + m["From"] + text + (html or "")
