@@ -515,7 +515,7 @@ function Home({ t, lang, ex, active, prefs, onOpen }: { t: T; lang: Lang; ex: Ex
               <button onClick={() => zoom(1)} aria-label={L(lang, "Zoom in", "Zoom avant")} className="flex h-11 w-11 items-center justify-center rounded-full border bg-card text-xl font-bold text-navy shadow-sm">+</button>
               <button onClick={() => zoom(-1)} aria-label={L(lang, "Zoom out", "Zoom arrière")} className="flex h-11 w-11 items-center justify-center rounded-full border bg-card text-xl font-bold text-navy shadow-sm">−</button>
             </div>
-            <div className="mx-auto rounded-full drop-shadow-[0_10px_18px_rgba(0,75,120,0.18)]" style={{ width: size, height: size }} aria-label={L(lang, "Interactive globe of monitored contexts. Use the list view for a text alternative.", "Globe interactif des contextes suivis. Utilisez la liste pour une alternative textuelle.")} role="img">
+            <div className="mx-auto overflow-hidden rounded-full drop-shadow-[0_10px_18px_rgba(0,75,120,0.18)]" style={{ width: size, height: size }} aria-label={L(lang, "Interactive globe of monitored contexts. Use the list view for a text alternative.", "Globe interactif des contextes suivis. Utilisez la liste pour une alternative textuelle.")} role="img">
               {mounted ? (
                 <Suspense fallback={<div className="h-full w-full animate-pulse rounded-full bg-secondary" />}>
                   <Globe size={size} contexts={shown} assignedIds={assignedIds} selectedId={selectedId} onSelect={select}
@@ -530,6 +530,15 @@ function Home({ t, lang, ex, active, prefs, onOpen }: { t: T; lang: Lang; ex: Ex
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-condensed text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--globe-marker)" }} />{L(lang, "Monitored context", "Contexte suivi")}</span>
           <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full border-2" style={{ borderColor: "var(--globe-marker)" }} />{L(lang, "Your question", "Votre question")}</span>
+          {selected && !listView && ([
+            [62, L(lang, "Selected country", "Pays sélectionné")],
+            [36, L(lang, "Shares a border", "Frontalier")],
+            [16, L(lang, "Two borders away", "À deux frontières")],
+          ] as const).map(([pct, label]) => (
+            <span key={pct} className="flex items-center gap-1.5">
+              <span className="h-2.5 w-3.5 rounded-sm" style={{ background: `color-mix(in srgb, var(--globe-marker) ${pct}%, var(--globe-land))` }} />{label}
+            </span>
+          ))}
           <Badge tone="muted">{rankedLabel}</Badge>
           {!listView && <button onClick={() => { setSelectedId(null); setResetSignal((n) => n + 1); }} className="ml-auto flex min-h-11 items-center gap-1 font-medium text-primary-strong"><RotateCcw className="h-3.5 w-3.5" />{L(lang, "Reset view", "Réinitialiser")}</button>}
         </div>
