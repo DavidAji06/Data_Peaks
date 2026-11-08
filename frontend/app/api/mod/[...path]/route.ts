@@ -6,7 +6,8 @@
  */
 import 'server-only';
 
-const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
+// API_INTERNAL_URL: server-side address of the API when it differs from the browser's (e.g. in Docker)
+const API_URL = (process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
 const MODERATOR_KEY = process.env.MODERATOR_KEY ?? '';
 const TIMEOUT_MS = 20000; // Invites wait for the SMTP send
 

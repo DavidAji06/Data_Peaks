@@ -11,6 +11,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from .db import Base
 
+# Postgres checks foreign keys at COMMIT, not per row: the code adds parents and children in one
+# flush without relationship(), so SQLAlchemy may insert a child first. SQLite does not enforce them.
+DEFERRED = {"deferrable": True, "initially": "DEFERRED"}
+
 
 def utc_now():
     return datetime.now(timezone.utc)
@@ -62,7 +66,7 @@ class PanelMembership(Base):
     __table_args__ = (UniqueConstraint("expert_id", "country"),)
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    expert_id: Mapped[str] = mapped_column(ForeignKey("experts.id"))
+    expert_id: Mapped[str] = mapped_column(ForeignKey("experts.id", **DEFERRED))
     country: Mapped[str]
     status: Mapped[str] = mapped_column(default="pending")
     note: Mapped[str | None] = mapped_column(Text, default=None)  # The expert's optional "why"
@@ -80,7 +84,7 @@ class PanelInvite(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
     email_sent: Mapped[bool | None] = mapped_column(Boolean, default=None)  # None = older invite
     # The expert created from this invite. Moderators see it only for non-anonymous experts.
-    expert_id: Mapped[str | None] = mapped_column(ForeignKey("experts.id"), default=None)
+    expert_id: Mapped[str | None] = mapped_column(ForeignKey("experts.id", **DEFERRED), default=None)
     joined_at: Mapped[datetime | None] = mapped_column(DateTime, default=None)
 
 
@@ -88,7 +92,7 @@ class Alert(Base):
     __tablename__ = "alerts"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    risk_id: Mapped[str] = mapped_column(ForeignKey("risks.id"))
+    risk_id: Mapped[str] = mapped_column(ForeignKey("risks.id", **DEFERRED))
     trigger_id: Mapped[str | None]
     report_title: Mapped[str] = mapped_column(Text)
     report_source: Mapped[str | None]
@@ -114,7 +118,7 @@ class Question(Base):
     __tablename__ = "questions"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
-    risk_id: Mapped[str] = mapped_column(ForeignKey("risks.id"))
+    risk_id: Mapped[str] = mapped_column(ForeignKey("risks.id", **DEFERRED))
     alert_id: Mapped[str | None]
     text: Mapped[str] = mapped_column(Text)
     resolution_criteria: Mapped[str] = mapped_column(Text)
@@ -129,8 +133,8 @@ class Invite(Base):
     __table_args__ = (UniqueConstraint("question_id", "expert_id"),)
 
     token: Mapped[str] = mapped_column(String, primary_key=True)
-    question_id: Mapped[str] = mapped_column(ForeignKey("questions.id"))
-    expert_id: Mapped[str] = mapped_column(ForeignKey("experts.id"))
+    question_id: Mapped[str] = mapped_column(ForeignKey("questions.id", **DEFERRED))
+    expert_id: Mapped[str] = mapped_column(ForeignKey("experts.id", **DEFERRED))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
 
@@ -139,8 +143,8 @@ class Response(Base):
     __table_args__ = (UniqueConstraint("question_id", "expert_id", "round"),)
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    question_id: Mapped[str] = mapped_column(ForeignKey("questions.id"))
-    expert_id: Mapped[str] = mapped_column(ForeignKey("experts.id"))
+    question_id: Mapped[str] = mapped_column(ForeignKey("questions.id", **DEFERRED))
+    expert_id: Mapped[str] = mapped_column(ForeignKey("experts.id", **DEFERRED))
     probability: Mapped[float] = mapped_column(Float)
     reason: Mapped[str] = mapped_column(Text)
     round: Mapped[int]  # 1 = blind answer, 2 = revision
@@ -153,8 +157,8 @@ class RiskDecision(Base):
     __tablename__ = "risk_decisions"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    risk_id: Mapped[str] = mapped_column(ForeignKey("risks.id"))
-    question_id: Mapped[str | None] = mapped_column(ForeignKey("questions.id"))
+    risk_id: Mapped[str] = mapped_column(ForeignKey("risks.id", **DEFERRED))
+    question_id: Mapped[str | None] = mapped_column(ForeignKey("questions.id", **DEFERRED))
     decision: Mapped[str]  # keep, raise, lower, update_trigger, add_trigger
     trigger_id: Mapped[str | None]
     note: Mapped[str | None] = mapped_column(Text)

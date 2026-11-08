@@ -1,0 +1,26 @@
+# Used by the backend image (built from the repo root)
+**/.git
+**/node_modules
+**/.next
+**/.output
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/*.db
+**/.env
+**/.env.*
+venv
+.venv
+.claude
+.playwright-mcp
+notebooks
+references
+docs
+data/raw
+data/processed/llm_cache
+data/processed/gold_runs
+ml/artifacts
+ml/intensity_score_deterministic
+ml/find_similar_past_events
+frontend
+expert-app

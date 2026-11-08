@@ -37,7 +37,9 @@ from .services.links import expert_invites, require_invite, resolve_link
 from .services.routing import clean_followed, followed_countries, route_question, should_notify
 from .services.scoring import expert_scores, latest_answers
 
-FRONTEND_URL = "http://localhost:3000"  # Moderator dashboard (and its CORS origin)
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")  # Moderator dashboard
+# Browser origins allowed to call the API: the dashboard and the expert app (comma-separated)
+CORS_ORIGINS = [o.strip().rstrip("/") for o in os.getenv("CORS_ORIGINS", f"{FRONTEND_URL},http://localhost:8080").split(",") if o.strip()]
 EXPERT_APP_URL = os.getenv("EXPERT_APP_URL", "http://localhost:8080")  # Expert app; links in emails point here
 MODERATOR_ONLY = [Depends(require_moderator)]
 MIN_GROUP_SIZE = 5  # Below this, group figures could reveal individual answers
@@ -52,7 +54,7 @@ app.state.session_factory = SessionLocal  # Background jobs open their own sessi
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_URL],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )

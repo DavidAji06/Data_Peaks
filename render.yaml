@@ -1,0 +1,73 @@
+# Render Blueprint: New > Blueprint in the Render dashboard, pick this repo.
+#
+# Three web services. The URLs below assume Render gave each service its plain name
+# (https://<name>.onrender.com). If a name was taken, Render adds a suffix: copy the real
+# URLs from the dashboard into these env vars and redeploy. The two frontends bake their
+# API URL in at build time, so they need a redeploy ("Clear build cache & deploy") after a change.
+
+services:
+  # FastAPI. Data lives in an external free Postgres (Neon), because free Render services
+  # have no persistent disk. Paste Neon's connection string as DATABASE_URL when asked.
+  # An empty database is seeded with the demo data on first start.
+  - type: web
+    name: data-peaks-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: MODERATOR_KEY
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://data-peaks-dashboard.onrender.com
+      - key: EXPERT_APP_URL
+        value: https://data-peaks-expert.onrender.com
+      - key: CORS_ORIGINS
+        value: https://data-peaks-dashboard.onrender.com,https://data-peaks-expert.onrender.com
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: GREENPT_API_KEY
+        sync: false
+
+  # Moderator dashboard (Next.js)
+  - type: web
+    name: data-peaks-dashboard
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: free
+    region: frankfurt
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://data-peaks-api.onrender.com
+      - key: NEXT_PUBLIC_USE_MOCK
+        value: "false"
+      - key: MODERATOR_KEY
+        fromService:
+          type: web
+          name: data-peaks-api
+          envVarKey: MODERATOR_KEY
+
+  # Expert app (TanStack Start on Node)
+  - type: web
+    name: data-peaks-expert
+    runtime: docker
+    dockerfilePath: ./expert-app/Dockerfile
+    dockerContext: ./expert-app
+    plan: free
+    region: frankfurt
+    envVars:
+      - key: VITE_API_URL
+        value: https://data-peaks-api.onrender.com

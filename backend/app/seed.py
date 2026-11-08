@@ -126,5 +126,21 @@ def seed():
           "No open question yet: approve an alert at http://localhost:3000/mod")
 
 
+def is_empty() -> bool:
+    """True when there is no risks table yet, or it has no rows (a brand-new database)."""
+    from sqlalchemy import func, inspect, select
+
+    if not inspect(engine).has_table(Risk.__tablename__):
+        return True
+    with SessionLocal() as db:
+        return not db.scalar(select(func.count()).select_from(Risk))
+
+
 if __name__ == "__main__":
-    seed()
+    import sys
+
+    # --if-empty: seed only a brand-new database (used on container start, keeps real data)
+    if "--if-empty" in sys.argv[1:] and not is_empty():
+        print("Database already has data: not seeding.")
+    else:
+        seed()

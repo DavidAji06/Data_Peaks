@@ -12,6 +12,7 @@
  * Expert tokens are credentials: pass them to fetch only; never render or log them.
  */
 import 'server-only';
+import { connection } from 'next/server';
 
 import curatedFile from '@/mock/curated.json';
 import {
@@ -66,6 +67,8 @@ import type {
 export { ApiError, NetworkError };
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/$/, '');
+/** Server-side calls may use a different address than the browser (e.g. the API's container name). */
+const SERVER_API_URL = (process.env.API_INTERNAL_URL || API_URL).replace(/\/$/, '');
 /** Mock unless explicitly 'false' (and an API URL is set): the default stays demo-safe. */
 export const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== 'false' || API_URL === '';
 export const DEMO_FALLBACK = process.env.NEXT_PUBLIC_DEMO_FALLBACK === 'true';
@@ -89,7 +92,7 @@ const realCallFor = (audience: Audience): Call => async <T>(method: 'GET' | 'POS
   if (audience === 'moderator' && MODERATOR_KEY) headers['x-moderator-key'] = MODERATOR_KEY;
   let res: Response;
   try {
-    res = await fetch(`${API_URL}${path}`, {
+    res = await fetch(`${SERVER_API_URL}${path}`, {
       method,
       cache: 'no-store', // expert- and moderator-specific data: never cache
       signal: AbortSignal.timeout(TIMEOUT_MS),
@@ -111,6 +114,9 @@ const mockCall: Call = async <T>(method: 'GET' | 'POST', path: string, body?: un
 
 /** Runs one screen's loader on the real API, or wholly on the demo backend (never a mix). */
 async function load<T>(loader: (call: Call) => Promise<T>, audience: Audience = 'expert'): Promise<Loaded<T>> {
+  // Live, per-request data (fetched with no-store): render it at request time. Without this,
+  // cacheComponents tries to prerender the page and stops at the clock read in AbortSignal.timeout.
+  await connection();
   if (USE_MOCK) return { data: await loader(mockCall), source: 'demo' };
   try {
     return { data: await loader(realCallFor(audience)), source: 'api' };

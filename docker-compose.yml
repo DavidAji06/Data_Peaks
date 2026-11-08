@@ -1,0 +1,62 @@
+# Runs the whole stack locally, the same way it runs on the server:
+#   docker compose up --build
+# Dashboard http://localhost:3000/mod · Expert app http://localhost:8080/?token=demo-expert-a · API http://localhost:8000/docs
+# Secrets (SMTP_*, MODERATOR_KEY, GREENPT_API_KEY) come from .env next to this file.
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: datapeaks
+      POSTGRES_PASSWORD: datapeaks
+      POSTGRES_DB: datapeaks
+    volumes:
+      - db-data:/var/lib/postgresql/data   # survives restarts; `docker compose down -v` wipes it
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U datapeaks"]
+      interval: 2s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports: ["8000:8000"]
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgresql://datapeaks:datapeaks@db:5432/datapeaks
+      CORS_ORIGINS: http://localhost:3000,http://localhost:8080
+      FRONTEND_URL: http://localhost:3000
+      EXPERT_APP_URL: http://localhost:8080
+      MODERATOR_KEY: ${MODERATOR_KEY:-dev-moderator-key}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      GREENPT_API_KEY: ${GREENPT_API_KEY:-}
+      GREENPT_MODEL: ${GREENPT_MODEL:-deepseek-v4.1-flash}
+
+  dashboard:
+    build:
+      context: frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000   # what the browser calls
+        NEXT_PUBLIC_USE_MOCK: "false"
+    ports: ["3000:3000"]
+    environment:
+      API_INTERNAL_URL: http://api:8000              # what the Next server calls
+      MODERATOR_KEY: ${MODERATOR_KEY:-dev-moderator-key}
+    depends_on: [api]
+
+  expert:
+    build:
+      context: expert-app
+      args:
+        VITE_API_URL: http://localhost:8000
+    ports: ["8080:8080"]
+    depends_on: [api]
+
+volumes:
+  db-data:
