@@ -11,7 +11,12 @@ import { MeshPhongMaterial, Color } from "three";
 import { feature, neighbors } from "topojson-client";
 import type { Topology, GeometryCollection } from "topojson-specification";
 import countries110m from "world-atlas/countries-110m.json";
-import { START_VIEW, type ConflictContext } from "./contexts";
+import { START_VIEW, type ConflictContext, getImpactColor } from "./contexts";
+
+const hexToRgba = (hex: string, alpha: number) => {
+  const c = new Color(hex);
+  return `rgba(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)}, ${alpha})`;
+};
 
 const cssVar = (name: string, fallback: string) => {
   if (typeof window === "undefined") return fallback;
@@ -88,11 +93,12 @@ export default function Globe({ size, contexts, assignedIds, selectedId, onSelec
     [selected, reducedMotion],
   );
 
-  // Zone colours: the marker red blended into the land blue, strongest at the country itself
+  // Zone colours: the selected context's impact color blended into the land blue, strongest at the country itself
+  const selectedColor = selected ? getImpactColor(selected.impactScore) : colors.marker;
   const zoneColors = useMemo(() => {
-    const mix = (t: number) => "#" + new Color(colors.land).lerp(new Color(colors.marker), t).getHexString();
+    const mix = (t: number) => "#" + new Color(colors.land).lerp(new Color(selectedColor), t).getHexString();
     return [mix(0.62), mix(0.36), mix(0.16)] as const;
-  }, [colors.land, colors.marker]);
+  }, [colors.land, selectedColor]);
 
   const material = useMemo(
     () => new MeshPhongMaterial({ color: new Color(colors.ocean), shininess: 8, specular: new Color("#1d3f7a") }),
@@ -170,7 +176,10 @@ export default function Globe({ size, contexts, assignedIds, selectedId, onSelec
       polygonAltitude={(d) => { const z = zones.get(d as object); return z === 0 ? 0.014 : z === 1 ? 0.008 : 0.004; }}
       polygonsTransitionDuration={reducedMotion ? 0 : 400}
       ringsData={rings}
-      ringColor={() => (t: number) => `rgba(255, 92, 110, ${Math.max(0, 1 - t)})`}
+      ringColor={() => (t: number) => {
+        const c = new Color(selectedColor);
+        return `rgba(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)}, ${Math.max(0, 1 - t)})`;
+      }}
       ringMaxRadius={RING_REACH_DEG}
       ringAltitude={0.016}
       ringPropagationSpeed={5}
@@ -179,13 +188,20 @@ export default function Globe({ size, contexts, assignedIds, selectedId, onSelec
       pointsData={points}
       pointLat="lat"
       pointLng="lng"
-      pointColor={(d) => ((d as Pt).halo ? "rgba(224, 38, 60, 0.35)" : colors.marker)}
+      pointColor={(d) => {
+        const pt = d as Pt;
+        const baseColor = getImpactColor(pt.impactScore);
+        return pt.halo ? hexToRgba(baseColor, 0.4) : baseColor;
+      }}
       pointAltitude={(d) => ((d as Pt).halo ? 0.008 : (d as Pt).id === selectedId ? 0.035 : 0.02)}
       pointRadius={(d) => ((d as Pt).halo ? ((d as Pt).id === selectedId ? 2.6 : 2.1) : (d as Pt).id === selectedId ? 1.5 : 1.1)}
       pointResolution={16}
       pointsMerge={false}
       pointsTransitionDuration={reducedMotion ? 0 : 250}
-      pointLabel={(d) => (d as ConflictContext).name.en}
+      pointLabel={(d) => {
+        const c = d as ConflictContext;
+        return `${c.name.en} (Impact ${c.impactScore ?? "—"}/5)`;
+      }}
       onPointClick={(d) => onSelect((d as ConflictContext).id)}
       onGlobeReady={() => setTimeout(() => setReady(true), 0)}
     />

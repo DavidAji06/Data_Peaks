@@ -6,6 +6,7 @@ export const mod = {
   nav: {
     label: 'Moderator sections',
     alerts: 'Alerts',
+    map: 'Map',
     questions: 'Questions',
     risks: 'Risks',
     leaderboard: 'Experts',
@@ -313,6 +314,27 @@ export const mod = {
     count: (shown: number, total: number) => (shown === total ? `${total} questions` : `${shown} of ${total} questions`),
     empty: 'No questions match these filters.',
     unknownCountry: 'Country unknown',
+  },
+
+  map: {
+    title: 'Risk map',
+    intro: 'The countries experts see on their globe, coloured by ACAPS impact. Press a dot to see its risks and neighbourhood.',
+    rankedAt: (d: string) => `Ranking of ${d}`,
+    empty: 'No ranked risks to show on the map yet.',
+    impact: 'Impact (1–5)',
+    impactOf: (n: number | null) => (n == null ? 'Impact —' : `Impact ${n}/5`),
+    selected: 'Selected country',
+    ring1: 'Shares a border',
+    ring2: 'Two borders away',
+    pick: 'Press a dot on the globe, or pick a country below.',
+    countries: 'Countries',
+    risksIn: (name: string) => `Ranked risks in ${name}`,
+    openRisk: 'Open risk',
+    level: 'ACAPS risk level',
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    reset: 'Reset view',
+    noWebgl: "The 3D globe isn't available in this browser. Showing a list instead.",
   },
 
   regionMap: {

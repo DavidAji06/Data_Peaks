@@ -785,6 +785,8 @@ function route(method: string, path: string, body: unknown): unknown {
     if (a === 'moderator' && b === 'panel-invites' && parts.length === 2) return listPanelInvites();
     if (a === 'moderator' && b === 'panels' && parts.length === 2) return listPanels();
     if (a === 'public' && b === 'questions' && parts.length === 2) return publicQuestions();
+    // No country centres offline: the moderator map shows its empty state
+    if (a === 'public' && b === 'contexts' && parts.length === 2) return { ranked_at: null, contexts: [] };
     if (a === 'join' && parts.length === 2) return { country: getOpenPanelInvite(b).country };
   }
   if (method === 'POST') {

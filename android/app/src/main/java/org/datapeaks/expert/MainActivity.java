@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.webkit.CookieManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -37,6 +38,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 /**
  * The ACAPS expert app as a native Android app. It shows the live expert site full-screen, so every
@@ -44,6 +46,7 @@ import android.widget.TextView;
  *
  * - Links from ACAPS emails (sign-in, invite, join) open here, and the token is saved on the phone
  *   by the web app itself (localStorage), exactly as in a browser.
+ * - Pull down at the top of a page to reload it with the latest data.
  * - Links to other sites (report sources) open in the phone's browser.
  */
 public class MainActivity extends Activity {
@@ -52,6 +55,9 @@ public class MainActivity extends Activity {
     private static final String APP_HOST = Uri.parse(APP_URL).getHost();
 
     private WebView web;
+    private SwipeRefreshLayout swipe;
+    /** Set from the page on each touch: the finger is on the globe or in a box scrolled down, so a pull is not a refresh. */
+    private volatile boolean touchBlocksRefresh = false;
     private ProgressBar progress;
     private View loading;
     private View offline;
@@ -68,7 +74,12 @@ public class MainActivity extends Activity {
 
         web = new WebView(this);
         configure(web);
-        root.addView(web, match());
+        swipe = new SwipeRefreshLayout(this);
+        swipe.addView(web, match());
+        swipe.setColorSchemeColors(Color.parseColor("#0096BA"), Color.parseColor("#0F172A"));
+        swipe.setOnChildScrollUpCallback((parent, child) -> touchBlocksRefresh || web.getScrollY() > 0);
+        swipe.setOnRefreshListener(this::refresh);
+        root.addView(swipe, match());
 
         loading = buildLoading();
         root.addView(loading, match());
@@ -122,6 +133,7 @@ public class MainActivity extends Activity {
         s.setAllowContentAccess(false);
         s.setUserAgentString(s.getUserAgentString() + " DataPeaksApp/" + BuildConfig.VERSION_NAME);
         CookieManager.getInstance().setAcceptCookie(true);
+        w.addJavascriptInterface(new PullGuard(), "DataPeaksPull");
         w.setOverScrollMode(View.OVER_SCROLL_NEVER);
 
         w.setWebViewClient(new WebViewClient() {
@@ -135,6 +147,8 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                swipe.setRefreshing(false);
+                view.evaluateJavascript(PULL_GUARD_JS, null);
                 if (!firstPageShown && offline.getVisibility() != View.VISIBLE) {
                     firstPageShown = true;
                     loading.setVisibility(View.GONE);
@@ -145,7 +159,10 @@ public class MainActivity extends Activity {
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                if (request.isForMainFrame()) showOffline();
+                if (request.isForMainFrame()) {
+                    swipe.setRefreshing(false);
+                    showOffline();
+                }
             }
         });
         w.setWebChromeClient(new WebChromeClient() {
@@ -155,6 +172,33 @@ public class MainActivity extends Activity {
                 progress.setVisibility(p >= 100 ? View.GONE : View.VISIBLE);
             }
         });
+    }
+
+    /**
+     * On every touch the page reports whether the finger is on the globe (a canvas, dragged to turn it) or
+     * inside a box that is scrolled down; then pulling down scrolls or turns instead of reloading.
+     */
+    private static final String PULL_GUARD_JS =
+            "(function(){if(window.__dpPull)return;window.__dpPull=1;"
+            + "document.addEventListener('touchstart',function(e){var el=e.target,b=false;"
+            + "while(el&&el.nodeType===1&&el!==document.documentElement){"
+            + "if(el.tagName==='CANVAS'||el.scrollTop>0){b=true;break;}el=el.parentElement;}"
+            + "try{DataPeaksPull.set(b);}catch(_){}},{passive:true,capture:true});})();";
+
+    private class PullGuard {
+        @JavascriptInterface
+        public void set(boolean blocked) {
+            touchBlocksRefresh = blocked;
+        }
+    }
+
+    /** Pull to refresh: reload the current app page (the web app fetches fresh data on load). */
+    private void refresh() {
+        touchBlocksRefresh = false;
+        offline.setVisibility(View.GONE);
+        String url = web.getUrl();
+        if (url == null || !isAppUrl(Uri.parse(url))) web.loadUrl(APP_URL + "/");
+        else web.reload();
     }
 
     /** The app's own pages stay in the app; anything else (sources, mail) goes to the phone. */

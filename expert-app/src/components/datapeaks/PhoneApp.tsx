@@ -11,12 +11,12 @@ import campImg from "@/assets/camp_sahel.jpg";
 import convoyImg from "@/assets/convoy_chad.jpg";
 import { Badge, Button, Card, LangToggle, SectionLabel, Wordmark, type Lang } from "./shared";
 import { useExpert, type Expert } from "./useExpert";
-import { useContexts, type ConflictContext } from "./contexts";
+import { useContexts, type ConflictContext, getImpactColor } from "./contexts";
 import { ApiError, type AnonymityLevel, type ApiSimilarRisk, type PanelStatus } from "@/lib/api";
 
 const Globe = lazy(() => import("./Globe"));
 
-type Screen = "profile" | "home" | "questions" | "group";
+type Screen = "home" | "questions" | "group" | "profile";
 type GroupView = "compare" | "revise" | "done";
 export type Privacy = "known" | "nickname" | "anonymous";
 type T = (typeof dict)["en"];
@@ -57,10 +57,10 @@ export function PhoneApp({ lang, setLang, onSignOut }: { lang: Lang; setLang: (l
   };
 
   const titles: Record<Screen, [string, string]> = {
-    profile: [L(lang, "My profile", "Mon profil"), L(lang, "Your panel preferences", "Vos préférences")],
     home: [L(lang, "Expert panel", "Panel d'experts"), L(lang, "See what's changing", "Ce qui évolue")],
     questions: [L(lang, "Questions", "Questions"), L(lang, "Share your view on a developing risk", "Votre avis sur un risque émergent")],
     group: [L(lang, "Group view", "Avis du groupe"), L(lang, "How does your view compare?", "Comparez votre réponse")],
+    profile: [L(lang, "My profile", "Mon profil"), L(lang, "Your panel preferences", "Vos préférences")],
   };
   const pending = ex.questions.filter((q) => q.status === "open" && (!q.answered || !q.revised)).length;
   // A different question starts with a fresh answer form and the group comparison.
@@ -75,10 +75,10 @@ export function PhoneApp({ lang, setLang, onSignOut }: { lang: Lang; setLang: (l
     go(s);
   };
   const nav: [Screen, string, typeof House][] = [
-    ["profile", L(lang, "Profile", "Profil"), UserRound],
     ["home", L(lang, "Home", "Accueil"), House],
     ["questions", "Questions", FileQuestion],
     ["group", L(lang, "Group", "Groupe"), Users],
+    ["profile", L(lang, "Profile", "Profil"), UserRound],
   ];
   const needsData = screen === "questions" || screen === "group";
   // Questions and Group need a question: with none yet (personal link, nothing routed) show "You're up to date"
@@ -464,7 +464,7 @@ function Home({ t, lang, ex, active, prefs, onOpen }: { t: T; lang: Lang; ex: Ex
       <section className="space-y-3">
         <div>
           <SectionLabel>{L(lang, "Where your view is needed", "Là où votre avis compte")}</SectionLabel>
-          <p className="text-sm text-muted-foreground">{L(lang, "Tap a red dot to see the risk.", "Touchez un point rouge pour voir le risque.")}</p>
+          <p className="text-sm text-muted-foreground">{L(lang, "Tap a dot to see the risk (colored by impact score).", "Touchez un point pour voir le risque (coloré par score d'impact).")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Chips options={[L(lang, "All contexts", "Tous"), L(lang, "My panels", "Mes panels"), L(lang, "My questions", "Mes questions")]} selected={[filter]} onChange={(s) => setFilter((s[0] ?? 0) as 0 | 1 | 2)} single />
@@ -502,8 +502,8 @@ function Home({ t, lang, ex, active, prefs, onOpen }: { t: T; lang: Lang; ex: Ex
               {!webgl && <p className="text-xs text-muted-foreground">{L(lang, "The 3D globe isn't available on this device. Showing a list instead.", "Le globe 3D n'est pas disponible sur cet appareil. Affichage en liste.")}</p>}
               {shown.map((c) => (
                 <button key={c.id} onClick={() => select(c.id)} className={`flex w-full items-center gap-3 rounded-lg border bg-card p-3 text-left ${selectedId === c.id ? "border-primary" : ""}`}>
-                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: "var(--globe-marker)" }} aria-hidden />
-                  <span className="flex-1"><span className="block font-bold text-navy">{c.name[lang]}</span><span className="line-clamp-1 block text-xs text-muted-foreground">{c.riskTitle}</span></span>
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: getImpactColor(c.impactScore) }} aria-hidden />
+                  <span className="flex-1"><span className="block font-bold text-navy">{c.name[lang]}</span><span className="line-clamp-1 block text-xs text-muted-foreground">{c.riskTitle}{c.impactScore ? ` · Impact ${c.impactScore}/5` : ""}</span></span>
                   {assignedIds.includes(c.id) && <Badge tone="primary">{L(lang, "Yours", "Vous")}</Badge>}
                 </button>
               ))}
@@ -528,7 +528,16 @@ function Home({ t, lang, ex, active, prefs, onOpen }: { t: T; lang: Lang; ex: Ex
         </div>
 
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-condensed text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--globe-marker)" }} />{L(lang, "Monitored context", "Contexte suivi")}</span>
+          <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1">
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#2563EB" }} title="1 - Low (Blue)" />
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#10B981" }} title="2 - Low (Green)" />
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#84CC16" }} title="3 - Medium (Lime)" />
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#EAB308" }} title="4 - High (Yellow)" />
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#E0263C" }} title="5 - Critical (Red)" />
+            </span>
+            {L(lang, "Impact (1-5)", "Impact (1-5)")}
+          </span>
           <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full border-2" style={{ borderColor: "var(--globe-marker)" }} />{L(lang, "Your question", "Votre question")}</span>
           {selected && !listView && ([
             [62, L(lang, "Selected country", "Pays sélectionné")],
@@ -575,6 +584,11 @@ function ContextSheet({ lang, ex, ctx, rankedLabel, question, panel, panelBusy, 
       <p className="mt-2 text-sm leading-snug">{question?.risk.title ?? ctx.riskTitle}</p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <Badge tone="risk">{L(lang, "ACAPS risk level", "Niveau de risque ACAPS")}{colon(lang)}{term(lang, d?.risk.risk_level ?? ctx.risks.find((r) => r.id === riskId)?.riskLevel ?? ctx.riskLevel)}</Badge>
+        {ctx.impactScore != null && (
+          <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-condensed text-xs font-bold text-white" style={{ background: getImpactColor(ctx.impactScore) }}>
+            {L(lang, "Impact", "Impact")} {ctx.impactScore}/5
+          </span>
+        )}
         <Badge tone="muted">{rankedLabel}</Badge>
       </div>
       {ctx.risks.filter((r) => r.id !== riskId).map((r) => (

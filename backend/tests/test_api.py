@@ -287,7 +287,8 @@ def test_public_contexts(client, monkeypatch):
     chad = anonymous["contexts"][0]
     assert len(anonymous["contexts"]) == 1
     assert chad["iso3"] == "TCD" and chad["has_question"] is False
-    assert chad["risks"] == [{"id": "R1", "title": "Test risk", "risk_level": None, "priority_score": 0.7}]
+    assert chad["risks"] == [{"id": "R1", "title": "Test risk", "risk_level": None, "priority_score": 0.7, "impact": None}]
+    assert chad["impact_score"] is None
     assert "p_materialise" not in str(anonymous)
 
     mine = client.get("/public/contexts", params={"token": "tok-a"}).json()

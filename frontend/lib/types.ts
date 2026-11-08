@@ -765,3 +765,31 @@ export interface RiskDecision {
   triggerId?: string;
   createdAt: string;
 }
+
+// ===========================================================================
+// Globe contexts (GET /public/contexts): the same data as the expert app's Home globe
+// ===========================================================================
+
+export interface ApiContexts {
+  ranked_at: string | null;
+  contexts: {
+    iso3: string;
+    country: string;
+    lat: number;
+    lng: number;
+    risks: { id: string; title: string; risk_level: string | null; priority_score: number | null; impact?: number | null }[];
+    impact_score?: number | null;
+    has_question: boolean;
+  }[];
+}
+
+export interface MapContext {
+  iso: string;
+  name: string;
+  lat: number;
+  lng: number;
+  /** ACAPS impact 1–5 (highest of the country's ranked risks), or from the risk level when missing. */
+  impactScore: number | null;
+  /** Up to three ranked risks, highest priority first. */
+  risks: { id: string; title: string; riskLevel: string | null; priority: number | null; impact: number | null }[];
+}

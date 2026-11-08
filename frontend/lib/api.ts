@@ -33,6 +33,7 @@ import type {
   Alert,
   AlertStatus,
   ApiAlert,
+  ApiContexts,
   ApiPublicQuestion,
   ApiLeaderboard,
   ApiPanelInvites,
@@ -46,6 +47,7 @@ import type {
   PanelInvites,
   Panels,
   Loaded,
+  MapContext,
   PublicOutcome,
   QuestionDetail,
   QuestionListItem,
@@ -215,5 +217,39 @@ export function getPublicOutcome(questionId: string): Promise<Loaded<PublicOutco
   return load(async (call) => {
     const all = (await call<ApiPublicQuestion[]>('GET', '/public/questions')).map(toPublicOutcome);
     return all.find((q) => q.questionId === questionId) ?? null;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Public: GET /public/contexts (no token). The countries on the expert app's globe, for the moderator map.
+// ---------------------------------------------------------------------------
+
+/** Impact from the ACAPS risk level when the API has no impact rating (same rule as the expert app). */
+function impactFromLevel(level: string | null | undefined): number | null {
+  const l = (level ?? '').toLowerCase();
+  if (l.includes('very high') || l.includes('critical')) return 5;
+  if (l.includes('high')) return 4;
+  if (l.includes('medium') || l.includes('moderate')) return 3;
+  if (l.includes('low')) return 2;
+  return null;
+}
+
+export function getMapContexts(): Promise<Loaded<{ rankedAt: string | null; contexts: MapContext[] }>> {
+  return load(async (call) => {
+    const res = await call<ApiContexts>('GET', '/public/contexts');
+    return {
+      rankedAt: res.ranked_at,
+      contexts: res.contexts.map((c) => {
+        const risks = c.risks.map((r) => ({ id: r.id, title: r.title, riskLevel: r.risk_level, priority: r.priority_score, impact: r.impact ?? null }));
+        return {
+          iso: c.iso3,
+          name: c.country,
+          lat: c.lat,
+          lng: c.lng,
+          impactScore: c.impact_score ?? risks.find((r) => r.impact != null)?.impact ?? impactFromLevel(risks[0]?.riskLevel),
+          risks,
+        };
+      }),
+    };
   });
 }

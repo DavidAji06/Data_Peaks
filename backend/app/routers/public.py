@@ -111,12 +111,15 @@ def public_contexts(token: str | None = None, db: Session = Depends(get_db)):
                 "title": risk.title,
                 "risk_level": risk.risk_level,
                 "priority_score": ranked.get("priority_score"),
+                "impact": risk.impact,
             })
 
     contexts = []
     for entry in by_country.values():
         entry["risks"].sort(key=lambda r: r["priority_score"] or 0, reverse=True)
         entry["risks"] = entry["risks"][:MAX_RISKS_PER_COUNTRY]
+        impacts = [r["impact"] for r in entry["risks"] if r.get("impact") is not None]
+        entry["impact_score"] = max(impacts) if impacts else None
         contexts.append(entry)
     contexts.sort(key=lambda c: c["risks"][0]["priority_score"] or 0, reverse=True)
 

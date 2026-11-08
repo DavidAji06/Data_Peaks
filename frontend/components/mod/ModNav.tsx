@@ -6,6 +6,7 @@ import { mod } from '@/lib/i18n/mod';
 
 const ITEMS = [
   { href: '/mod', label: mod.nav.alerts, match: (p: string) => p === '/mod' || p.startsWith('/mod/alerts') },
+  { href: '/mod/map', label: mod.nav.map, match: (p: string) => p.startsWith('/mod/map') },
   { href: '/mod/questions', label: mod.nav.questions, match: (p: string) => p.startsWith('/mod/questions') },
   { href: '/mod/risks', label: mod.nav.risks, match: (p: string) => p.startsWith('/mod/risks') },
   { href: '/mod/leaderboard', label: mod.nav.leaderboard, match: (p: string) => p.startsWith('/mod/leaderboard') },
