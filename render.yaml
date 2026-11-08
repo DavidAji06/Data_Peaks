@@ -7,7 +7,8 @@
 
 services:
   # FastAPI. Data lives in an external free Postgres (Neon), because free Render services
-  # have no persistent disk. Paste Neon's connection string as DATABASE_URL when asked.
+  # have no persistent disk. Paste Neon's DIRECT connection string (the host without
+  # "-pooler") as DATABASE_URL when asked.
   # An empty database is seeded with the demo data on first start.
   - type: web
     name: data-peaks-api
