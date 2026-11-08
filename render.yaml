@@ -55,6 +55,12 @@ services:
         value: https://data-peaks-api.onrender.com
       - key: NEXT_PUBLIC_USE_MOCK
         value: "false"
+      # Sign-in for /mod (browser's Basic auth box). Read the generated password in the
+      # dashboard's Environment tab. Without MOD_PASSWORD, /mod answers 503 (locked).
+      - key: MOD_USERNAME
+        value: acaps
+      - key: MOD_PASSWORD
+        generateValue: true
       - key: MODERATOR_KEY
         fromService:
           type: web
