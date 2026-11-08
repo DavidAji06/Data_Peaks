@@ -1,9 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Mail } from "lucide-react";
-import { api, ApiError } from "@/lib/api";
+import { api, ApiError, setToken } from "@/lib/api";
 import { Button, Card, LangToggle, Wordmark, type Lang } from "./shared";
 
 const L = (lang: Lang, en: string, fr: string) => (lang === "fr" ? fr : en);
+
+/** The token in a pasted sign-in link (…/?token=…), or the bare token itself. */
+function tokenFromPaste(text: string): string | null {
+  const value = text.trim();
+  if (!value) return null;
+  try {
+    const t = new URL(value).searchParams.get("token");
+    if (t) return t;
+  } catch {
+    /* not a URL: maybe the bare token */
+  }
+  return /^[A-Za-z0-9_-]{8,}$/.test(value) ? value : null;
+}
 
 /**
  * Passwordless sign-in: the expert types their email and we send their personal link. The API
@@ -21,6 +34,27 @@ export function SignIn({
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState<string | null>(null);
+  // Inside the Android app the email link may open in the browser instead: let the expert paste it.
+  const [inApp, setInApp] = useState(false);
+  const [pasted, setPasted] = useState("");
+  const [pasteError, setPasteError] = useState<string | null>(null);
+  useEffect(() => setInApp(/DataPeaksApp\//.test(navigator.userAgent)), []);
+
+  const usePasted = () => {
+    const token = tokenFromPaste(pasted);
+    if (!token) {
+      setPasteError(
+        L(
+          lang,
+          "That doesn't look like the sign-in link from the email.",
+          "Cela ne ressemble pas au lien de connexion de l'e-mail.",
+        ),
+      );
+      return;
+    }
+    setToken(token);
+    window.location.replace("/");
+  };
 
   const send = async () => {
     const value = email.trim();
@@ -86,6 +120,43 @@ export function SignIn({
                 `Si ${email.trim()} appartient à un membre du panel, un lien de connexion est en route. Cela peut prendre une minute ; vérifiez aussi vos indésirables.`,
               )}
             </p>
+            {inApp && (
+              <form
+                className="space-y-2 border-t pt-3"
+                noValidate
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  usePasted();
+                }}
+              >
+                <label htmlFor="signin-paste" className="font-condensed text-sm text-navy">
+                  {L(
+                    lang,
+                    "Did the link open in your browser? Copy it and paste it here:",
+                    "Le lien s'est ouvert dans le navigateur ? Copiez-le et collez-le ici :",
+                  )}
+                </label>
+                <input
+                  id="signin-paste"
+                  type="url"
+                  inputMode="url"
+                  autoComplete="off"
+                  value={pasted}
+                  onChange={(e) => setPasted(e.target.value)}
+                  className="h-12 w-full rounded-md border-2 border-input bg-card px-3 text-base outline-none focus:border-navy"
+                  aria-invalid={pasteError ? true : undefined}
+                  aria-describedby={pasteError ? "signin-paste-error" : undefined}
+                />
+                {pasteError && (
+                  <p id="signin-paste-error" className="text-sm text-risk" role="alert">
+                    {pasteError}
+                  </p>
+                )}
+                <Button className="w-full">
+                  {L(lang, "Sign in with this link", "Se connecter avec ce lien")}
+                </Button>
+              </form>
+            )}
             <Button variant="outline" className="w-full" onClick={() => setState("idle")}>
               {L(lang, "Use another email", "Utiliser une autre adresse")}
             </Button>
